@@ -8,8 +8,8 @@
 
 ## 초록
 Self-Attention의 연산과 메모리 overhead를 줄이는 것
-1. Content-based 접근으로 local, temporal sparse attention보다 효율성을 더 얻는다
-2. 연산 복잡도를 $O(N^{2}d) \rightarrow O(N^{1.5}d)$로 줄인다
+1. Content-based 접근으로 local, temporal sparse attention보다 효율성을 더 높인다.
+2. 연산 복잡도를 $O(N^{2}d) \rightarrow O(N^{1.5}d)$로 줄인다.
 
 ## 도입
 * RNN CNN의 경우 Local neighborhood context는 연산하지만 self-attention의 경우에는 $N^2$의 복잡도를 가질만큼 전체 sequence length를 연산한다.
@@ -24,8 +24,14 @@ $$ \displaystyle\sum_{i\leq n} = n(n-1)/2 $$
 ## 기존 기법의 문제점
 ### Attention with Temprosal Sparisty
 * Fixed temporal context : Dynamically segment the sequence into variable sized chunks 에서 활용할 수 없다.
-* Hierarchical attention : contiguous neighborhood of selected area에서 활용, 추후 coarse layers with the local layers로 간략화 되었다.
-* Strided attention
+  - Strided attention : sub-sampled temporal resolution (Sparse attention)
+* Hierarchical attention : contiguous neighborhood of selected area에서 활용
+  - 추후 coarse layers with the local layers로 간략화 되었다.
+
+### Attention with Content-Based Sparsity
+* Sparsemax - using entmax : efficient inference - arbitrary saprsity attention patterns
+  - Space and Time Complexity 개선이 없다. (Sparsemax가 연산 자체를 줄여주진 않는다)
+* spherical $k$-means outperform LSH(Locality Sensitive Hashing) in MIPS(Maximum Inner product Search)
 
 ## 제안 기법
 * Transforemr에서 FFN의 weight loading 시간과, computing 시간을 줄이기 위한 내용으로 중요한 부분만 선택적으로 계산하는 방법
@@ -132,6 +138,47 @@ $$ \sigma^l = \sqrt{\frac{1}{H}{\displaystyle\sum_{i=1}^{H}(a_i^l - μ^l)^2}}$$
 <P align="center"> <img src = "https://github.com/user-attachments/assets/8a50840b-2aab-4fc5-890d-eae450c710b5" width="40%" height="40%"> </P>
 4. 위 과정을 k번 반복하여 총 k개의 센트로이드를 생성한다.
 5. 센트로이드 사이의 거리를 최대한 멀리 위치시키는 방향으로 1개씩 총 k번 반복하여 k개의 클러스터를 만들어낸다는 뜻이다.
+
+
+#### Locality-sensitive hasing
+비슷한 자료를 같은 Buckets(바구니) 에 넣어서 찾는 알고리즘
+* 서로 가까운 포인트들은 같은 비구니에, 먼 포인터 들은 다른 바구니에 남겨지는 확률적 알고리즘
+<P align="center"> <img src = "https://github.com/user-attachments/assets/c33b9aad-189c-42c2-af72-ad6365d57b25" width="30%" height="30%"> </P>
+
+1. Shingling
+*  Shingle(조약돌) 로 만드는 단계
+*  "Nadal" \rightarrow "Na", "ad", "da", "al" 로 만드는 단계 (2-shingles)
+
+2. Jaccard Index(유사성)
+* $$J(A,B) = \frac{|A \cap B|}{|A \cup B|}$$
+* A:{Na, ad, da, al}
+* B:{Na, ad, di, ia}
+* Jaccard Index = $\frac{2}{6}$
+
+3. hashing
+* Input : $d$, Hash function : $H()$
+* $d_1$, $d_2$ 유사성 높으면 $H(d_1)$ $H(d_2)$ 유사성도 높다
+
+3-1. Min-hasing
+* 1. 문서의 shingle 행렬의 행 인덱스를 랜덤으로 섞는다. 
+<P align="center"> <img src = "https://github.com/user-attachments/assets/e17fd4cc-e6f3-4e6e-8521-218ca9649a43" width="30%" height="30%"> </P>
+* 2. 왼쪽 갈색 Index 행렬의 1이 있는 곳을 보면 2번째와 4번째 열에 해당한다.
+     그러므로, Signature 행렬에서 1이라는 행의 인덱스를 2번째와 4번째 열에 넣어 준다.
+     그리고 2번째 행 인덱스에서의 행의 값을 보면, 1이 1번째와 3번째에서 등장한다.
+     그러면 2라는 행의 인덱스를 해당 열에 넣어 준다.
+     Signature matrix M이 다 차면 끝
+<P align="center"> <img src = "https://github.com/user-attachments/assets/09bbaf25-5810-4365-8658-2078f3d3df24" width="30%" height="30%"> </P>
+* 3. 3가지 랜덤 인덱스의 Signature 값
+<P align="center"> <img src = "https://github.com/user-attachments/assets/cc4e3343-85c8-48ea-b939-293a9790aab7" width="30%" height="30%"> </P>
+* 4. Signature 행렬의 Jaccard Index 유사성을 판별
+<P align="center"> <img src = "https://github.com/user-attachments/assets/2d0f03fa-5c3d-4e3e-8456-7072b0927371" width="30%" height="30%"> </P>
+
+4. Locality-sensitive hashing
+* LSH의 일반적인 아이디어는 2개의 문서의 signature를 만들었을 때, 그것이 이 두 문서들이 쌍인지 아닌지를 판별할 수 있는 알고리즘을 찾는 것이다.
+* Band partitioning을 하여서 해쉬 함수를 나누고 이를 bucket에 넣어 유사한것 끼리 비교한다.(bxr은 상수, b가 줄어들면 r이 늘고)
+<P align="center"> <img src = "https://github.com/user-attachments/assets/dda943ec-a277-41b8-88a1-ac1f9087723b" width="30%" height="30%">
+<img src = "https://github.com/user-attachments/assets/0f6ea840-a717-4e60-a1b0-0271b2dc1aab" width="30%" height="30%"> </P>
+
 
 ## 추가 공부 필요한 사항
 1. Attention with Temporal Sparsity
