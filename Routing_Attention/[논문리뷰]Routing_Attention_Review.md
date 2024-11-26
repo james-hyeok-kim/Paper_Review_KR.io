@@ -223,23 +223,3 @@ $$ \sigma^l = \sqrt{\frac{1}{H}{\displaystyle\sum_{i=1}^{H}(a_i^l - μ^l)^2}}$$
 * Band partitioning을 하여서 해쉬 함수를 나누고 이를 bucket에 넣어 유사한것 끼리 비교한다.(bxr은 상수, b가 줄어들면 r이 늘고)
 <P align="center"> <img src = "https://github.com/user-attachments/assets/dda943ec-a277-41b8-88a1-ac1f9087723b" width="30%" height="30%">
 <img src = "https://github.com/user-attachments/assets/0f6ea840-a717-4e60-a1b0-0271b2dc1aab" width="30%" height="30%"> </P>
-
-
-## 추가 공부 필요한 사항
-1. Attention with Temporal Sparsity
-   
-2. Attention with Content-Based Sparsity
-
-* Fixed bounded local context - 
-* Decreasing the temporal resolution of context -
-
-3. Sparse Computation beyond Attention
-  * Gating techniques
-  * Sparsely gated Mixture-of-experts
-  * Key-value lookups to replace the feed forward network in the Transformer
-
-4. Self-Attentive Auto-regressive Sequence Modeling
-
-
-## 추가 공부 필요한 논문
-
