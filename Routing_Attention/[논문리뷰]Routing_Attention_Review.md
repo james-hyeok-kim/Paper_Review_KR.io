@@ -21,7 +21,7 @@ $$ \displaystyle\sum_{i\leq n} = n(n-1)/2 $$
 
 * 때문에, Memory efficient attention은 "data independent" 하거나, "fixed sparsity patterns"을 가져야 한다.
 
-## 기존 기법의 문제점
+## 기존 기법의 특징
 ### Attention with Temprosal Sparisty
 * Fixed temporal context : Dynamically segment the sequence into variable sized chunks 에서 활용할 수 없다.
   - Strided attention : sub-sampled temporal resolution (Sparse attention)
@@ -33,19 +33,64 @@ $$ \displaystyle\sum_{i\leq n} = n(n-1)/2 $$
   - Space and Time Complexity 개선이 없다. (Sparsemax가 연산 자체를 줄여주진 않는다)
 * spherical $k$-means outperform LSH(Locality Sensitive Hashing) in MIPS(Maximum Inner product Search)
 
+### Sparse Computation beyond Attention
+* Gating for conditional Computation (조건부 연산)
+  - 대표적인 예시 MOE(Mixture of experts)
+* Key-Value lookup으로 FFN 대체
+
+## Self-Attentive Auto-regressive Sequence Modeling
+* 긴 sequence length + $n^2$ complexity application을 타겟으로 진행
+
+## Efficient Content-Dependent Sparse Attention
+* Block sparse attention : Half the hedas - Local attention, Half the heads - strided attention
+* Local attention relative positional encoding scheme : Good baseline 
+* Routing attention 논문의 Target : more generic formulation, 전체 attention matrix가 sparsity구할때 필요없는 경우
+
+
+## Routing Attention with Clustering
+* Queries 와 Keys 값을 Cluster에 할당
+* Centroid(중심점) parameter sequence(xy)방향으로 공유
+  - Q와 K 중심점은 $\mu$에 모두 포함 (Nearest centroid) $\mu(Q) = \mu(K) = \mu$
+* $O(nkd+n^2d/k)$
+  - $$nkd = vector\ (n) \times TopK\ centroids\(k) \times space\ of\ size\ (d)$$ - Clustering assignment
+  - $$n^2d/k = Query\ (n)\ \times \ Key\ (n)\ \times \ Dimension\ (d) / TopK\ (k)$$ - Query Key dot products 
+* Optimal choice of $k$ is $\sqrt{n}$ [PDF](https://arxiv.org/pdf/1904.10509)
+
+### Training centroid $\mu$ update
+$$\mu \leftarrow \lambda\mu + \frac{(1-\lambda)}{2} \displaystyle\sum_{i:\mu(Q_i)=\mu}{Q_i}+\frac{(1-\lambda)}{2}\displaystyle\sum_{i:\mu(K_j)=\mu}{K_j}+\frac{(1-\lambda)}{2}$$
+
+$$\lambda = 0.999$$
+
 ## 제안 기법
 * Transforemr에서 FFN의 weight loading 시간과, computing 시간을 줄이기 위한 내용으로 중요한 부분만 선택적으로 계산하는 방법
 * 중요한 부분을 선택할 때는 K-means clustering 을 사용하여 TopK만 연산
-
-
-
+<p align="center">
+<img src = "https://github.com/user-attachments/assets/205093f1-1bcf-406c-9168-4bb984adbd9f" width="60%" height="60%">
+</p> 
+<p align="center">
+<img src = "https://github.com/user-attachments/assets/f2853b12-2604-4e54-9404-8c612644cd42" width="40%" height="40%">
+</p>
 
 
 ## 실험
+* Bits/dim이 가장 낮은 것은 Routing Transformer Heads 4, Layers 4, Attention window 1024
+* Steps/sec가 가장 많은 것은 Routing Heads 2, Layers 2, Attention window 512
 
-## 비교 기법
+<p align="center">
+<img src = "https://github.com/user-attachments/assets/49d86288-f6f5-4bfa-888f-6cc0f704bbd6" width="50%" height="50%">
+</p>
 
-## 추가로 알게된 사항
+* 비교군 대비, Perplexity와 Bits/dim 모두 낮은 수준 (좋은 기법)
+
+<p align="center">
+<img src = "https://github.com/user-attachments/assets/95ce8dbd-5bce-4d87-a18a-306ed2c0b08f" width="45%" height="50%">
+<img src = "https://github.com/user-attachments/assets/3320cac0-856b-493f-ab9a-b8907ebde081" width="45%" height="50%">
+</p>
+
+
+---
+
+## 부록 - 추가로 공부한 내용
 ### Sparsemax & Entmax
 #### Sparsemax
 Sparse.Softmax를 의미하여 0이 아닌, i,j만 softmax처리하고 나머지는 0으로 처리되는 것을 의미
