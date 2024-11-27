@@ -39,7 +39,7 @@ $$ \displaystyle\sum_{i\leq n} = n(n-1)/2 $$
 * Key-Value lookup으로 FFN 대체
 
 ## Self-Attentive Auto-regressive Sequence Modeling
-* 긴 sequence length + $n^2$ complexity application을 타겟으로 진행
+* long sequence length + $n^2$ complexity application을 타겟으로 진행
 
 ## Efficient Content-Dependent Sparse Attention
 * Block sparse attention : Half the hedas - Local attention, Half the heads - strided attention
