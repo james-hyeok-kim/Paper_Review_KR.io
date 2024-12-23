@@ -8,7 +8,8 @@ Impact of Data Normalization on Deep Neural Network for Time Series Forecasting
 논문 : [PDF](https://arxiv.org/pdf/1812.05519)
 
 ## 초록
-Serial Data의 여러 Normalization 효과를 알아보는 논문
+
+Serial Data의 여러 Normalization 효과를 알아보는 논문
 
 ## 도입
 
@@ -36,6 +37,7 @@ $$x_{norm} = \frac{x-\mu(X)}{\delta(X)} $$
 
 ### Median Normalization
 * 중앙값에 의한 정규화
+
 $$ x_{norm} = \frac{x}{median(X)}$$
 
 ### Sigmoid Normalization
