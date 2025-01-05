@@ -24,8 +24,13 @@ Markov chain forwarding 방식으로 noise를 더하고, reverse방식으로 noi
 
 ### Training (학습)
 * Variational Bound를 최적화 하는 형태로 진행
-* 
+* $E\left[ -log p_\theta(x_0) \right] \le E_q \left[ -log \frac{p_\theta (x_{0:t})}{q(x_{1:T}|x_0)} \right] = E_q \left[ -log p(x_T) - \displaystyle\sum_{t \ge 1} log \frac{p_\theta (x_{t-1})}{q(x_{t}|x_{t-1})} \right] =: L$
 
+### 추가적인 조건
+* sampling $x_t$ at arbitrary timestep t
+* $\alpha_t := 1-\beta_t$
+* $\bar{\alpha_t}=\prod^t_{s=1}\alpha_s$
+* $q(x_t|x_0) = N(x_t;\sqrt{\bar{a_t}}x_0, (1-\bar{\alpha_t})I)$
 
 
 ## 실험
