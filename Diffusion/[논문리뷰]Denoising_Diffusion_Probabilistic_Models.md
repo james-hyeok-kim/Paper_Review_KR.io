@@ -1,4 +1,4 @@
-# Denoising Diffusion Probabilistic Models
+# Denoising Diffusion Probabilistic Models - 1
 저자(소속) : Jonathan Ho (UC Berkeley), Ajay Jain(UC Berkeley), Pieter Abbeel(UC Berkeley)
 논문 : [PDF](https://arxiv.org/pdf/2006.11239)
 일자 : 16 Dec 2020
@@ -6,10 +6,21 @@
 ## 초록
 
 ## 도입
-![image](https://github.com/user-attachments/assets/1351575a-8638-446c-9a9b-d5d9dc8db15c)
+<p align="center">
+<img src = "https://github.com/user-attachments/assets/1351575a-8638-446c-9a9b-d5d9dc8db15c" width="60%" height="60%">
+</p> 
 
 Markov chain forwarding 방식으로 noise를 더하고, reverse방식으로 noise에서 이미지를 생성
 
+## 배경
+### Reverse Process $p_{\theta}$
+* $p_{\theta}(x_{0:T}) \rightarrow reverse \ process$
+* Markov chain with learned Gaussian transitions, $p(x_T) = N(x_T;0,I):$
+* $p_{\theta}(x_{0:T}) := p(x_{T})\displaystyle\prod_{t=1}^{T}p_{\theta}(x_{t-1}|x_{t}), \ \ \ p_{\theta}(x_{t-1}|x_t) :=  N (x_{t-1};\mu_{\theta}(x_t,t),\sum_{\theta}(x_t,t))$
+
+### Forward Process (Diffusion Process) $q$
+* $q(x_{1:T}|x_0) := \displaystyle\prod_{t=1}^{T}q(x_t|x_{t-1}), \ \ \ q(x_t|x_{t-1}) := N(x_t;\sqrt{1- \beta_{t}}x_{t-1},\beta_{t}I)$
+* Variance Schedule $\beta_1, ... , \beta_T:$
 
 
 ## 실험
@@ -22,8 +33,9 @@ Markov chain forwarding 방식으로 noise를 더하고, reverse방식으로 noi
 마르코프 체인은 '마르코프 성질'을 가진 '이산시간 확률과정' 입니다.
 마르코프 성질 - 과거와 현재 상태가 주어졌을 때의 미래 상태의 조건부 확률 분포가 과거 상태와는 독립적으로 현재 상태에 의해서만 결정됨
 이산시간 확률과정 - 이산적인 시간의 변화에 따라 확률이 변화하는 과정
-![image](https://github.com/user-attachments/assets/7ae5afbc-7884-4e35-a570-cb87513daaf7)
-
+<p align="center">
+<img src = "https://github.com/user-attachments/assets/7ae5afbc-7884-4e35-a570-cb87513daaf7" width="60%" height="60%">
+</p> 
 #### 결합확률분포(Joint Probability Distribution)
 예를 들어 확률 변수 $X_1,X_2, ... , X_n$ 이 있다고 가정하면,
 일반적으로 이 확률변수들의 결합확률분포는 다음과 같이 계산할 수 있다.
