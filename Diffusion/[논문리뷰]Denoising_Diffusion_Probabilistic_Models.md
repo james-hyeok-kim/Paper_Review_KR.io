@@ -88,7 +88,7 @@ https://modulabs.co.kr/blog/variational-inference-intro
 
 * $p(x)$ 확률분포, 은닉변수 $Z$, 양변에 log를 씌우면 Jensen 부등식을 통해 Lower Bound 표현
 * $q(Z|\lambda)$ 에서 $\lambda$ 는 Variational Parameter, $\lambda$가 $q$에 작동한다는 표현
-* $KL(p \parallel q) = \sum_Z p(Z) log p(Z) / q(Z)$ 로 정의, 분포간 얼마나 떨어져 있는지 표현
+* $KL(p \parallel q) = \sum_Z p(Z) log p(Z) / q(Z)$ 로 정의, 두 확률분포의 차이를 계산하는 함수
 
 $logp(X) = log(\displaystyle\sum_Z p(X,Z))$
 
