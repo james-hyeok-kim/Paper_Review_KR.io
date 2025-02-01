@@ -19,7 +19,7 @@ Markov chain forwarding 방식으로 noise를 더하고, reverse방식으로 noi
 ### Reverse Process $p_{\theta}$
 * $p_{\theta}(x_{0:T}) \rightarrow reverse \ process$
 * Markov chain with learned Gaussian transitions, $p(x_T) = N(x_T;0,I):$ (Normal distribution)
-* 보통 Normal Distribution의 표현 $N(\mu, \sigma^2)$ 평균 $(\mu)$ , 분산 $(\sigma)$ 로 표현
+* 보통 Normal Distribution의 표현 $X ~ N(\mu, \sigma^2)$ 평균 $(\mu)$ , 분산 $(\sigma)$ 로 표현
 * $p_{\theta}(x_{0:T}) := p(x_{T})\displaystyle\prod_{t=1}^{T}p_{\theta}(x_{t-1}|x_{t}), \ \ \ p_{\theta}(x_{t-1}|x_t) :=  N (x_{t-1};\mu_{\theta}(x_t,t),\sum_{\theta}(x_t,t))$
 
 ### Forward Process (Diffusion Process) $q$
