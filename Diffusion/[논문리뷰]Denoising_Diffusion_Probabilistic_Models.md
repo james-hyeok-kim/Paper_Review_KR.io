@@ -1,6 +1,8 @@
 # Denoising Diffusion Probabilistic Models - 1
 저자(소속) : Jonathan Ho (UC Berkeley), Ajay Jain(UC Berkeley), Pieter Abbeel(UC Berkeley)
+
 논문 : [PDF](https://arxiv.org/pdf/2006.11239)
+
 일자 : 16 Dec 2020
 
 ## 초록
