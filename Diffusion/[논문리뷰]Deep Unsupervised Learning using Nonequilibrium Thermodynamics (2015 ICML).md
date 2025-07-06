@@ -56,6 +56,538 @@ $Z=∫ϕ(x)dx$를 계산하기가 거의 불가능합니다.
 
 ---
 
+### 2. Algorithm
+
+#### 목표
+* Forward diffusion process를 통해 복잡한 데이터 분포를 **단순한 분포(예: 정규분포)**로 변환
+
+* Reverse diffusion process를 학습하여, 단순한 분포로부터 데이터를 복원하는 생성 모델을 정의
+
+* 이 과정은 물리학에서 말하는 **비평형 확산(nonequilibrium diffusion)**에 기반하며, 확률모델 자체를 Markov chain의 종단 상태로 정의합니다.
+
+#### 2.1 Forward Trajectory (Inference Process)
+
+##### 2.1.1 핵심 개념:
+데이터 분포 $q(x^(0))$로부터 시작해서, 확산 커널을 반복 적용하여 점점 구조를 무너뜨려 단순한 분포 $π(x^(T))$로 만듭니다.
+$q(x^{(t)}∣x^{(t−1)})=T_{π}(x^{(t)}∣x^{(t−1)};β_t)$
+
+즉, 노이즈를 점점 추가하는 Markov chain입니다.
+* $T_{π}$: 확산 커널 (Gaussian, Binomial 등)
+* $β_{t}$: 확산 강도(시간마다 다르게 설정 가능)
+* 𝑇: 전체 타임스텝 수
+
+전체 확률 경로:
+
+$$q(x^{(0:T)})=q(x^{(0)}) \displaystyle\prod^{t=1}_{t=1}q(x^{(t)}∣x^{(t−1)})$$
+
+
+🔁 2.2 Reverse Trajectory (Generative Process)
+💡 핵심 개념:
+정규분포 
+𝜋
+(
+𝑥
+(
+𝑇
+)
+)
+π(x 
+(T)
+ )에서 시작해서, 학습된 reverse Markov chain을 거쳐 원래 데이터 분포로 되돌아가는 생성 모델.
+
+𝑝
+(
+𝑥
+(
+0
+:
+𝑇
+)
+)
+=
+𝑝
+(
+𝑥
+(
+𝑇
+)
+)
+∏
+𝑡
+=
+1
+𝑇
+𝑝
+(
+𝑥
+(
+𝑡
+−
+1
+)
+∣
+𝑥
+(
+𝑡
+)
+)
+p(x 
+(0:T)
+ )=p(x 
+(T)
+ ) 
+t=1
+∏
+T
+​
+ p(x 
+(t−1)
+ ∣x 
+(t)
+ )
+핵심:
+각 스텝 
+𝑝
+(
+𝑥
+(
+𝑡
+−
+1
+)
+∣
+𝑥
+(
+𝑡
+)
+)
+p(x 
+(t−1)
+ ∣x 
+(t)
+ )는 forward의 역과 같은 구조를 갖되, mean, covariance 또는 flip 확률만 학습하면 됩니다.
+
+Gaussian: mean 
+𝑓
+𝜇
+(
+𝑥
+(
+𝑡
+)
+,
+𝑡
+)
+f 
+μ
+​
+ (x 
+(t)
+ ,t), covariance 
+𝑓
+Σ
+(
+𝑥
+(
+𝑡
+)
+,
+𝑡
+)
+f 
+Σ
+​
+ (x 
+(t)
+ ,t)
+
+Binomial: bit flip rate 
+𝑓
+𝑏
+(
+𝑥
+(
+𝑡
+)
+,
+𝑡
+)
+f 
+b
+​
+ (x 
+(t)
+ ,t)
+
+📈 2.3 Model Probability (Log-Likelihood)
+직접 
+𝑝
+(
+𝑥
+(
+0
+)
+)
+p(x 
+(0)
+ )를 계산하기는 어렵지만, forward/reverse 경로의 확률비를 계산해 근사합니다:
+
+𝑝
+(
+𝑥
+(
+0
+)
+)
+=
+𝐸
+𝑞
+(
+𝑥
+(
+1
+:
+𝑇
+)
+∣
+𝑥
+(
+0
+)
+)
+[
+𝑝
+(
+𝑥
+(
+0
+:
+𝑇
+)
+)
+𝑞
+(
+𝑥
+(
+1
+:
+𝑇
+)
+∣
+𝑥
+(
+0
+)
+)
+]
+p(x 
+(0)
+ )=E 
+q(x 
+(1:T)
+ ∣x 
+(0)
+ )
+​
+ [ 
+q(x 
+(1:T)
+ ∣x 
+(0)
+ )
+p(x 
+(0:T)
+ )
+​
+ ]
+이건 Annealed Importance Sampling과 Jarzynski Equality와 유사한 방식입니다.
+
+🧪 2.4 Training (Log-likelihood Bound Maximization)
+로그 가능도:
+𝐿
+=
+𝐸
+𝑞
+(
+𝑥
+(
+0
+)
+)
+[
+log
+⁡
+𝑝
+(
+𝑥
+(
+0
+)
+)
+]
+L=E 
+q(x 
+(0)
+ )
+​
+ [logp(x 
+(0)
+ )]
+이는 직접 계산이 어려워서 Jensen's inequality로 lower bound 
+𝐾
+K를 도입:
+
+𝐿
+≥
+𝐾
+=
+−
+∑
+𝑡
+=
+2
+𝑇
+𝐸
+𝑞
+(
+𝑥
+(
+0
+)
+,
+𝑥
+(
+𝑡
+)
+)
+[
+𝐷
+𝐾
+𝐿
+(
+𝑞
+(
+𝑥
+(
+𝑡
+−
+1
+)
+∣
+𝑥
+(
+𝑡
+)
+,
+𝑥
+(
+0
+)
+)
+∥
+𝑝
+(
+𝑥
+(
+𝑡
+−
+1
+)
+∣
+𝑥
+(
+𝑡
+)
+)
+)
+]
++
+entropy terms
+L≥K=− 
+t=2
+∑
+T
+​
+ E 
+q(x 
+(0)
+ ,x 
+(t)
+ )
+​
+ [D 
+KL
+​
+ (q(x 
+(t−1)
+ ∣x 
+(t)
+ ,x 
+(0)
+ )∥p(x 
+(t−1)
+ ∣x 
+(t)
+ ))]+entropy terms
+즉, reverse transition과 posterior 간의 KL divergence를 최소화하는 것이 학습의 핵심입니다.
+
+✅ 학습 대상: 각 스텝의 reverse kernel (mean, covariance, flip rate 등)
+
+📊 2.4.1 Diffusion Schedule 
+𝛽
+𝑡
+β 
+t
+​
+ 
+Gaussian: 
+𝛽
+1
+β 
+1
+​
+ 은 고정, 나머지는 gradient로 학습 가능
+
+Binomial: 
+𝛽
+𝑡
+=
+1
+𝑇
+−
+𝑡
++
+1
+β 
+t
+​
+ = 
+T−t+1
+1
+​
+  등 일정한 노이즈 감소 스케줄 사용
+
+🔄 2.5 Posterior 계산 및 분포 곱셈
+문제:
+이미지 복원, inpainting, denoising 등에서는 
+𝑝
+(
+𝑥
+(
+0
+)
+∣
+known data
+)
+p(x 
+(0)
+ ∣known data) 계산이 필요합니다.
+
+해결:
+Diffusion model은 **임의의 함수 
+𝑟
+(
+𝑥
+(
+0
+)
+)
+r(x 
+(0)
+ )**를 곱해서 새로운 분포 
+𝑝
+~
+(
+𝑥
+(
+0
+)
+)
+∝
+𝑝
+(
+𝑥
+(
+0
+)
+)
+𝑟
+(
+𝑥
+(
+0
+)
+)
+p
+~
+​
+ (x 
+(0)
+ )∝p(x 
+(0)
+ )r(x 
+(0)
+ )를 구성할 수 있습니다.
+
+이는 reverse kernel에 perturbation을 주는 방식으로 처리됨
+
+Gaussian인 경우엔 closed-form으로 처리 가능
+
+🔥 2.6 Entropy Bound
+forward process가 알려져 있으므로, reverse 과정의 conditional entropy에 대해 상한/하한을 계산할 수 있습니다.
+
+𝐻
+𝑞
+(
+𝑋
+(
+𝑡
+)
+∣
+𝑋
+(
+𝑡
+−
+1
+)
+)
+≥
+𝐻
+𝑞
+(
+𝑋
+(
+𝑡
+−
+1
+)
+∣
+𝑋
+(
+𝑡
+)
+)
+≥
+...
+H 
+q
+​
+ (X 
+(t)
+ ∣X 
+(t−1)
+ )≥H 
+q
+​
+ (X 
+(t−1)
+ ∣X 
+(t)
+ )≥...
+→ 이는 likelihood bound의 해석에 사용됨 (Appendix A 참조)
+
+---
+
 ### Appendix
 #### 1. Monte Carlo
   - 정확한 계산이 어렵거나 불가능할 때, 많은 수의 랜덤 샘플을 뽑아서 평균을 내면 근사값이 된다는 아이디어입니다.
@@ -100,250 +632,65 @@ $Δθ∝E_{data}[f(x)]−E_{model}[f(x)]$
 * 많게는 수천 스텝 필요 → 비효율적
 
 
-🔍 3. Score Matching
-✅ 목적:
-정규화 상수 없는 확률분포에서도 학습 가능하게 함
+#### 4. Score Matching
+##### 4-1. 목적:
+* 정규화 상수 없는 확률분포에서도 학습 가능하게 함
 
-⚙️ 아이디어:
-score function 
-∇
-𝑥
-log
-⁡
-𝑝
-(
-𝑥
-)
-∇ 
-x
-​
- logp(x)을 이용해 다음을 최소화:
+##### 4-2. 아이디어:
+score function $∇_x \log p(x)$을 이용해 다음을 최소화:
 
-𝐽
-(
-𝜃
-)
-=
-𝐸
-𝑝
-𝑑
-𝑎
-𝑡
-𝑎
-[
-∥
-∇
-𝑥
-log
-⁡
-𝑝
-𝜃
-(
-𝑥
-)
-−
-∇
-𝑥
-log
-⁡
-𝑝
-𝑑
-𝑎
-𝑡
-𝑎
-(
-𝑥
-)
-∥
-2
-]
-J(θ)=E 
-p 
-data
-​
- 
-​
- [∥∇ 
-x
-​
- logp 
-θ
-​
- (x)−∇ 
-x
-​
- logp 
-data
-​
- (x)∥ 
-2
- ]
-⚠️ 한계:
-2차 도함수 계산 필요 → 고차원에서는 느림
+$J(θ)=E_{p_{data}} [∥∇_{x} \log p_{θ}(x)−∇_{x} \log p_{data}(x)∥^{2}]$
 
-샘플링 자체는 불가능
+##### 4-3. 한계:
+* 2차 도함수 계산 필요 → 고차원에서는 느림
+* 샘플링 자체는 불가능
 
-🔍 4. Pseudolikelihood
-✅ 목적:
-Markov Random Field 같은 모델에서 복잡한 joint likelihood 대신 조건부 확률만 사용
+#### 5. Pseudolikelihood
+##### 5-1. 목적
+* Markov Random Field 같은 모델에서 복잡한 joint likelihood 대신 조건부 확률만 사용
 
-𝑃
-𝐿
-(
-𝑥
-)
-=
-∏
-𝑖
-𝑝
-(
-𝑥
-𝑖
-∣
-𝑥
-∖
-𝑖
-)
-PL(x)= 
-i
-∏
-​
- p(x 
-i
-​
- ∣x 
-∖i
-​
- )
-⚠️ 한계:
-조건부 확률만 최대화 → global 구조 학습에는 한계
+$PL(x)= \displaystyle\prod_{i}p(x_i|x_{i-1})$
 
-Likelihood를 직접 최적화하는 것보다 정확도 낮을 수 있음
+##### 5-2. 한계
+* 조건부 확률만 최대화 → global 구조 학습에는 한계
+* Likelihood를 직접 최적화하는 것보다 정확도 낮을 수 있음
 
-🔍 5. Loopy Belief Propagation (LBP)
-✅ 목적:
-그래프 모델 (특히 MRF, CRF)에서 근사적인 marginal inference
+#### 6. Loopy Belief Propagation (LBP)
 
-⚙️ 아이디어:
-메시지 전달 알고리즘을 사이클이 있는 그래프에도 적용
+##### 6-1. 목적
+* 그래프 모델 (특히 MRF, CRF)에서 근사적인 marginal inference
 
-반복적 메시지 전달을 통해 근사분포 계산
+##### 6-2. 아이디어
+* 메시지 전달 알고리즘을 사이클이 있는 그래프에도 적용
 
-⚠️ 한계:
-수렴이 보장되지 않음
+* 반복적 메시지 전달을 통해 근사분포 계산
 
-근사 정확도 떨어질 수 있음
+##### 6-3. 한계
+* 수렴이 보장되지 않음
 
-🔍 6. Mean Field Theory
-✅ 목적:
-복잡한 분포를 독립된 단일 변수의 곱으로 근사
+* 근사 정확도 떨어질 수 있음
 
-𝑝
-(
-𝑥
-)
-≈
-∏
-𝑖
-𝑞
-𝑖
-(
-𝑥
-𝑖
-)
-p(x)≈ 
-i
-∏
-​
- q 
-i
-​
- (x 
-i
-​
- )
-⚠️ 한계:
+#### 7. Mean Field Theory
+##### 7-1. 목적
+* 복잡한 분포를 독립된 단일 변수의 곱으로 근사
+
+$p(x)≈ \displaystyle\prod_{i} q_{i}(x_{i})$
+
+##### 7-2. 한계
 변수 간 의존성 무시 → 복잡한 구조 표현 불가능
 
 간단한 구조에서는 작동하지만 일반화에 약함
 
-🔍 7. Minimum Probability Flow (MPF)
-✅ 목적:
-Energy-based model에서 정규화 상수 없이도 학습 가능하게 함
+#### 8. Minimum Probability Flow (MPF)
+##### 8-1. 목적
+* Energy-based model에서 정규화 상수 없이도 학습 가능하게 함
 
-⚙️ 아이디어:
-데이터 분포 
-𝑝
-𝑑
-𝑎
-𝑡
-𝑎
-p 
-data
-​
- 에서 가까운 이웃 상태로의 확률 흐름을 줄이도록 학습
+##### 8-2. 아이디어
+* 데이터 분포 $p_{data}$에서 가까운 이웃 상태로의 확률 흐름을 줄이도록 학습
+* 즉, 데이터와 비데이터 사이의 flow를 줄이기
 
-즉, 데이터와 비데이터 사이의 flow를 줄이기
+$min_{𝜃} \displaystyle\sum_{𝑥∈data} \displaystyle\sum_{𝑥'}𝑇(𝑥′∣𝑥) \log \frac{𝑝_{𝜃}(𝑥′)}{𝑝_{𝜃}(𝑥)}$
 
-min
-⁡
-𝜃
-∑
-𝑥
-∈
-data
-∑
-𝑥
-′
-𝑇
-(
-𝑥
-′
-∣
-𝑥
-)
-log
-⁡
-𝑝
-𝜃
-(
-𝑥
-′
-)
-𝑝
-𝜃
-(
-𝑥
-)
-θ
-min
-​
-  
-x∈data
-∑
-​
-  
-x 
-′
- 
-∑
-​
- T(x 
-′
- ∣x)log 
-p 
-θ
-​
- (x)
-p 
-θ
-​
- (x 
-′
- )
-​
- 
-⚠️ 한계:
-이웃 상태 정의에 따라 결과가 민감
-
-복잡한 분포에는 한계
+##### 8-3. 한계
+* 이웃 상태 정의에 따라 결과가 민감
+* 복잡한 분포에는 한계
