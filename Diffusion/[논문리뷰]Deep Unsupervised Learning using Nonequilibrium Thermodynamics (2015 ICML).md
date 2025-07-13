@@ -101,9 +101,20 @@ $$p(x^{(0)})=E_{q(x^{(1:T)}∣x^{(0)})}\left[\frac{p(x^{(0:T)})}{q(x^{(1:T)}|x^{
 
 이건 Annealed Importance Sampling과 Jarzynski Equality와 유사한 방식입니다.
 
+#### 개념정리 Log-Likelihood란?
+Likelihood
+* 어떤 데이터 $x$가 관측되었을때, 모델이 그 데이터를 낼 확률
+* $p_{\theta}(x)$:파라미터 $\theta$를 가진 모델이 $x$를 생성할 확률
+* 여러 데이터가 있을 경우 전체 likelihodd는 곲
+
+  $$L(\theta)=\displaystyle\prod_{i=1}^Np_{\theta}(x_i)$$
+
+* Log-Likelihodd는 위 확률의 로그를 취한 것
+* 곱이 너무 작아지는 것을 방지, 수학적으로 미분이 쉬워서 최적화에 유리
 
 ### 2.4 Training (Log-likelihood Bound Maximization)
-로그 가능도: $𝐿=𝐸_{𝑞(𝑥^{(0)})}[\log ⁡𝑝(𝑥^{(0)})]$
+로그 가능도(Log likelihodd): $𝐿=𝐸_{𝑞(𝑥^{(0)})}[\log ⁡𝑝(𝑥^{(0)})]$
+
 이는 직접 계산이 어려워서 Jensen's inequality로 lower bound 𝐾를 도입:
 
 
