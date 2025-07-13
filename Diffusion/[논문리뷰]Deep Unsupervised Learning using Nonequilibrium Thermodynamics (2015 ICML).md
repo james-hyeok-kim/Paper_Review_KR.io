@@ -65,6 +65,8 @@ $Z=∫ϕ(x)dx$를 계산하기가 거의 불가능합니다.
 
 * 이 과정은 물리학에서 말하는 **비평형 확산(nonequilibrium diffusion)**에 기반하며, 확률모델 자체를 Markov chain의 종단 상태로 정의합니다.
 
+---
+
 #### 2.1 Forward Trajectory (Inference Process)
 
 ##### 2.1.1 핵심 개념:
@@ -80,6 +82,7 @@ $q(x^{(t)}∣x^{(t−1)})=T_{π}(x^{(t)}∣x^{(t−1)};β_t)$
 
 $$q(x^{(0:T)})=q(x^{(0)}) \displaystyle\prod^{t=1}_{t=1}q(x^{(t)}∣x^{(t−1)})$$
 
+---
 
 ### 2.2 Reverse Trajectory (Generative Process)
 #### 2.2.1 핵심 개념
@@ -93,6 +96,7 @@ $$p(x^{(0:T)})=p(x^{(T)}) \displaystyle\prod_{t=1}^{T} p(x^{(t−1)} ∣x ^{(t)}
 
 * Binomial: bit flip rate $f_b(x^{(t)},t)$
 
+---
 
 ### 2.3 Model Probability (Log-Likelihood)
 직접 $p(x^{(0)})$ 를 계산하기는 어렵지만, forward/reverse 경로의 확률비를 계산해 근사합니다:
@@ -112,177 +116,75 @@ Likelihood
 * Log-Likelihodd는 위 확률의 로그를 취한 것
 * 곱이 너무 작아지는 것을 방지, 수학적으로 미분이 쉬워서 최적화에 유리
 
+---
+
 ### 2.4 Training (Log-likelihood Bound Maximization)
 로그 가능도(Log likelihodd): $𝐿=𝐸_{𝑞(𝑥^{(0)})}[\log ⁡𝑝(𝑥^{(0)})]$
 
 이는 직접 계산이 어려워서 Jensen's inequality로 lower bound 𝐾를 도입:
 
 
-$$𝐿≥𝐾=−\displaystyle\sum_{𝑡=2}^{𝑇}𝐸𝑞(𝑥^{(0)},𝑥^{(𝑡)})[𝐷_{𝐾𝐿}(𝑞(𝑥^{(𝑡−1)}∣𝑥^{(𝑡)},𝑥^{(0)})∥𝑝(𝑥^{(𝑡−1)}∣𝑥^{(𝑡)}))]+entropy terms$$
+$$𝐿≥𝐾=−\displaystyle\sum_{𝑡=2}^{𝑇}𝐸_{𝑞(𝑥^{(0)},𝑥^{(𝑡)})}[𝐷_{𝐾𝐿}(𝑞(𝑥^{(𝑡−1)}∣𝑥^{(𝑡)},𝑥^{(0)})∥𝑝(𝑥^{(𝑡−1)}∣𝑥^{(𝑡)}))]+entropy terms$$
 
 즉, reverse transition과 posterior 간의 KL divergence를 최소화하는 것이 학습의 핵심입니다.
 
 * DKL (Kullback-Leibler Divergence)
 * $D_{KL}(P∣∣Q)=∑_x P(x) \log \frac{P(x)}{Q(x)}$
 
-​
-
+|제목|내용|
+|:---|:---|
+|$q(x^{(t)}∣x^{(0)})$ | forward diffusion 과정: $x^{(0)}→x^{(T)}$|
+|$p(x^{(t−1)}∣x^{(t)})$ | 학습하고자 하는 reverse process (생성 모델)|
+|D_{KL}(q∣∣p) |	두 분포 사이의 차이 측정|
+|$E_{q(x^{(0)},x^{(t)})}[⋅]$ |	forward process에서 샘플링된 샘플로부터 기대값을 계산|
+|entropy terms| 일부는 정규화상수 또는 모델에 상관없는 항으로 무시 가능|
 
 ✅ 학습 대상: 각 스텝의 reverse kernel (mean, covariance, flip rate 등)
 
-📊 2.4.1 Diffusion Schedule 
-𝛽
-𝑡
-β 
-t
-​
- 
-Gaussian: 
-𝛽
-1
-β 
-1
-​
- 은 고정, 나머지는 gradient로 학습 가능
+#### 2.4.1 Diffusion Schedule $𝛽_𝑡$
+* Gaussian: $𝛽_1$은 고정, 나머지는 gradient로 학습 가능
 
-Binomial: 
-𝛽
-𝑡
-=
-1
-𝑇
-−
-𝑡
-+
-1
-β 
-t
-​
- = 
-T−t+1
-1
-​
-  등 일정한 노이즈 감소 스케줄 사용
+* Binomial: $𝛽_𝑡 = \frac{1}{𝑇−𝑡+1}$등 일정한 노이즈 감소 스케줄 사용
 
-🔄 2.5 Posterior 계산 및 분포 곱셈
-문제:
-이미지 복원, inpainting, denoising 등에서는 
-𝑝
-(
-𝑥
-(
-0
-)
-∣
-known data
-)
-p(x 
-(0)
- ∣known data) 계산이 필요합니다.
+---
 
-해결:
-Diffusion model은 **임의의 함수 
-𝑟
-(
-𝑥
-(
-0
-)
-)
-r(x 
-(0)
- )**를 곱해서 새로운 분포 
-𝑝
-~
-(
-𝑥
-(
-0
-)
-)
-∝
-𝑝
-(
-𝑥
-(
-0
-)
-)
-𝑟
-(
-𝑥
-(
-0
-)
-)
-p
-~
-​
- (x 
-(0)
- )∝p(x 
-(0)
- )r(x 
-(0)
- )를 구성할 수 있습니다.
+### 2.5 Posterior 계산 및 분포 곱셈
+
+문제 : 이미지 복원, inpainting, denoising 등에서는 $p(x^{(0)}∣known data)$ 계산이 필요합니다.
+
+해결: Diffusion model은 임의의 함수 $r(x^{(0)})$를 곱해서 새로운 분포 $\tilde{p}(x^{(0)})∝p(x^{(0)})r(x{(0)})$를 구성할 수 있습니다.
 
 이는 reverse kernel에 perturbation을 주는 방식으로 처리됨
 
 Gaussian인 경우엔 closed-form으로 처리 가능
 
-🔥 2.6 Entropy Bound
-forward process가 알려져 있으므로, reverse 과정의 conditional entropy에 대해 상한/하한을 계산할 수 있습니다.
+---
 
-𝐻
-𝑞
-(
-𝑋
-(
-𝑡
-)
-∣
-𝑋
-(
-𝑡
-−
-1
-)
-)
-≥
-𝐻
-𝑞
-(
-𝑋
-(
-𝑡
-−
-1
-)
-∣
-𝑋
-(
-𝑡
-)
-)
-≥
-...
-H 
-q
-​
- (X 
-(t)
- ∣X 
-(t−1)
- )≥H 
-q
-​
- (X 
-(t−1)
- ∣X 
-(t)
- )≥...
-→ 이는 likelihood bound의 해석에 사용됨 (Appendix A 참조)
+### Posterior란? (사후확률)
 
+#### 정의 
+
+어떤 관측값 y가 주어졌을 때, 잠재 변수 𝑥가 실제로 어떤 값일지를 예측하는 확률분포예요.
+
+$$p(x|y) = \frac{p(x) \cdot p(y|x)}{p(y)}$$
+
+* $p(x)$: 사전 확률 (prior)
+
+* $p(y∣x)$: likelihood (관측값의 조건부 확률)
+
+* $p(x∣y)$: posterior (우리가 알고 싶은 것)
+
+* $p(y)$: 정규화 상수
+
+* “이런 결과가 관측되었는데, 원인은 무엇일까?” →  원인을 추정하는 역추론적 사고가 posterior입니다.
+
+#### 논문 맥락에서의 Posterior
+
+$$ posterior \propto p(x^{(0)}) \cdot r(x^{(0)})$$
+
+* $p(x^{(0)})$ : 모델 분포
+* $r(x^{(0)})$ : 조건, 관측된 부분분
+  
 ---
 
 ### Appendix
