@@ -121,7 +121,7 @@ Likelihood
 ---
 
 ### 2.4 Training (Log-likelihood Bound Maximization)
-로그 가능도(Log likelihodd): $𝐿=𝐸_{𝑞(𝑥^{(0)})}[\log ⁡𝑝(𝑥^{(0)})]$
+로그 가능도(Log likelihood): $𝐿=𝐸_{𝑞(𝑥^{(0)})}[\log ⁡𝑝(𝑥^{(0)})]$
 
 이는 직접 계산이 어려워서 Jensen's inequality로 lower bound 𝐾를 도입:
 
