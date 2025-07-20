@@ -115,7 +115,7 @@ Likelihood
 
   $$L(\theta)=\displaystyle\prod_{i=1}^Np_{\theta}(x_i)$$
 
-* Log-Likelihodd는 위 확률의 로그를 취한 것
+* Log-Likelihood는 위 확률의 로그를 취한 것
 * 곱이 너무 작아지는 것을 방지, 수학적으로 미분이 쉬워서 최적화에 유리
 
 ---
