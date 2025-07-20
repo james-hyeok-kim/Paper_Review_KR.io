@@ -63,7 +63,7 @@ Markov chain forwarding 방식으로 noise를 더하고, reverse방식으로 noi
 
 #### 목표
 $$p_θ(x)=∫p_θ(x∣z)p(z)dz$$
-* 다음과 같은 형태의 확률 생성 모델을 다룹니다
+다음과 같은 형태의 확률 생성 모델을 다룹니다
 * $𝑧$는 latent variable (잠재 변수)
 * $𝑝(𝑧): 간단한 prior 분포 (ex: $𝑁(0,𝐼)$)
 * $𝑝_𝜃(𝑥∣𝑧)$: decoder (복원 모델)
