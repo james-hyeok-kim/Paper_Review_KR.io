@@ -115,9 +115,47 @@ $$𝜇_𝜃(𝑥_𝑡,𝑡)=\frac{1}{𝛼_𝑡}(𝑥_𝑡−\frac{𝛽_𝑡}{\sq
 * $\bar{\alpha_t}=\prod^t_{s=1}\alpha_s$
 * $q(x_t|x_0) = N(x_t;\sqrt{\bar{a_t}}x_0, (1-\bar{\alpha_t})I)$
 
-### Generative Models as Latent Variable Models
 
+DDPM의 역방향 과정이 score-based model 및 Langevin dynamics와 어떻게 연결되는지를 설명합니다. 
 
+약간 수학적으로 더 깊이 들어가는 파트
+
+### Langevin Dynamics란?
+
+Langevin dynamics는 확률분포 
+
+$𝑝(𝑥)$에서 샘플링할 때 자주 쓰이는 stochastic differential equation 기반 샘플링 방법입니다.
+
+💡 정의
+$$𝑥_{𝑡+1}=𝑥_𝑡+\frac{𝜂}{2}∇_𝑥log𝑝(𝑥_𝑡)+\sqrt{𝜂}⋅𝑁(0,𝐼)$$
+
+* $∇_x logp(x_t)$는 score function이라 부릅니다.
+* 즉, 확률 밀도함수의 gradient 방향으로 이동 + 약간의 노이즈 추가
+→ 반복적으로 이 업데이트를 적용하면 $𝑝(𝑥)$에서 샘플링 가능
+
+🔹 4.2 Score Matching과 연결
+DDPM의 denoising 모델은 사실상 score function을 예측하고 있습니다.
+
+* DDPM은 각 시점 𝑡마다, $𝑥_𝑡∼𝑞(𝑥_𝑡∣𝑥_0)에서 샘플링하고
+
+* 네트워크는 노이즈 $𝜖_𝜃(𝑥_𝑡,𝑡)$를 예측 → 이건$∇_{𝑥_𝑡}log𝑞(𝑥_𝑡)$의 방향과 같은 역할
+
+따라서 DDPM은 score function을 간접적으로 학습한다고 볼 수 있음
+
+🔹 4.3 결론: DDPM ≈ Score-based Model
+논문은 다음과 같이 요약합니다:
+
+```
+In the limit of small $𝛽_𝑡$ the reverse DDPM process becomes equivalent to Langevin dynamics with a learned score function.
+```
+
+즉:
+
+* $𝛽_𝑡$ → 0 : 매우 작은 노이즈 단계에서
+
+* 역방향 DDPM 과정은 Langevin dynamics와 동일해짐
+
+* 따라서 DDPM은 score-based 생성 모델의 특수한 형태로 해석 가능
 
 ---
 
