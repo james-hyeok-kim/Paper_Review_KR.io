@@ -15,6 +15,12 @@
 * 노이즈 이미지에서 점차 노이즈를 제거하여 원본 데이터를 복원하는 확률적 경로를 학습.
 * 이 과정이 데이터 생성의 핵심 
 
+#### 기존 생성 모델들(GAN, VAE 등)의 단점을 보완하며, 모드 커버리지와 샘플 품질 모두 우수함.
+
+#### GAN은 mode collapse 문제가 있었고, VAE는 샘플 품질이 낮았음.
+
+
+
 ## 초록
 Implementation : [Git](https://github.com/hojonathanho/diffusion)
 
