@@ -111,7 +111,7 @@ $$p(x^{(0)})=E_{q(x^{(1:T)}∣x^{(0)})}\left[\frac{p(x^{(0:T)})}{q(x^{(1:T)}|x^{
 Likelihood
 * 어떤 데이터 $x$가 관측되었을때, 모델이 그 데이터를 낼 확률
 * $p_{\theta}(x)$:파라미터 $\theta$를 가진 모델이 $x$를 생성할 확률
-* 여러 데이터가 있을 경우 전체 likelihodd는 곲
+* 여러 데이터가 있을 경우 전체 likelihood는 곱
 
   $$L(\theta)=\displaystyle\prod_{i=1}^Np_{\theta}(x_i)$$
 
