@@ -40,6 +40,7 @@ Markov chain forwarding 방식으로 noise를 더하고, reverse방식으로 noi
 
 ### Forward Process (Diffusion Process) $q$
 * $q(x_{1:T}|x_0) := \displaystyle\prod_{t=1}^{T}q(x_t|x_{t-1}), \ \ \ q(x_t|x_{t-1}) := N(x_t;\sqrt{1- \beta_{t}}x_{t-1},\beta_{t}I)$
+* 작은 가우시안 노이즈를 T단계에 걸쳐 점차 추가
 * Variance(Noise) Schedule $\beta_1, ... , \beta_T:$ - 미리 정해둔 노이즈값
 * $\sqrt{1- \beta_{t}}$ 로 scaling하는 이유는 variance가 발산하는 것을 막기 위해서
 
