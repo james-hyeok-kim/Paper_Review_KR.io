@@ -5,6 +5,8 @@
 
 일자 : 16 Dec 2020
 
+---
+
 ## 핵심 아이디어
 
 ### 순방향 확산(forward process): 실제 데이터 
@@ -20,7 +22,6 @@
 #### GAN은 mode collapse 문제가 있었고, VAE는 샘플 품질이 낮았음.
 
 
-
 ## 초록
 Implementation : [Git](https://github.com/hojonathanho/diffusion)
 
@@ -30,6 +31,8 @@ Implementation : [Git](https://github.com/hojonathanho/diffusion)
 </p> 
 
 Markov chain forwarding 방식으로 noise를 더하고, reverse방식으로 noise에서 이미지를 생성
+
+---
 
 ## 배경
 ### Reverse Process $p_{\theta}$
@@ -56,10 +59,25 @@ Markov chain forwarding 방식으로 noise를 더하고, reverse방식으로 noi
 * $\bar{\alpha_t}=\prod^t_{s=1}\alpha_s$
 * $q(x_t|x_0) = N(x_t;\sqrt{\bar{a_t}}x_0, (1-\bar{\alpha_t})I)$
 
+### Generative Models as Latent Variable Models
+
+#### 목표
+$$p_θ(x)=∫p_θ(x∣z)p(z)dz$$
+* 다음과 같은 형태의 확률 생성 모델을 다룹니다
+* $𝑧$는 latent variable (잠재 변수)
+* $𝑝(𝑧): 간단한 prior 분포 (ex: $𝑁(0,𝐼)$)
+* $𝑝_𝜃(𝑥∣𝑧)$: decoder (복원 모델)
+* 이 모델에서 $log𝑝_𝜃(𝑥)$ 를 직접 계산하는 건 어렵다. → 추정을 통해 근사.
+
+---
 
 ## 실험
 
+---
+
 ## 결과
+
+---
 
 ## 부록
 ### Markov Chain
