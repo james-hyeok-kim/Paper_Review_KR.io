@@ -209,7 +209,10 @@ $I \approx \frac{𝑏−𝑎}{N} \displaystyle\sum_{i=1}^{N} f(x_i) $
 ---
 
 #### 2. Variational Bayes (VB)
-##### 2-1. 목적:복잡한 **posterior $p(z∣x)$**를 직접 계산하기 어려울 때, tractable한 분포 $q(z)$ 로 근사해서 **Evidence Lower Bound (ELBO)**를 최적화함.
+##### 2-1. 목적
+
+복잡한 **posterior $p(z∣x)$**를 직접 계산하기 어려울 때, tractable한 분포 $q(z)$ 로 근사해서 **Evidence Lower Bound (ELBO)**를 최적화함.
+
 ##### 2-2. 아이디어
 * $\log p(x) ≥ E_{q(z)} [\log p(x,z) − \log q(z)]$
 
