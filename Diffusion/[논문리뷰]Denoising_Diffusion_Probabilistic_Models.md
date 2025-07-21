@@ -136,6 +136,7 @@ $$𝑥_{𝑡+1}=𝑥_𝑡+\frac{𝜂}{2}∇_𝑥log𝑝(𝑥_𝑡)+\sqrt{𝜂}�
 * 즉, 확률 밀도함수의 gradient 방향으로 이동 + 약간의 노이즈 추가
 → 반복적으로 이 업데이트를 적용하면 $𝑝(𝑥)$에서 샘플링 가능
 * $𝜂$은 step size or learning rate를 의미
+* $𝑁(0,𝐼)$는 평균 0, 분산 1인 정규분포, python에서는 numpy.random.normal(loc=0.0, scale=1.0, size= ...)으로 구현가능
 
 🔹 Score Matching과 연결
 DDPM의 denoising 모델은 사실상 score function을 예측하고 있습니다.
