@@ -191,7 +191,7 @@ $$L=E_q​[−logp_θ​(x_0)]≤E_q​ [−log\frac{p_θ(x_{0:T})​}{q(x_{1:T�
 
 * 이를 아래와 같이 재 정립
 
-$$L=E_q[D_{KL}​ (q(x_T​ ∣x_0​ )∣∣p(x_T​ ))+ \displaystyle\sum_{t>1} D_{KL}​ (q(x_{t−1}​ ∣x_t​ ,x_0​ )∣∣p_θ​ (x_{t−1}∣x_t))−logp_θ (x_0​ ∣x_1 )]$$
+$$L=E_q[D_{KL}​(q(x_T​∣x_0​)∣∣p(x_T​))+ \displaystyle\sum_{t>1}D_{KL}​(q(x_{t−1}​∣x_t​,x_0​)∣∣p_θ​(x_{t−1}∣x_t))−logp_θ(x_0∣x_1)]$$
 
 * 전송률
   * $L_T=D_{KL}(q(x_T∣x_0 )∣∣p(x_T)): 이는 초기 잠재 변수 $x_T$ 를 전송하는 데 필요한 비트 수를 나타냅니다.
