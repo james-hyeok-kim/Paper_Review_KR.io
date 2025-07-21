@@ -75,7 +75,7 @@ $$log𝑝_𝜃(𝑥)≥𝐸_{𝑞_𝜙(𝑧∣𝑥)}[log⁡𝑝_𝜃(𝑥∣𝑧
 
 ---
 
-### Forward Process (Diffusion Process) $q$
+## Forward Process (Diffusion Process) $q$
 * $q(x_{1:T}|x_0) := \displaystyle\prod_{t=1}^{T}q(x_t|x_{t-1}), \ \ \ q(x_t|x_{t-1}) := N(x_t;\sqrt{1- \beta_{t}}x_{t-1},\beta_{t}I)$
 * 작은 가우시안 노이즈를 T단계에 걸쳐 점차 추가
 * Variance(Noise) Schedule $\beta_1, ... , \beta_T:$ - 미리 정해둔 노이즈값 (예: 0.0001 ~ 0.02)
@@ -84,14 +84,17 @@ $$log𝑝_𝜃(𝑥)≥𝐸_{𝑞_𝜙(𝑧∣𝑥)}[log⁡𝑝_𝜃(𝑥∣𝑧
 
 👉 즉, 한번에 $𝑥_0$ 에서 $𝑥_𝑡$를 샘플링할 수 있음.
 
-### Reverse Process $p_{\theta}$
+---
+
+## Reverse Process $p_{\theta}$
 * $p_{\theta}(x_{0:T}) \rightarrow reverse \ process$
 * Markov chain with learned Gaussian transitions, $p(x_T) = N(x_T;0,I):$ (Normal distribution)
 * 보통 Normal Distribution의 표현 $X \sim N(\mu, \sigma^2)$ 평균 $(\mu)$ , 분산 $(\sigma)$ 로 표현
 * $p_{\theta}(x_{0:T}) := p(x_{T})\displaystyle\prod_{t=1}^{T}p_{\theta}(x_{t-1}|x_{t}),  \ \ \ p_{\theta}(x_{t-1}|x_t) :=  N (x_{t-1};\mu_{\theta}(x_t,t),\sum_{\theta}(x_t,t))$
 
+---
 
-### Training (학습)
+## Training (학습)
 * Variational Bound를 최적화 하는 형태로 진행
 * Negative log likelihood
 * $E\left[ -log p_\theta(x_0) \right] \le E_q \left[ -log \frac{p_\theta (x_{0:t})}{q(x_{1:T}|x_0)} \right] = E_q \left[ -log p(x_T) - \displaystyle\sum_{t \ge 1} log \frac{p_\theta (x_{t-1})}{q(x_{t}|x_{t-1})} \right] =: L$
@@ -132,17 +135,18 @@ $$𝑥_{𝑡+1}=𝑥_𝑡+\frac{𝜂}{2}∇_𝑥log𝑝(𝑥_𝑡)+\sqrt{𝜂}�
 * $∇_x logp(x_t)$는 score function이라 부릅니다.
 * 즉, 확률 밀도함수의 gradient 방향으로 이동 + 약간의 노이즈 추가
 → 반복적으로 이 업데이트를 적용하면 $𝑝(𝑥)$에서 샘플링 가능
+* $𝜂$은 step size or learning rate를 의미
 
-🔹 4.2 Score Matching과 연결
+🔹 Score Matching과 연결
 DDPM의 denoising 모델은 사실상 score function을 예측하고 있습니다.
 
-* DDPM은 각 시점 𝑡마다, $𝑥_𝑡∼𝑞(𝑥_𝑡∣𝑥_0)에서 샘플링하고
+* DDPM은 각 시점 𝑡마다, $𝑥_𝑡∼𝑞(𝑥_𝑡∣𝑥_0)$에서 샘플링하고
 
-* 네트워크는 노이즈 $𝜖_𝜃(𝑥_𝑡,𝑡)$를 예측 → 이건$∇_{𝑥_𝑡}log𝑞(𝑥_𝑡)$의 방향과 같은 역할
+* 네트워크는 노이즈 $𝜖_𝜃(𝑥_𝑡,𝑡)$를 예측 → 이건 $∇_{𝑥_𝑡}log𝑞(𝑥_𝑡)$ 의 방향과 같은 역할
 
 따라서 DDPM은 score function을 간접적으로 학습한다고 볼 수 있음
 
-🔹 4.3 결론: DDPM ≈ Score-based Model
+🔹 결론: DDPM ≈ Score-based Model
 논문은 다음과 같이 요약합니다:
 
 ```
