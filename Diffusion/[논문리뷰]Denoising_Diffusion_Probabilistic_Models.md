@@ -97,10 +97,11 @@ $$log𝑝_𝜃(𝑥)≥𝐸_{𝑞_𝜙(𝑧∣𝑥)}[log⁡𝑝_𝜃(𝑥∣𝑧
 ## Training (학습)
 * Variational Bound를 최적화 하는 형태로 진행
 * Negative log likelihood
-* $E\left[ -log p_\theta(x_0) \right] \le E_q \left[ -log \frac{p_\theta (x_{0:t})}{q(x_{1:T}|x_0)} \right] = E_q \left[ -log p(x_T) - \displaystyle\sum_{t \ge 1} log \frac{p_\theta (x_{t-1})}{q(x_{t}|x_{t-1})} \right] =: L$
+* $E\left[ -log p_{\theta}(x_0) \right] \le E_q \left[ -log \frac{p_\theta (x_{0:t})}{q(x_{1:T}|x_0)} \right] = E_q \left[ -log p(x_T) - \displaystyle\sum_{t \ge 1} log \frac{p_\theta (x_{t-1})}{q(x_{t}|x_{t-1})} \right] =: L$
   * $$L=E_q [log\frac{p_θ(x_0,…,x_T)}{q(x_1,…,x_T ∣x_0)}]$$
+  
 이 loss는 다음처럼 분해 가능:
-  * $$𝐿=𝐸_𝑞[\displaystyle\prod_{𝑡=1}^{𝑇}𝐷_{𝐾𝐿}(𝑥𝑡−1∣𝑥𝑡,𝑥0)∥𝑝𝜃(𝑥𝑡−1∣𝑥𝑡))−log⁡𝑝𝜃(𝑥0∣𝑥1)]$$
+  * $$𝐿=𝐸_𝑞[\displaystyle\prod_{𝑡=1}^{𝑇}𝐷_{𝐾𝐿}(𝑥_{𝑡−1}∣𝑥_{𝑡},𝑥_0)∥𝑝_𝜃(𝑥_{𝑡−1}|∣𝑥_𝑡))−log⁡𝑝_𝜃(𝑥_0∣𝑥_1)]$$
 * $E$는 기대값, 변수 x의 기대값으로 반복실험의 평균적인 값을 의미
 
 ### Parameterization (Noise Prediction)
