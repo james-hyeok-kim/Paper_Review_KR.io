@@ -97,7 +97,7 @@ $$log𝑝_𝜃(𝑥)≥𝐸_{𝑞_𝜙(𝑧∣𝑥)}[log⁡𝑝_𝜃(𝑥∣𝑧
 ## Training (학습)
 * Variational Bound를 최적화 하는 형태로 진행
 * Negative log likelihood
-* $E\left[ -log p_{\theta}(x_0) \right] \le E_q \left[ -log \frac{p_\theta (x_{0:t})}{q(x_{1:T}|x_0)} \right] = E_q \left[ -log p(x_T) - \displaystyle\sum_{t \ge 1} log \frac{p_\theta (x_{t-1})}{q(x_{t}|x_{t-1})} \right] =: L$
+* $E\left[ -logp_{\theta}(x_0)\right] \le E_q\left[ -log\frac{p_\theta(x_{0:t})}{q(x_{1:T}|x_0)}\right] = E_q \left[-log p(x_T)-\displaystyle\sum_{t\ge1} log\frac{p_\theta(x_{t-1})}{q(x_{t}|x_{t-1})}\right] =: L$
   * $$L=E_q [log\frac{p_θ(x_0,…,x_T)}{q(x_1,…,x_T ∣x_0)}]$$
   
 이 loss는 다음처럼 분해 가능:
@@ -187,11 +187,11 @@ In the limit of small $𝛽_𝑡$ the reverse DDPM process becomes equivalent to
 
 * Variational Upper Bound인 L을 최소화 시켜야 하는데,
 
-$$L=E_q​[−logp_θ​(x_0)]≤E_q​ [−log\frac{p_θ(x_{0:T})​}{q(x_{1:T​}∣x_0)}]$$
+$$L=E_q​[−logp_θ​(x_0)]≤E_q​[−log\frac{p_θ(x_{0:T})​}{q(x_{1:T​}∣x_0)}]$$
 
 * 이를 아래와 같이 재 정립
 
-$$L=E_q[D_{KL}​(q(x_T​∣x_0​)∣∣p(x_T​))+ \displaystyle\sum_{t>1}D_{KL}​(q(x_{t−1}​∣x_t​,x_0​)∣∣p_θ​(x_{t−1}∣x_t))−logp_θ(x_0∣x_1)]$$
+$$L=E_q[D_{KL}​(q(x_T​∣x_0​)∣∣p(x_T​))+\displaystyle\sum_{t>1}D_{KL}​(q(x_{t−1}​∣x_t​,x_0​)∣∣p_θ​(x_{t−1}∣x_t))−logp_θ(x_0∣x_1)]$$
 
 * 전송률
   * $L_T=D_{KL}(q(x_T∣x_0 )∣∣p(x_T))$: 이는 초기 잠재 변수 $x_T$ 를 전송하는 데 필요한 비트 수를 나타냅니다.
