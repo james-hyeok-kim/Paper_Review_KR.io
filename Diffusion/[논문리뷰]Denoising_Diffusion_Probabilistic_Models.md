@@ -56,7 +56,7 @@ $$p_θ(x)=∫p_θ(x∣z)p(z)dz$$
 
 🔹 ELBO 정의
 
-$$log𝑝_𝜃(𝑥)≥𝐸_{𝑞_𝜙(𝑧∣𝑥)}[log⁡𝑝_𝜃(𝑥∣𝑧)]−𝐷_{KL}(𝑞_𝜙(𝑧∣𝑥)∥𝑝(𝑧))$$
+$$log𝑝_𝜃(𝑥)≥𝐸_{𝑞_𝜙(𝑧∣𝑥)}[log⁡𝑝_𝜃(𝑥∣𝑧)]−𝐷_{KL}(𝑞_𝜙(𝑧∣𝑥) \parallel 𝑝(𝑧))$$
 
 * 이 식은 다음 두 항의 합으로 해석됨:
   * 복원항 (likelihood term): $𝐸_𝑞[log⁡𝑝(𝑥∣𝑧)]$
@@ -105,7 +105,7 @@ $$L=E_q​[ −logp_θ​(x_0)\]≤E_{q}​[−log\frac{p_θ(x_{0:T})​}{q(x_{1
 
 * 이를 아래와 같이 재 정립
 
-$$L=E_q[D_{KL}​(q(x_T|x_0​)||p(x_T))+\displaystyle\sum_{t>1}D_{KL}​(q(x_{t−1}​|x_t​,x_0)||p_θ(x_{t−1}|x_t))−\log p_θ(x_0|x_1)]$$
+$$L=E_q[D_{KL}​(q(x_T|x_0​) \parallel p(x_T))+\displaystyle\sum_{t>1}D_{KL}​(q(x_{t−1}​|x_t​,x_0)\parallel p_θ(x_{t−1}|x_t))−\log p_θ(x_0|x_1)]$$
 
 * Variational Bound를 최적화 하는 형태로 진행
 * Negative log likelihood
@@ -113,7 +113,7 @@ $$L=E_q[D_{KL}​(q(x_T|x_0​)||p(x_T))+\displaystyle\sum_{t>1}D_{KL}​(q(x_{t
   * $$L=E_q [log\frac{p_θ(x_0,…,x_T)}{q(x_1,…,x_T ∣x_0)}]$$
   
 이 loss는 다음처럼 분해 가능:
-  * $$𝐿=𝐸_𝑞[\displaystyle\sum_{𝑡=1}^{𝑇}𝐷_{𝐾𝐿}(𝑥_{𝑡−1}|𝑥_{𝑡},𝑥_0)||𝑝_𝜃(𝑥_{𝑡−1}||𝑥_𝑡))−log⁡𝑝_𝜃(𝑥_0|𝑥_1)]$$
+  * $$𝐿=𝐸_𝑞[\displaystyle\sum_{𝑡=1}^{𝑇}𝐷_{𝐾𝐿}(𝑥_{𝑡−1}|𝑥_{𝑡},𝑥_0) \parallel 𝑝_𝜃(𝑥_{𝑡−1} \parallel 𝑥_𝑡))−log⁡𝑝_𝜃(𝑥_0|𝑥_1)]$$
 * $E$는 기대값, 변수 x의 기대값으로 반복실험의 평균적인 값을 의미
 
 ### Parameterization (Noise Prediction)
@@ -203,7 +203,7 @@ $$L=E_q​[−logp_θ​(x_0)]≤E_q​[−log\frac{p_θ(x_{0:T})​}{q(x_{1:T�
 
 * 이를 아래와 같이 재 정립
 
-$$L=E_q[D_{KL}​(q(x_T|x_0​)||p(x_T))+\displaystyle\sum_{t>1}D_{KL}​(q(x_{t−1}​|x_t​,x_0)||p_θ(x_{t−1}|x_t))−\log p_θ(x_0|x_1)]$$
+$$L=E_q[D_{KL}​(q(x_T|x_0​)\parallel p(x_T))+\displaystyle\sum_{t>1}D_{KL}​(q(x_{t−1}​|x_t​,x_0)\parallel p_θ(x_{t−1}|x_t))−\log p_θ(x_0|x_1)]$$
 
 * 전송률 (Rate)
   * $L_T=D_{KL}(q(x_T∣x_0 )∣∣p(x_T))$: 이는 초기 잠재 변수 $x_T$ 를 전송하는 데 필요한 비트 수를 나타냅니다.
@@ -225,7 +225,7 @@ $$L=E_q[D_{KL}​(q(x_T|x_0​)||p(x_T))+\displaystyle\sum_{t>1}D_{KL}​(q(x_{t
 
 * 왜곡 - 전송률 플롯 (Rate-Distortion Plot)
   * Distortion (RMSE): 왜곡은 평균 제곱근 오차(Root Mean Squared Error, RMSE)로 측정
-    * $x_0$는 원본 이미지,$\hat{x}_0$는 $x_t$로부터 추정된 이미지이며, 왜곡은 $\sqrt{||x_0-\hat{x}_0||^2/D}$로 계산됩니다.
+    * $x_0$는 원본 이미지,$\hat{x}_0$는 $x_t$로부터 추정된 이미지이며, 왜곡은 $\sqrt{\parallel x_0-\hat{x}_0\parallel ^2/D}$로 계산됩니다.
     * 여기서 D는 데이터 차원입니다. 이는 [0,255] 스케일에서 측정됩니다.
   * Rate (bits/dim): 전송률은 특정 시간 t까지 수신된 누적 비트 수(cumulative number of bits received so far)로 계산됩니다.
     * 플롯의 X축은 역방향 과정 스텝 $(T-t)$를 나타내고, Y축은 각각 왜곡과 전송률을 나타냅니다.
