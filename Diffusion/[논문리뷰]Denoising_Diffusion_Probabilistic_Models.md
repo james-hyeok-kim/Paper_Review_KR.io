@@ -107,14 +107,51 @@ $$L=E_q​[ −logp_θ​(x_0)\]≤E_{q}​[−log\frac{p_θ(x_{0:T})​}{q(x_{1
 
 $$L=E_q[D_{KL}​(q(x_T|x_0​) \parallel p(x_T))+\displaystyle\sum_{t>1}D_{KL}​(q(x_{t−1}​|x_t​,x_0)\parallel p_θ(x_{t−1}|x_t))−\log p_θ(x_0|x_1)]$$
 
-* Variational Bound를 최적화 하는 형태로 진행
-* Negative log likelihood
-* $E\left[ -logp_{\theta}(x_0)\right] \le E_q\left[ -log\frac{p_\theta(x_{0:t})}{q(x_{1:T}|x_0)}\right] = E_q \left[-log p(x_T)-\displaystyle\sum_{t\ge1} log\frac{p_\theta(x_{t-1})}{q(x_{t}|x_{t-1})}\right] =: L$
-  * $$L=E_q [log\frac{p_θ(x_0,…,x_T)}{q(x_1,…,x_T ∣x_0)}]$$
-  
-이 loss는 다음처럼 분해 가능:
-  * $$𝐿=𝐸_𝑞[\displaystyle\sum_{𝑡=1}^{𝑇}𝐷_{𝐾𝐿}(𝑥_{𝑡−1}|𝑥_{𝑡},𝑥_0) \parallel 𝑝_𝜃(𝑥_{𝑡−1} \parallel 𝑥_𝑡))−log⁡𝑝_𝜃(𝑥_0|𝑥_1)]$$
-* $E$는 기대값, 변수 x의 기대값으로 반복실험의 평균적인 값을 의미
+### 간소화
+
+* 이를 간소화하여 훈련을 하는데, 역방향 과정 평균 $(\mu_\theta)$ 재매개변수화하여 간소화 한다.
+  * 이미지 $x_t$로부터 이전 시점의 이미지 $x_{t-1}$을 예측하는 역방향 과정(reverse process)을 학습
+  * 이 역방향 과정은 다음과 같은 조건부 가우시안 분포로 정의
+
+$$p_θ(x_{t−1}∣x_t)=N(x_{t−1};μ_θ(x_t,t),\sum_θ(x_t,t))$$
+
+* 여기서 $\mu_{\theta}(x_t,t)$는 모델이 학습해야 할 평균 함수
+* $\Sigma_{\theta}(x_t,t)$는 공분산 행렬
+* 논문에서는 공분산 행렬 $\Sigma_{\theta}(x_t,t)$를 고정된 상수로 설정하므로, 결국 모델이 학습해야 할 핵심은 평균 함수 $μ_θ(x_t,t)$ 입니다.
+
+#### $\mu_{\theta}(x_t,t)$에측의 문제점
+* 복잡한 관계: $x_t$ 와 $x{t−1}$사이의 관계는 노이즈가 추가되는 정도$(β_t)$에 따라 복잡하게 변함
+* 학습의 어려움: 신경망이 이 복잡한 평균 값을 직접 예측하도록 훈련시키는 것은 어려울 수 있음
+
+#### $\epsilon_{\theta}$를 예측하도록 재매개변수화
+
+* 논문은 이 문제를 해결하기 위해 $\mu_{\theta}(x_t,t)$를 직접 예측하는 대신, $x_t$에 추가된 노이즈 ϵ을 예측하는 신경망 $\epsilon_{\theta}(x_t,t)$를 학습하도록 재매개변수화합니다.
+* 이 아이디어는 정방향 과정의 핵심 관계에서 출발합니다
+  * 정방향 과정에서 $x_t$는 원본 이미지 $x_0$에 노이즈 ϵ이 추가된 형태로 표현될 수 있습니다
+
+$$x_t=\sqrt{\bar{α}_t}x_0 + \sqrt{1−\bar{α}_t}ϵ$$
+
+* 여기서 $\epsilon \sim \mathcal{N}(0,I)$는 표준 정규 분포에서 샘플링된 노이즈입니다.
+* 이 식을 ϵ에 대해 정리하면 다음과 같습니다
+
+$$ϵ=\frac{x_t−\sqrt{\bar{α_t}}x_0} {\sqrt{1−\bar{α_t}}}$$
+
+* 역방향 과정의 평균 $\mu_{\theta}(x_t,t)$는 사실상 정방향 과정의 사후 분포 평균 $\tilde{\mu}_t(x_t,x_0)$를 근사하는 것을 목표로 합니다.
+* 이 $\tilde{\mu}_t(x_t,x_0)$는 다음과 같이 표현됩니다:
+
+$$\tilde{μ}_t(x_t,x_0)=\frac{\sqrt{\hat{α}_{t−1}}β_t}{1−\hat{α}_t}x_0 + \frac{\sqrt{α_t}(1−\bar{α}_{t−1})}{1−\hat{α}_t}x_t$$
+
+* 이 $\tilde{μ}_t(x_t,x_0)$ 식에 위에서 정리한 ϵ의 표현식을 대입하고 정리하면, $\tilde{\mu}_t(x_t,x_0)$가 ϵ에 대한 함수로 표현될 수 있음을 알 수 있습니다.
+
+* 논문에서는 이 관계를 활용하여 $\mu_{\theta}(x_t,t)$를 다음과 같이 새로운 형태로 정의합니다:
+
+$$μ_θ(x_t,t)=\frac{1}{\sqrt{α_t}}(x_t − \frac{β_t}{\sqrt{1−\bar{α}t}}ϵ_θ(x_t,t))$$
+
+여기서 $\epsilon_{\theta}(x_t,t)$는 신경망이 학습할 노이즈 예측 함수입니다.
+
+
+---
+
 
 ### Parameterization (Noise Prediction)
 역방향 분포의 평균은 다음과 같이 계산 가능:
