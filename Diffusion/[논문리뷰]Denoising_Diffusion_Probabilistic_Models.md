@@ -90,7 +90,7 @@ $$log𝑝_𝜃(𝑥)≥𝐸_{𝑞_𝜙(𝑧∣𝑥)}[log⁡𝑝_𝜃(𝑥∣𝑧
 ## Reverse Process $p_{\theta}$
 * $p_{\theta}(x_{0:T}) \rightarrow reverse \ process$
 * Markov chain with learned Gaussian transitions, $p(x_T) = N(x_T;0,I):$ (Normal distribution)
-* 보통 Normal Distribution의 표현 $X \sim N(\mu, \sigma^2)$ 평균 $(\mu)$ , 분산 $(\sigma)$ 로 표현
+* 보통 Normal Distribution의 표현 $X \sim N(\mu, \sigma^2)$ 평균 $(\mu)$ , 분산 $(\sigma)^2$ 로 표현
 * $p_{\theta}(x_{0:T}) := p(x_{T})\displaystyle\prod_{t=1}^{T}p_{\theta}(x_{t-1}|x_{t}),  \ \ \ p_{\theta}(x_{t-1}|x_t) :=  N (x_{t-1};\mu_{\theta}(x_t,t),\sum_{\theta}(x_t,t))$
 
 ---
