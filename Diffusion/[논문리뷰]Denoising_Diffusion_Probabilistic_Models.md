@@ -76,7 +76,8 @@ $$log𝑝_𝜃(𝑥)≥𝐸_{𝑞_𝜙(𝑧∣𝑥)}[log⁡𝑝_𝜃(𝑥∣𝑧
 ---
 
 ## Forward Process (Diffusion Process) $q$
-* $q(x_{1:T}|x_0) := \displaystyle\prod_{t=1}^{T}q(x_t|x_{t-1}), \ \ \ q(x_t|x_{t-1}) := N(x_t;\sqrt{1- \beta_{t}}x_{t-1},\beta_{t}I)$
+* $q(x_{1:T}|x_0) := \displaystyle\prod_{t=1}^{T}q(x_t|x_{t-1})
+* q(x_t|x_{t-1}) := N(x_t;\sqrt{1- \beta_{t}}x_{t-1},\beta_{t}I)$
 * 작은 가우시안 노이즈를 T단계에 걸쳐 점차 추가
 * Variance(Noise) Schedule $\beta_1, ... , \beta_T:$
   * 미리 정해둔 노이즈값 (예: 0.0001 ~ 0.02)
