@@ -164,7 +164,7 @@ $$E_{x_0,ϵ} \left[\frac{β_{t}^{2}}{2σ_{t}^{2}α_{t}(1−\bar{α_t})} \paralle
 
 <p align="center">
 <img width="804" height="206" alt="image" src="https://github.com/user-attachments/assets/ba2539a9-93a5-417b-bb4f-fda5aa30bdb4" />
-<\p>
+</p> 
 
 ---
 
