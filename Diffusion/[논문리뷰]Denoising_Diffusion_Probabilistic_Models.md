@@ -162,6 +162,10 @@ $$E_{x_0,ϵ} \left[\frac{β_{t}^{2}}{2σ_{t}^{2}α_{t}(1−\bar{α_t})} \paralle
   * 바 알파 $(\bar{α_{t}})$ = $\prod_{s=1}^{t} α_{s}$
   * 노이즈 예측 신경망 $(ϵ_θ(x_t,t))$
 
+
+<img width="804" height="206" alt="image" src="https://github.com/user-attachments/assets/ba2539a9-93a5-417b-bb4f-fda5aa30bdb4" />
+
+
 ---
 
 
