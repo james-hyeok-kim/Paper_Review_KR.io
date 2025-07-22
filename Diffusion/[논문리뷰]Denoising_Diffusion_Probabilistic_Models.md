@@ -50,7 +50,7 @@ $$p_θ(x)=∫p_θ(x∣z)p(z)dz$$
 #### Variational Inference and ELBO
 🔹 아이디어:
 
-* 복잡한 $𝑝_𝜃(𝑥)$ 를 직접 계산하는 대신, **ELBO (Evidence Lower Bound)**를 최대화해서 근사한다.
+* 복잡한 $𝑝_𝜃(𝑥)$ 를 직접 계산하는 대신, ELBO (Evidence Lower Bound)를 최대화해서 근사한다.
 
 * $𝑞_𝜙(𝑧∣𝑥)$ : encoder 또는 approximate posterior
 
@@ -80,6 +80,7 @@ $$log𝑝_𝜃(𝑥)≥𝐸_{𝑞_𝜙(𝑧∣𝑥)}[log⁡𝑝_𝜃(𝑥∣𝑧
 * 작은 가우시안 노이즈를 T단계에 걸쳐 점차 추가
 * Variance(Noise) Schedule $\beta_1, ... , \beta_T:$ - 미리 정해둔 노이즈값 (예: 0.0001 ~ 0.02)
 * $\sqrt{1- \beta_{t}}$ 로 scaling하는 이유는 variance가 발산하는 것을 막기 위해서
+  * $\sqrt{1-\beta_t}^2 + \beta_t^2 = 1 = \sigma^2(variance)$ \rightarrow 가우시안 분포
 * 여기서 $𝛼_𝑡:=1−𝛽_𝑡$, $\bar{α_t}:=\displaystyle\prod_{𝑠=1}^{𝑡}𝛼_𝑠$
 
 👉 즉, 한번에 $𝑥_0$ 에서 $𝑥_𝑡$를 샘플링할 수 있음.
