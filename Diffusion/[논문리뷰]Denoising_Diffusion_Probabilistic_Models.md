@@ -139,7 +139,8 @@ $$ϵ=\frac{x_t−\sqrt{\bar{α_t}}x_0} {\sqrt{1−\bar{α_t}}}$$
 * 역방향 과정의 평균 $\mu_{\theta}(x_t,t)$는 사실상 정방향 과정의 사후 분포 평균 $\tilde{\mu}_t(x_t,x_0)$를 근사하는 것을 목표로 합니다.
 * 이 $\tilde{\mu}_t(x_t,x_0)$는 다음과 같이 표현됩니다:
 
-$$\tilde{μ}_t(x_t,x_0)=\frac{\sqrt{\hat{α}_{t−1}}β_t}{1−\hat{α}_t}x_0 + \frac{\sqrt{α_t}(1−\bar{α}_{t−1})}{1−\hat{α}_t}x_t$$
+$$\tilde{μ_{t}}(x_t,x_0) = \frac{\sqrt{\bar{α_{t-1}}}β_t}{1 − \bar{α_t}} x_{0} + \frac {\sqrt{α_t}(1−\bar{α_{t−1}})} {1−\bar{α_t}} x_{t}$$
+
 
 * 이 $\tilde{μ}_t(x_t,x_0)$ 식에 위에서 정리한 ϵ의 표현식을 대입하고 정리하면, $\tilde{\mu}_t(x_t,x_0)$가 ϵ에 대한 함수로 표현될 수 있음을 알 수 있습니다.
 
