@@ -42,7 +42,7 @@ $$p_θ(x)=∫p_θ(x∣z)p(z)dz$$
 다음과 같은 형태의 확률 생성 모델을 다룹니다
 
 * $𝑧$는 latent variable (잠재 변수)
-* $𝑝(𝑧): 간단한 prior 분포 (ex: $𝑁(0,𝐼)$)
+* $𝑝(𝑧)$: 간단한 prior 분포 (ex: $𝑁(0,𝐼)$)
 * $𝑝_𝜃(𝑥∣𝑧)$: decoder (복원 모델)
 * 이 모델에서 $log𝑝_𝜃(𝑥)$ 를 직접 계산하는 건 어렵다. → 추정을 통해 근사.
 
@@ -96,6 +96,14 @@ $$log𝑝_𝜃(𝑥)≥𝐸_{𝑞_𝜙(𝑧∣𝑥)}[log⁡𝑝_𝜃(𝑥∣𝑧
 ---
 
 ## Training (학습)
+* 훈련 목표 : Variational Upper Bound인 L을 최소화
+
+$$L=E_q​[−logp_θ​(x_0)]≤E_q​[−log\frac{p_θ(x_{0:T})​}{q(x_{1:T​}∣x_0)}]$$
+
+* 이를 아래와 같이 재 정립
+
+$$L=E_q[D_{KL}​(q(x_T|x_0​)||p(x_T))+\displaystyle\sum_{t>1}D_{KL}​(q(x_{t−1}​|x_t​,x_0)||p_θ(x_{t−1}|x_t))−\log p_θ(x_0|x_1)]$$
+
 * Variational Bound를 최적화 하는 형태로 진행
 * Negative log likelihood
 * $E\left[ -logp_{\theta}(x_0)\right] \le E_q\left[ -log\frac{p_\theta(x_{0:t})}{q(x_{1:T}|x_0)}\right] = E_q \left[-log p(x_T)-\displaystyle\sum_{t\ge1} log\frac{p_\theta(x_{t-1})}{q(x_{t}|x_{t-1})}\right] =: L$
@@ -186,13 +194,13 @@ In the limit of small $𝛽_𝑡$ the reverse DDPM process becomes equivalent to
 
 #### Progressive Coding 수식적 해석
 
-* Variational Upper Bound인 L을 최소화 시켜야 하는데,
+* 훈련 목표 : Variational Upper Bound인 L을 최소화
 
 $$L=E_q​[−logp_θ​(x_0)]≤E_q​[−log\frac{p_θ(x_{0:T})​}{q(x_{1:T​}∣x_0)}]$$
 
 * 이를 아래와 같이 재 정립
 
-$$L=E_q[D_{KL}​(q(x_T|x_0​)|p(x_T))+\displaystyle\sum_{t>1}D_{KL}​(q(x_{t−1}​|x_t​,x_0)|p_θ(x_{t−1}|x_t))−\log p_θ(x_0|x_1)]$$
+$$L=E_q[D_{KL}​(q(x_T|x_0​)||p(x_T))+\displaystyle\sum_{t>1}D_{KL}​(q(x_{t−1}​|x_t​,x_0)||p_θ(x_{t−1}|x_t))−\log p_θ(x_0|x_1)]$$
 
 * 전송률 (Rate)
   * $L_T=D_{KL}(q(x_T∣x_0 )∣∣p(x_T))$: 이는 초기 잠재 변수 $x_T$ 를 전송하는 데 필요한 비트 수를 나타냅니다.
