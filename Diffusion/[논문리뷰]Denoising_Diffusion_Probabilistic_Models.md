@@ -107,6 +107,10 @@ $$L=E_q​[ −logp_θ​(x_0)\]≤E_{q}​[−log\frac{p_θ(x_{0:T})​}{q(x_{1
 
 $$L=E_q[D_{KL}​(q(x_T|x_0​) \parallel p(x_T))+\displaystyle\sum_{t>1}D_{KL}​(q(x_{t−1}​|x_t​,x_0)\parallel p_θ(x_{t−1}|x_t))−\log p_θ(x_0|x_1)]$$
 
+<img width="1117" height="141" alt="image" src="https://github.com/user-attachments/assets/56681e35-47f1-4217-bb4b-a12d7e5a03be" />
+
+
+
 ### 간소화
 
 * 이를 간소화하여 훈련을 하는데, 역방향 과정 평균 $(\mu_\theta)$ 재매개변수화하여 간소화 한다.
@@ -154,7 +158,19 @@ $$μ_θ(x_t,t)=\frac{1}{\sqrt{α_t}}(x_t − \frac{β_t}{\sqrt{1−\bar{α}t}}ϵ
 
 $$E_{x_0,ϵ} \left[\frac{β_{t}^{2}}{2σ_{t}^{2}α_{t}(1−\bar{α_t})} \parallel ϵ−ϵ_θ(\sqrt{\bar{α_t}}x_0 + \sqrt{1−\bar{α_t}}ϵ,t) \parallel^2 \right]$$
 
-* $L_{t−1}$ 항은 $x_{t-1}$의 실제 사후 분포 $q(x_{t-1}|x_t,x_0)$와 모델이 예측하는 역방향 과정 $p_θ(x_{t−1}∣x_t)$ 간의 $D_{KL}$로 정의됩니다. 이 $D_{KL}$은 가우시안 분포 간의 비교이므로, 평균 제곱 오차 형태로 나타낼 수 있습니다.
+
+기존 초기 식
+
+$$L_{t-1} = E_q \left[\frac{1}{2\sigma^2_t} \parallel \tilde{\mu_t}(X_t,X_0)-\mu_\theta(X_t, t)\parallel^2 \right] + C$$
+
+* $\tilde{𝜇_𝑡}(𝑥_𝑡, 𝑥_0)$: forward process에서의 closed-form posterior 평균
+* $𝜇_𝜃(𝑥_𝑡,𝑡)$: 학습된 reverse process 평균
+* $𝜎_𝑡^2$: reverse process의 고정된 분산
+* $𝐶$: $θ$에 영향을 주지 않는 상수 (따라서 최적화에는 무관)
+
+*  이 $D_{KL}$은 가우시안 분포 간의 비교이므로, 평균 제곱 오차 형태로 나타낼 수 있습니다.
+
+* $L_{t−1}$ 항은 $x_{t-1}$의 실제 사후 분포 $q(x_{t-1}|x_t,x_0)$와 모델이 예측하는 역방향 과정 $p_θ(x_{t−1}∣x_t)$ 간의 $D_{KL}$로 정의됩니다.
 
 * 요소
   * 분산 스케줄 $(β_t)$
