@@ -14,6 +14,9 @@ DDIM은 DDPM과 동일한 훈련 방식을 사용하면서도, 샘플을 생성�
 
 DDPM과 달리, DDIM은 비마르코프(non-Markovian) 확산 과정을 사용하여 샘플링에 필요한 단계를 대폭 줄였습니다
 
+<img width="653" height="139" alt="image" src="https://github.com/user-attachments/assets/bd4fc49f-f068-4d6c-b6d6-316d3b6c5a31" />
+
+
 
 ### DDPM 한계
 DDPM은 적대적 학습(adversarial training) 없이도 고품질의 이미지를 생성할 수 있다는 장점이 있습니다. 
