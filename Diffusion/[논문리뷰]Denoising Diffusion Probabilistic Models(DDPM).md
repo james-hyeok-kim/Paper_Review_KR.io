@@ -105,11 +105,50 @@ $$log\ 𝑝_𝜃(𝑥)≥𝐸_{𝑞_𝜙(𝑧∣𝑥)}[log⁡𝑝_𝜃(𝑥∣�
 
 $$L=E_q​[ −logp_θ​(x_0)\]≤E_{q}​[−log\frac{p_θ(x_{0:T})​}{q(x_{1:T​}∣x_0)}\]$$
 
-* 이를 아래와 같이 재 정립 [더 자세한 유도](https://github.com/james-hyeok-kim/Paper_Review_KR.io/blob/main/Diffusion/%5B%EB%85%BC%EB%AC%B8%EB%A6%AC%EB%B7%B0%5DDenoising%20Diffusion%20Probabilistic%20Models(DDPM).md#loss-%EC%88%98%EC%8B%9D-%EC%9D%B4%ED%95%B4)
-
+* 이를 아래와 같이 재 정립 
 $$L=E_q[D_{KL}​(q(x_T|x_0​) \parallel p(x_T))+\displaystyle\sum_{t>1}D_{KL}​(q(x_{t−1}​|x_t​,x_0)\parallel p_θ(x_{t−1}|x_t))−\log p_θ(x_0|x_1)]$$
 
+  * 유도 (Loss 수식 이해) [Youtube](https://www.youtube.com/watch?v=ybvJbvllgJk)
+  * Bayesian Rule $p(x|y) = \frac{p(x,y)}{p(y)}$
+  * Markov Chain $q(x_t|x_{t-1},x_{t-2},x_0) = q(x_t|x_{t-1})$
+
+$L = E_q \left[ − \log \frac{p_θ(x_{0:T})}{q(x_{1:T} |x_0)} \right] \\ (17)$
+
+$= E_q \left[ − \log p(x_T) − \displaystyle\sum_{t≥1} \log \frac{p_θ(x_{t−1}|x_t)}{q(x_t|x_{t−1})} \right] \\ (18)$
+
+$t\geq1 \rightarrow t\gt1$
+
+$= E_q \left[− \log \ p(x_T) − \displaystyle\sum_{t>1} \log \frac{p_θ(x_{t−1}|x_t)}{q(x_t|x_{t−1})} − \log \frac{p_θ(x_0|x_1)}{q(x_1|x_0)} \right] \\ (19)$
+
+$\frac{1}{q(x_t|x_{t-1})} = \frac{1}{q(x_{t-1}|x_t,x_0)} \cdot \frac{q(x_{t-1}|x_0)}{q(x_t|x_0)}$
+
+$q(x_t|x_{t-1}) = q(x_t|x_{t-1}, x_0) = \frac{q(x_t,x_{t-1},x_0)}{q(x_{t-1},x_0)} \cdot \frac{q(x_t,x_0)}{q(x_t,x_0)} = q(x_{t-1}|x_t,x_0) \cdot \frac{q(x_t,x_0)}{q(x_{t-1},x_0)}$
+
+$= E_q \left[− \log \ p(x_T) − \displaystyle\sum_{t>1} \log \frac{p_θ(x_{t−1}|x_t)}{q(x_{t−1}|x_t, x_0)} · \frac{q(x_{t−1}|x_0)}{q(x_t|x_0)} − \log \frac{p_θ(x_0|x_1)}{q(x_1|x_0)} \right] \\ (20)$
+
+$= E_q \left[− \log \ p(x_T) − \displaystyle\sum_{t>1} \log \frac{p_θ(x_{t−1}|x_t)}{q(x_{t−1}|x_t, x_0)} -\displaystyle\sum_{t>1} log \frac{q(x_{t−1}|x_0)}{q(x_t|x_0)} − \log \frac{p_θ(x_0|x_1)}{q(x_1|x_0)} \right] $
+
+$-\displaystyle\sum_{t>1} log \frac{q(x_{t−1}|x_0)}{q(x_t|x_0)} = -log \frac{q(x_1|x_0)}{q(x_2|x_0)} -log \frac{q(x_2|x_0)}{q(x_3|x_0)} -log \frac{q(x_3|x_0)}{q(x_4|x_0)}  \cdots = -log\frac{q(x_1|x_0)}{q(x_t|x_0)}$
+
+$= E_q \left[ − \log \ \frac{p(x_T)}{q(x_T |x_0)} − \displaystyle\sum_{t>1} \log \frac{p_θ(x_{t−1}|x_t)}{q(x_{t−1}|x_t, x_0)} − \log \ p_θ(x_0|x_1) \right] \\ (21)$
+
+$= E_q \left[ D_{KL}(q(x_T|x_0) \parallel p(x_T)) + \displaystyle\sum_{t>1} D_{KL}(q(x_{t−1}|x_t, x_0) \parallel p_θ(x_{t−1}|x_t)) − \log \ p_θ(x_0|x_1) \right] \\ (22)$
+
+
+
+
+
+<img width="800" height="470" alt="image" src="https://github.com/user-attachments/assets/d58ced51-8f98-410d-a48b-4e5f783fcae3" />
+
+<img width="772" height="112" alt="image" src="https://github.com/user-attachments/assets/8434a4e2-6b6c-4780-98ac-5e0eda0dd051" />
+
+<img width="796" height="376" alt="image" src="https://github.com/user-attachments/assets/bdb3ca08-c397-4dcc-bd08-5daf8e85f7f8" />
+
+
 <img width="1117" height="141" alt="image" src="https://github.com/user-attachments/assets/56681e35-47f1-4217-bb4b-a12d7e5a03be" />
+
+
+
 
 
 
@@ -432,15 +471,6 @@ $\ \ \ \ \ \ \ \ \ \ \ \ \  = log(\displaystyle\sum_Z q(Z|\lambda)\frac{p(X,Z)}{
 $\ \ \ \ \ \ \ \ \ \ \ \ \  \ge \displaystyle\sum_Z q(Z|\lambda)log\frac{p(X,Z)}{p(Z|\lambda)}$
    
 
-### Loss 수식 이해
-
-https://www.youtube.com/watch?v=ybvJbvllgJk
-
-<img width="800" height="470" alt="image" src="https://github.com/user-attachments/assets/d58ced51-8f98-410d-a48b-4e5f783fcae3" />
-
-<img width="772" height="112" alt="image" src="https://github.com/user-attachments/assets/8434a4e2-6b6c-4780-98ac-5e0eda0dd051" />
-
-<img width="796" height="376" alt="image" src="https://github.com/user-attachments/assets/bdb3ca08-c397-4dcc-bd08-5daf8e85f7f8" />
 
 
 ### 
