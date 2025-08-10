@@ -108,9 +108,10 @@ $$L=E_q​[ −logp_θ​(x_0)\]≤E_{q}​[−log\frac{p_θ(x_{0:T})​}{q(x_{1
 * 이를 아래와 같이 재 정립 
 $$L=E_q[D_{KL}​(q(x_T|x_0​) \parallel p(x_T))+\displaystyle\sum_{t>1}D_{KL}​(q(x_{t−1}​|x_t​,x_0)\parallel p_θ(x_{t−1}|x_t))−\log p_θ(x_0|x_1)]$$
 
-  * 유도 (Loss 수식 이해) [Youtube](https://www.youtube.com/watch?v=ybvJbvllgJk)
-  * Bayesian Rule $p(x|y) = \frac{p(x,y)}{p(y)}$
-  * Markov Chain $q(x_t|x_{t-1},x_{t-2},x_0) = q(x_t|x_{t-1})$
+### Loss 유도
+* 유도 (Loss 수식 이해) [Youtube](https://www.youtube.com/watch?v=ybvJbvllgJk)
+* Bayesian Rule $p(x|y) = \frac{p(x,y)}{p(y)}$
+* Markov Chain $q(x_t|x_{t-1},x_{t-2},x_0) = q(x_t|x_{t-1})$
 
 $L = E_q \left[ − \log \frac{p_θ(x_{0:T})}{q(x_{1:T} |x_0)} \right] \\ (17)$
 
@@ -134,22 +135,55 @@ $= E_q \left[ − \log \ \frac{p(x_T)}{q(x_T |x_0)} − \displaystyle\sum_{t>1} 
 
 $= E_q \left[ D_{KL}(q(x_T|x_0) \parallel p(x_T)) + \displaystyle\sum_{t>1} D_{KL}(q(x_{t−1}|x_t, x_0) \parallel p_θ(x_{t−1}|x_t)) − \log \ p_θ(x_0|x_1) \right] \\ (22)$
 
-
-
-
-
-<img width="800" height="470" alt="image" src="https://github.com/user-attachments/assets/d58ced51-8f98-410d-a48b-4e5f783fcae3" />
-
-<img width="772" height="112" alt="image" src="https://github.com/user-attachments/assets/8434a4e2-6b6c-4780-98ac-5e0eda0dd051" />
-
-<img width="796" height="376" alt="image" src="https://github.com/user-attachments/assets/bdb3ca08-c397-4dcc-bd08-5daf8e85f7f8" />
-
-
 <img width="1117" height="141" alt="image" src="https://github.com/user-attachments/assets/56681e35-47f1-4217-bb4b-a12d7e5a03be" />
 
+Loss를 통해 P를 어떻게 구하는지는 알았는데, q는 어떻게 구할건지
+
+### 확률분포 $q$
+[유도공식](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/)
+
+* $q(x_t|x_{t-1}) := N(x_t;\sqrt{1- \beta_{t}}x_{t-1},\beta_{t}I) (6)$
+(6)가우시안분포를 따른다는 뜻
+
+* 정규분포의 확률밀도 함수는 $f(x) \propto exp(-\frac{(x-\mu)^2}{2\sigma^2})$의 형태를 가진다
+
+2. 각 항의 지수 부분
+
+$q(x_{t−1}∣x_t,x_0)=q(x_t∣x_{t−1})\frac{q(x_{t−1}∣x_0)}{q(x_t∣x_0)}$
+​
+위의 베이즈 정리 식의 각 항을 지수 부분만으로 나타내면 다음과 같습니다.
+
+```math
+1. q(x_t∣x_{t−1})=N(x_t;\sqrt{1−β_t}x_{t−1},β_tI)
+```
+```math
+1-1. 지수 부분: − \frac{(x_t − \sqrt{1−β_t}x_{t−1})^2}{2β_t}
+```
+
+```math
+2. q(x_{t−1}∣x_0) = N(x_{t−1};\sqrt{\bar{\alpha}_{t-1}}x_0, (1- \bar{\alpha}_{t-1}I)
+```
+
+```math
+2-1. 지수 부분: -\frac{(x_{t−1}-\bar{α}_{t−1}x_0)^2}{2(1−\bar{α}_{t−1})}
+```
+```math
+ 3. q(x_t∣x_0)=N(x_t;\sqrt{\bar{α}_t}x_0,(1-\bar{α}_t)I)
+```
+```math
+3-1. 지수 부분: −\frac{(x_t − \sqrt{\bar{α}_t}x_0)^2}{2(1−\bar{α}_t)}
+```
+
+```math
+q(x_{t−1}∣x_t,x_0) \propto exp(지수_1+지수_2−지수_3)
+```
+
+```math
+q(x_{t−1}∣x_t,x_0) \propto exp(− \frac{(x_t − \sqrt{1−β_t}x_{t−1})^2}{2β_t} -\frac{(x_{t−1}−\bar{α}_{t−1}x_0)^2}{2(1−\bar{α}_{t−1})}−\frac{(x_t − \sqrt{\bar{α}_t}x_0)^2}{2(1−\bar{α}_t)})
+```
 
 
-
+<img width="855" height="855" alt="image" src="https://github.com/user-attachments/assets/0e7faed0-3c02-4e53-8099-ea2993eee963" />
 
 
 ### 간소화
