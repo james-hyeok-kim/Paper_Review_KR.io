@@ -149,6 +149,12 @@ $$ϵ=\frac{x_t-\sqrt{\bar{α_t}}x_0}{\sqrt{1-\bar{α_t}}}$$
 {\tilde{\mu}}_{t}(x_t,x_0) = \frac{\sqrt{{\bar{\alpha}}_{t-1}} \beta_t}{1-\bar{\alpha}_t}x_0 + \frac {\sqrt{\alpha_t}(1-\bar{\alpha}_{t-1})}{1-{\bar{\alpha}}_t} x_{t}
 ```
 
+```math
+\tilde{\beta_t}:=\frac{1-\bar{\alpha}_{t-1}}{1-\bar{\alpha}_t}\beta_t
+```
+
+
+
 * 이 $\tilde{μ}_t(x_t,x_0)$ 식에 위에서 정리한 ϵ의 표현식을 대입하고 정리하면, $\tilde{\mu}_t(x_t,x_0)$가 ϵ에 대한 함수로 표현될 수 있음을 알 수 있습니다.
 
 * 논문에서는 이 관계를 활용하여 $\mu_{\theta}(x_t,t)$를 다음과 같이 새로운 형태로 정의합니다:
