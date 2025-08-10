@@ -116,17 +116,17 @@ $$L=E_q[D_{KL}​(q(x_T|x_0​) \parallel p(x_T))+\displaystyle\sum_{t>1}D_{KL}�
 
 ```math
 \begin{align}
-L & = E_q \left[ − \log \frac{p_θ(x_{0:T})}{q(x_{1:T} |x_0)} \right] (17) \\\\
-&= E_q \left[ − \log p(x_T) − \displaystyle\sum_{t≥1} \log \frac{p_θ(x_{t−1}|x_t)}{q(x_t|x_{t−1})} \right] (18) \\\\
+L & = E_q \left[ − \log \frac{p_θ(x_{0:T})}{q(x_{1:T} |x_0)} \right] \;\; (17) \\\\
+&= E_q \left[ − \log p(x_T) − \displaystyle\sum_{t≥1} \log \frac{p_θ(x_{t−1}|x_t)}{q(x_t|x_{t−1})} \right] \;\;(18) \\\\
 * & t\geq1 \rightarrow t\gt1 \\\\
-&= E_q \left[− \log \ p(x_T) − \displaystyle\sum_{t>1} \log \frac{p_θ(x_{t−1}|x_t)}{q(x_t|x_{t−1})} − \log \frac{p_θ(x_0|x_1)}{q(x_1|x_0)} \right] (19) \\\\
+&= E_q \left[− \log \ p(x_T) − \displaystyle\sum_{t>1} \log \frac{p_θ(x_{t−1}|x_t)}{q(x_t|x_{t−1})} − \log \frac{p_θ(x_0|x_1)}{q(x_1|x_0)} \right] \;\;(19) \\\\
 * &\frac{1}{q(x_t|x_{t-1})} = \frac{1}{q(x_{t-1}|x_t,x_0)} \cdot \frac{q(x_{t-1}|x_0)}{q(x_t|x_0)} \\\\
 * & q(x_t|x_{t-1}) = q(x_t|x_{t-1}, x_0) = \frac{q(x_t,x_{t-1},x_0)}{q(x_{t-1},x_0)} \cdot \frac{q(x_t,x_0)}{q(x_t,x_0)} = q(x_{t-1}|x_t,x_0) \cdot \frac{q(x_t,x_0)}{q(x_{t-1},x_0)} \\\\
-&= E_q \left[− \log \ p(x_T) − \displaystyle\sum_{t>1} \log \frac{p_θ(x_{t−1}|x_t)}{q(x_{t−1}|x_t, x_0)} · \frac{q(x_{t−1}|x_0)}{q(x_t|x_0)} − \log \frac{p_θ(x_0|x_1)}{q(x_1|x_0)} \right] (20) \\\\
+&= E_q \left[− \log \ p(x_T) − \displaystyle\sum_{t>1} \log \frac{p_θ(x_{t−1}|x_t)}{q(x_{t−1}|x_t, x_0)} · \frac{q(x_{t−1}|x_0)}{q(x_t|x_0)} − \log \frac{p_θ(x_0|x_1)}{q(x_1|x_0)} \right] \;\;(20) \\\\
 &= E_q \left[− \log \ p(x_T) − \displaystyle\sum_{t>1} \log \frac{p_θ(x_{t−1}|x_t)}{q(x_{t−1}|x_t, x_0)} -\displaystyle\sum_{t>1} log \frac{q(x_{t−1}|x_0)}{q(x_t|x_0)} − \log \frac{p_θ(x_0|x_1)}{q(x_1|x_0)} \right]  \\\\
 * &-\displaystyle\sum_{t>1} log \frac{q(x_{t−1}|x_0)}{q(x_t|x_0)} = -log \frac{q(x_1|x_0)}{q(x_2|x_0)} -log \frac{q(x_2|x_0)}{q(x_3|x_0)} -log \frac{q(x_3|x_0)}{q(x_4|x_0)}  \cdots = -log\frac{q(x_1|x_0)}{q(x_T|x_0)} \\\\
-&= E_q \left[ − \log \ \frac{p(x_T)}{q(x_T |x_0)} − \displaystyle\sum_{t>1} \log \frac{p_θ(x_{t−1}|x_t)}{q(x_{t−1}|x_t, x_0)} − \log \ p_θ(x_0|x_1) \right] (21) \\\\
-&= E_q \left[ D_{KL}(q(x_T|x_0) \parallel p(x_T)) + \displaystyle\sum_{t>1} D_{KL}(q(x_{t−1}|x_t, x_0) \parallel p_θ(x_{t−1}|x_t)) − \log \ p_θ(x_0|x_1) \right] (22) \\\\
+&= E_q \left[ − \log \ \frac{p(x_T)}{q(x_T |x_0)} − \displaystyle\sum_{t>1} \log \frac{p_θ(x_{t−1}|x_t)}{q(x_{t−1}|x_t, x_0)} − \log \ p_θ(x_0|x_1) \right] \;\;(21) \\\\
+&= E_q \left[ D_{KL}(q(x_T|x_0) \parallel p(x_T)) + \displaystyle\sum_{t>1} D_{KL}(q(x_{t−1}|x_t, x_0) \parallel p_θ(x_{t−1}|x_t)) − \log \ p_θ(x_0|x_1) \right] \;\;(22) \\\\
 \end{align}
 ```
 
