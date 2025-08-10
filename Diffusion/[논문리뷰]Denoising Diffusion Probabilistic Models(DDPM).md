@@ -5,6 +5,7 @@
 
 일자 : 16 Dec 2020
 
+
 ---
 
 ## 핵심 아이디어
@@ -113,27 +114,21 @@ $$L=E_q[D_{KL}​(q(x_T|x_0​) \parallel p(x_T))+\displaystyle\sum_{t>1}D_{KL}�
 * Bayesian Rule $p(x|y) = \frac{p(x,y)}{p(y)}$
 * Markov Chain $q(x_t|x_{t-1},x_{t-2},x_0) = q(x_t|x_{t-1})$
 
-$L = E_q \left[ − \log \frac{p_θ(x_{0:T})}{q(x_{1:T} |x_0)} \right] \\ (17)$
-
-$= E_q \left[ − \log p(x_T) − \displaystyle\sum_{t≥1} \log \frac{p_θ(x_{t−1}|x_t)}{q(x_t|x_{t−1})} \right] \\ (18)$
-
-$t\geq1 \rightarrow t\gt1$
-
-$= E_q \left[− \log \ p(x_T) − \displaystyle\sum_{t>1} \log \frac{p_θ(x_{t−1}|x_t)}{q(x_t|x_{t−1})} − \log \frac{p_θ(x_0|x_1)}{q(x_1|x_0)} \right] \\ (19)$
-
-$\frac{1}{q(x_t|x_{t-1})} = \frac{1}{q(x_{t-1}|x_t,x_0)} \cdot \frac{q(x_{t-1}|x_0)}{q(x_t|x_0)}$
-
-$q(x_t|x_{t-1}) = q(x_t|x_{t-1}, x_0) = \frac{q(x_t,x_{t-1},x_0)}{q(x_{t-1},x_0)} \cdot \frac{q(x_t,x_0)}{q(x_t,x_0)} = q(x_{t-1}|x_t,x_0) \cdot \frac{q(x_t,x_0)}{q(x_{t-1},x_0)}$
-
-$= E_q \left[− \log \ p(x_T) − \displaystyle\sum_{t>1} \log \frac{p_θ(x_{t−1}|x_t)}{q(x_{t−1}|x_t, x_0)} · \frac{q(x_{t−1}|x_0)}{q(x_t|x_0)} − \log \frac{p_θ(x_0|x_1)}{q(x_1|x_0)} \right] \\ (20)$
-
-$= E_q \left[− \log \ p(x_T) − \displaystyle\sum_{t>1} \log \frac{p_θ(x_{t−1}|x_t)}{q(x_{t−1}|x_t, x_0)} -\displaystyle\sum_{t>1} log \frac{q(x_{t−1}|x_0)}{q(x_t|x_0)} − \log \frac{p_θ(x_0|x_1)}{q(x_1|x_0)} \right] $
-
-$-\displaystyle\sum_{t>1} log \frac{q(x_{t−1}|x_0)}{q(x_t|x_0)} = -log \frac{q(x_1|x_0)}{q(x_2|x_0)} -log \frac{q(x_2|x_0)}{q(x_3|x_0)} -log \frac{q(x_3|x_0)}{q(x_4|x_0)}  \cdots = -log\frac{q(x_1|x_0)}{q(x_T|x_0)}$
-
-$= E_q \left[ − \log \ \frac{p(x_T)}{q(x_T |x_0)} − \displaystyle\sum_{t>1} \log \frac{p_θ(x_{t−1}|x_t)}{q(x_{t−1}|x_t, x_0)} − \log \ p_θ(x_0|x_1) \right] \\ (21)$
-
-$= E_q \left[ D_{KL}(q(x_T|x_0) \parallel p(x_T)) + \displaystyle\sum_{t>1} D_{KL}(q(x_{t−1}|x_t, x_0) \parallel p_θ(x_{t−1}|x_t)) − \log \ p_θ(x_0|x_1) \right] \\ (22)$
+```math
+\begin{align}
+L & = E_q \left[ − \log \frac{p_θ(x_{0:T})}{q(x_{1:T} |x_0)} \right] (17) \\\\
+&= E_q \left[ − \log p(x_T) − \displaystyle\sum_{t≥1} \log \frac{p_θ(x_{t−1}|x_t)}{q(x_t|x_{t−1})} \right] (18) \\\\
+* & t\geq1 \rightarrow t\gt1 \\\\
+&= E_q \left[− \log \ p(x_T) − \displaystyle\sum_{t>1} \log \frac{p_θ(x_{t−1}|x_t)}{q(x_t|x_{t−1})} − \log \frac{p_θ(x_0|x_1)}{q(x_1|x_0)} \right] (19) \\\\
+* &\frac{1}{q(x_t|x_{t-1})} = \frac{1}{q(x_{t-1}|x_t,x_0)} \cdot \frac{q(x_{t-1}|x_0)}{q(x_t|x_0)} \\\\
+* & q(x_t|x_{t-1}) = q(x_t|x_{t-1}, x_0) = \frac{q(x_t,x_{t-1},x_0)}{q(x_{t-1},x_0)} \cdot \frac{q(x_t,x_0)}{q(x_t,x_0)} = q(x_{t-1}|x_t,x_0) \cdot \frac{q(x_t,x_0)}{q(x_{t-1},x_0)} \\\\
+&= E_q \left[− \log \ p(x_T) − \displaystyle\sum_{t>1} \log \frac{p_θ(x_{t−1}|x_t)}{q(x_{t−1}|x_t, x_0)} · \frac{q(x_{t−1}|x_0)}{q(x_t|x_0)} − \log \frac{p_θ(x_0|x_1)}{q(x_1|x_0)} \right] (20) \\\\
+&= E_q \left[− \log \ p(x_T) − \displaystyle\sum_{t>1} \log \frac{p_θ(x_{t−1}|x_t)}{q(x_{t−1}|x_t, x_0)} -\displaystyle\sum_{t>1} log \frac{q(x_{t−1}|x_0)}{q(x_t|x_0)} − \log \frac{p_θ(x_0|x_1)}{q(x_1|x_0)} \right]  \\\\
+* &-\displaystyle\sum_{t>1} log \frac{q(x_{t−1}|x_0)}{q(x_t|x_0)} = -log \frac{q(x_1|x_0)}{q(x_2|x_0)} -log \frac{q(x_2|x_0)}{q(x_3|x_0)} -log \frac{q(x_3|x_0)}{q(x_4|x_0)}  \cdots = -log\frac{q(x_1|x_0)}{q(x_T|x_0)} \\\\
+&= E_q \left[ − \log \ \frac{p(x_T)}{q(x_T |x_0)} − \displaystyle\sum_{t>1} \log \frac{p_θ(x_{t−1}|x_t)}{q(x_{t−1}|x_t, x_0)} − \log \ p_θ(x_0|x_1) \right] (21) \\\\
+&= E_q \left[ D_{KL}(q(x_T|x_0) \parallel p(x_T)) + \displaystyle\sum_{t>1} D_{KL}(q(x_{t−1}|x_t, x_0) \parallel p_θ(x_{t−1}|x_t)) − \log \ p_θ(x_0|x_1) \right] (22) \\\\
+\end{align}
+```
 
 <img width="1117" height="141" alt="image" src="https://github.com/user-attachments/assets/56681e35-47f1-4217-bb4b-a12d7e5a03be" />
 
@@ -152,34 +147,17 @@ Loss를 통해 P를 어떻게 구하는지는 알았는데, q는 어떻게 구�
 $q(x_{t−1}∣x_t,x_0)=q(x_t∣x_{t−1})\frac{q(x_{t−1}∣x_0)}{q(x_t∣x_0)}$
 ​
 위의 베이즈 정리 식의 각 항을 지수 부분만으로 나타내면 다음과 같습니다.
-
 ```math
-1. q(x_t∣x_{t−1})=N(x_t;\sqrt{1−β_t}x_{t−1},β_tI)
-```
-```math
-1-1. 지수 부분: − \frac{(x_t − \sqrt{1−β_t}x_{t−1})^2}{2β_t}
-```
-
-```math
-2. q(x_{t−1}∣x_0) = N(x_{t−1};\sqrt{\bar{\alpha}_{t-1}}x_0, (1- \bar{\alpha}_{t-1}I)
-```
-
-```math
-2-1. 지수 부분: -\frac{(x_{t−1}-\bar{α}_{t−1}x_0)^2}{2(1−\bar{α}_{t−1})}
-```
-```math
- 3. q(x_t∣x_0)=N(x_t;\sqrt{\bar{α}_t}x_0,(1-\bar{α}_t)I)
-```
-```math
-3-1. 지수 부분: −\frac{(x_t − \sqrt{\bar{α}_t}x_0)^2}{2(1−\bar{α}_t)}
-```
-
-```math
-q(x_{t−1}∣x_t,x_0) \propto exp(지수_1+지수_2−지수_3)
-```
-
-```math
-q(x_{t−1}∣x_t,x_0) \propto exp(− \frac{(x_t − \sqrt{1−β_t}x_{t−1})^2}{2β_t} -\frac{(x_{t−1}−\bar{α}_{t−1}x_0)^2}{2(1−\bar{α}_{t−1})}−\frac{(x_t − \sqrt{\bar{α}_t}x_0)^2}{2(1−\bar{α}_t)})
+\begin{align}
+1. & q(x_t∣x_{t−1})=N(x_t;\sqrt{1−β_t}x_{t−1},β_tI) \\\\
+1-1. & 지수 부분: − \frac{(x_t − \sqrt{1−β_t}x_{t−1})^2}{2β_t} \\\\
+2. & q(x_{t−1}∣x_0) = N(x_{t−1};\sqrt{\bar{\alpha}_{t-1}}x_0, (1- \bar{\alpha}_{t-1}I) \\\\
+2-1. & 지수 부분: -\frac{(x_{t−1}-\bar{α}_{t−1}x_0)^2}{2(1−\bar{α}_{t−1})} \\\\
+3. & q(x_t∣x_0)=N(x_t;\sqrt{\bar{α}_t}x_0,(1-\bar{α}_t)I) \\\\
+3-1. & 지수 부분: −\frac{(x_t − \sqrt{\bar{α}_t}x_0)^2}{2(1−\bar{α}_t)} \\\\
+q(x_{t−1}∣x_t,x_0) & \propto exp(지수_1+지수_2−지수_3) \\\\
+q(x_{t−1}∣x_t,x_0) & \propto exp(− \frac{(x_t − \sqrt{1−β_t}x_{t−1})^2}{2β_t} -\frac{(x_{t−1}−\bar{α}_{t−1}x_0)^2}{2(1−\bar{α}_{t−1})}−\frac{(x_t − \sqrt{\bar{α}_t}x_0)^2}{2(1−\bar{α}_t)})
+\end{align}
 ```
 
 
