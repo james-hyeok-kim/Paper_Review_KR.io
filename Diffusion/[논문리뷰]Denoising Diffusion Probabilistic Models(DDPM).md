@@ -426,8 +426,7 @@ $\ \ \ \ \ \ \ \ \ \ \ \ \  = log(\displaystyle\sum_Z q(Z|\lambda)\frac{p(X,Z)}{
 $\ \ \ \ \ \ \ \ \ \ \ \ \  \ge \displaystyle\sum_Z q(Z|\lambda)log\frac{p(X,Z)}{p(Z|\lambda)}$
    
 
-### 
-Loss 수식 이해
+### Loss 수식 이해
 
 https://www.youtube.com/watch?v=ybvJbvllgJk
 
@@ -437,4 +436,6 @@ https://www.youtube.com/watch?v=ybvJbvllgJk
 
 <img width="796" height="376" alt="image" src="https://github.com/user-attachments/assets/bdb3ca08-c397-4dcc-bd08-5daf8e85f7f8" />
 
+
+### 
 
