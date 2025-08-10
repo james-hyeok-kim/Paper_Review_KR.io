@@ -427,3 +427,11 @@ $\ \ \ \ \ \ \ \ \ \ \ \ \  \ge \displaystyle\sum_Z q(Z|\lambda)log\frac{p(X,Z)}
    
 
 ### 
+
+<img width="800" height="470" alt="image" src="https://github.com/user-attachments/assets/d58ced51-8f98-410d-a48b-4e5f783fcae3" />
+
+<img width="772" height="112" alt="image" src="https://github.com/user-attachments/assets/8434a4e2-6b6c-4780-98ac-5e0eda0dd051" />
+
+<img width="796" height="376" alt="image" src="https://github.com/user-attachments/assets/bdb3ca08-c397-4dcc-bd08-5daf8e85f7f8" />
+
+
