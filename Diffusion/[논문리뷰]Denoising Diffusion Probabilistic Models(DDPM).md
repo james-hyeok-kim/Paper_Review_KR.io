@@ -105,7 +105,7 @@ $$log\ 𝑝_𝜃(𝑥)≥𝐸_{𝑞_𝜙(𝑧∣𝑥)}[log⁡𝑝_𝜃(𝑥∣�
 
 $$L=E_q​[ −logp_θ​(x_0)\]≤E_{q}​[−log\frac{p_θ(x_{0:T})​}{q(x_{1:T​}∣x_0)}\]$$
 
-* 이를 아래와 같이 재 정립 (더 자세한 유도)[https://github.com/james-hyeok-kim/Paper_Review_KR.io/blob/main/Diffusion/%5B%EB%85%BC%EB%AC%B8%EB%A6%AC%EB%B7%B0%5DDenoising%20Diffusion%20Probabilistic%20Models(DDPM).md#loss-%EC%88%98%EC%8B%9D-%EC%9D%B4%ED%95%B4]
+* 이를 아래와 같이 재 정립 [더 자세한 유도](https://github.com/james-hyeok-kim/Paper_Review_KR.io/blob/main/Diffusion/%5B%EB%85%BC%EB%AC%B8%EB%A6%AC%EB%B7%B0%5DDenoising%20Diffusion%20Probabilistic%20Models(DDPM).md#loss-%EC%88%98%EC%8B%9D-%EC%9D%B4%ED%95%B4)
 
 $$L=E_q[D_{KL}​(q(x_T|x_0​) \parallel p(x_T))+\displaystyle\sum_{t>1}D_{KL}​(q(x_{t−1}​|x_t​,x_0)\parallel p_θ(x_{t−1}|x_t))−\log p_θ(x_0|x_1)]$$
 
