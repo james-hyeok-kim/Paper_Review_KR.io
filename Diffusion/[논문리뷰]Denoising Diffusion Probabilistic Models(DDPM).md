@@ -106,6 +106,48 @@ $$log\ 𝑝_𝜃(𝑥)≥𝐸_{𝑞_𝜙(𝑧∣𝑥)}[log⁡𝑝_𝜃(𝑥∣�
 
 $$L=E_q​[ −logp_θ​(x_0)\]≤E_{q}​[−log\frac{p_θ(x_{0:T})​}{q(x_{1:T​}∣x_0)}\]$$
 
+#### Variational Upper Bound 유도
+정확한 유도 과정:
+
+1. 로그-우도(Log-Likelihood)
+
+```math
+\log \; p_θ(x_0)=\log\int{p_θ}(x_{0:T}))dx_{1:T}
+```
+​
+여기서 $p_\theta(x_{0:T})$는 모든 시점의 데이터를 포함하는 결합 확률 분포입니다.
+
+2. $q(x_{1:T}|x_0)$로 확장
+
+```math
+\log\;p_θ(x_0)= \log \int{p_θ(x_{0:T}) \frac{q(x_{1:T}∣x_0)}{q(x_{1:T}∣x_0)} dx_{1:T}} = \log \;E_{q(x_{1:T}∣x_0)} \left[\frac{p_θ(x_{0:T})}{q(x_{1:T}∣x_0)} \right]
+```
+
+여기서 $q(x_{1:T}|x_0)$는 우리가 학습하는 모델인 인코더(encoder)에 해당하는 분포입니다.
+
+3. 젠센 부등식(Jensen's inequality) 적용
+로그 함수는 오목 함수(concave function)이므로 젠센 부등식이 적용됩니다.
+
+$$logE[X]≥E[logX]$$
+
+```math
+\log \; p_θ(x_0)≥E_{q(x_{1:T}∣x_0)} \left[\log \frac{p_θ(x_{0:T})}{q(x_{1:T}∣x_0)} \right]=ELBO
+```
+
+4. L (Variational Upper Bound)의 등장:
+위에서 유도된 $\log p_\theta(x_0) \ge \text{ELBO}$를 재정렬하면 다음과 같습니다.
+
+```math
+−log\;p_θ(x_0)≤−ELBO=−E_{q(x_{1:T}∣x_0)} \left[log\frac{p_θ(x_{0:T})}{q(x_{1:T}∣x_0)} \right]
+```
+
+이때, 우변의 항 $- \text{ELBO}$를 우리는 **L (Variational Upper Bound)**라고 부릅니다.
+
+```math
+L=E_{q(x_{1:T}∣x_0)} \left[−\log \;p_θ(x_{0:T})+ \log \; q(x_{1:T}∣x_0) \right]
+```
+
+
 ### Loss 유도
 $$L=E_q[D_{KL}​(q(x_T|x_0​)\parallel p(x_T))+\displaystyle\sum_{t>1}D_{KL}​(q(x_{t−1}​|x_t​,x_0)\parallel p_θ(x_{t−1}|x_t))−\log p_θ(x_0|x_1)] \\ (5) $$
 * 유도 (Loss 수식 이해) [Youtube](https://www.youtube.com/watch?v=ybvJbvllgJk)
