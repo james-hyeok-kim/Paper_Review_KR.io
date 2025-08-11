@@ -134,10 +134,14 @@ L & = E_q \left[ − \log \frac{p_θ(x_{0:T})}{q(x_{1:T} |x_0)} \right] \;\; (17
 
 Loss를 통해 P를 어떻게 구하는지는 알았는데, q는 어떻게 구할건지
 
+---
+
 ### 확률분포 $q$
 [유도공식](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/)
 
-* $q(x_t|x_{t-1}) := N(x_t;\sqrt{1- \beta_{t}}x_{t-1},\beta_{t}I) (6)$
+* $q(x_{t-1}|x_t,x_0) = N(x_{t-1}; \tilde{\mu}_t(x_t,x_0), \tilde{\beta}_tI) \;\; (6)$
+
+* $q(x_t|x_{t-1}) := N(x_t;\sqrt{1- \beta_{t}}x_{t-1},\beta_{t}I)$
 (6)가우시안분포를 따른다는 뜻
 
 * 정규분포의 확률밀도 함수는 $f(x) \propto exp(-\frac{(x-\mu)^2}{2\sigma^2})$의 형태를 가진다
