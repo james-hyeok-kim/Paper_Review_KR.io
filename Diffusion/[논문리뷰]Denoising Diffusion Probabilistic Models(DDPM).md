@@ -110,6 +110,7 @@ $$L=E_q​[ −logp_θ​(x_0)\]≤E_{q}​[−log\frac{p_θ(x_{0:T})​}{q(x_{1
 $$L=E_q[D_{KL}​(q(x_T|x_0​) \parallel p(x_T))+\displaystyle\sum_{t>1}D_{KL}​(q(x_{t−1}​|x_t​,x_0)\parallel p_θ(x_{t−1}|x_t))−\log p_θ(x_0|x_1)]$$
 
 ### Loss 유도
+$$L=E_q[D_{KL}​(q(x_T|x_0​)\parallel p(x_T))+\displaystyle\sum_{t>1}D_{KL}​(q(x_{t−1}​|x_t​,x_0)\parallel p_θ(x_{t−1}|x_t))−\log p_θ(x_0|x_1)] \;\; (5) $$
 * 유도 (Loss 수식 이해) [Youtube](https://www.youtube.com/watch?v=ybvJbvllgJk)
 * Bayesian Rule $p(x|y) = \frac{p(x,y)}{p(y)}$
 * Markov Chain $q(x_t|x_{t-1},x_{t-2},x_0) = q(x_t|x_{t-1})$
@@ -139,15 +140,16 @@ Loss를 통해 P를 어떻게 구하는지는 알았는데, q는 어떻게 구�
 ### 확률분포 $q$
 [유도공식](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/)
 
-* $q(x_{t-1}|x_t,x_0) = N(x_{t-1}; \tilde{\mu}_t(x_t,x_0), \tilde{\beta}_tI) \;\; (6)$
+$$q(x_{t-1}|x_t,x_0) = N(x_{t-1}; \tilde{\mu}_t(x_t,x_0), \tilde{\beta}_tI) \;\; (6)$$
 
 ```math
-{\tilde{\mu}}_{t}(x_t,x_0) = \frac{\sqrt{{\bar{\alpha}}_{t-1}} \beta_t}{1-\bar{\alpha}_t}x_0 + \frac {\sqrt{\alpha_t}(1-\bar{\alpha}_{t-1})}{1-{\bar{\alpha}}_t} x_{t} \;\; (7)
-```
-
-```math
+\begin{align}
+{\tilde{\mu}}_{t}(x_t,x_0) = \frac{\sqrt{{\bar{\alpha}}_{t-1}} \beta_t}{1-\bar{\alpha}_t}x_0 + \frac {\sqrt{\alpha_t}(1-\bar{\alpha}_{t-1})}{1-{\bar{\alpha}}_t} x_{t} \;\; (7) \\\\
 \tilde{\beta_t}:=\frac{1-\bar{\alpha}_{t-1}}{1-\bar{\alpha}_t}\beta_t  \;\; (7)
+\end{align}
 ```
+
+
 
 * $q(x_t|x_{t-1}) := N(x_t;\sqrt{1- \beta_{t}}x_{t-1},\beta_{t}I)$
 (6)가우시안분포를 따른다는 뜻
