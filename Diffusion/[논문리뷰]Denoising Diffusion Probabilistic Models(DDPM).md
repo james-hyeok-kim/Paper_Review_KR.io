@@ -159,11 +159,11 @@ $q(x_{t−1}∣x_t,x_0)=q(x_t∣x_{t−1})\frac{q(x_{t−1}∣x_0)}{q(x_t∣x_0)
 위의 베이즈 정리 식의 각 항을 지수 부분만으로 나타내면 다음과 같습니다.
 ```math
 \begin{align}
-1. & q(x_t∣x_{t−1})=N(x_t;\sqrt{1−β_t}x_{t−1},β_tI) \\\\
+1. & q(x_t∣x_{t−1})=N(x_t;\sqrt{1−β_t}x_{t−1},β_tI) \;\; (2) \\\\
 1-1. & 지수 부분: − \frac{(x_t − \sqrt{1−β_t}x_{t−1})^2}{2β_t} \\\\
-2. & q(x_{t−1}∣x_0) = N(x_{t−1};\sqrt{\bar{\alpha}_{t-1}}x_0, (1- \bar{\alpha}_{t-1}I) \\\\
+2. & q(x_{t−1}∣x_0) = N(x_{t−1};\sqrt{\bar{\alpha}_{t-1}}x_0, (1- \bar{\alpha}_{t-1}I) \;\; (4) \\\\
 2-1. & 지수 부분: -\frac{(x_{t−1}-\sqrt{\bar{α}_{t−1}}x_0)^2}{2(1−\bar{α}_{t−1})} \\\\
-3. & q(x_t∣x_0)=N(x_t;\sqrt{\bar{α}_t}x_0,(1-\bar{α}_t)I) \\\\
+3. & q(x_t∣x_0)=N(x_t;\sqrt{\bar{α}_t}x_0,(1-\bar{α}_t)I) \;\; (4) \\\\
 3-1. & 지수 부분: −\frac{(x_t − \sqrt{\bar{α}_t}x_0)^2}{2(1−\bar{α}_t)} \\\\
 q(x_{t−1}∣x_t,x_0) & \propto exp(지수_1+지수_2−지수_3) \\\\
 q(x_{t−1}∣x_t,x_0) & \propto exp(− \frac{(x_t − \sqrt{1−β_t}x_{t−1})^2}{2β_t} -\frac{(x_{t−1}−\sqrt{\bar{α}_{t−1}}x_0)^2}{2(1−\bar{α}_{t−1})}−\frac{(x_t − \sqrt{\bar{α}_t}x_0)^2}{2(1−\bar{α}_t)})
