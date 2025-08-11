@@ -137,12 +137,12 @@ Loss를 통해 P를 어떻게 구하는지는 알았는데, q는 어떻게 구�
 ### 확률분포 $q$
 [유도공식](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/)
 
-$$q(x_{t-1}|x_t,x_0) = N(x_{t-1}; \tilde{\mu}_t(x_t,x_0), \tilde{\beta}_tI) \;\; (6)$$
+$$q(x_{t-1}|x_t,x_0) = N(x_{t-1}; \tilde{\mu}_t(x_t,x_0), \tilde{\beta}_tI) \\ (6)$$
 
 ```math
 \begin{align}
-{\tilde{\mu}}_{t}(x_t,x_0) = \frac{\sqrt{{\bar{\alpha}}_{t-1}} \beta_t}{1-\bar{\alpha}_t}x_0 + \frac {\sqrt{\alpha_t}(1-\bar{\alpha}_{t-1})}{1-{\bar{\alpha}}_t} x_{t} \;\; (7) \\\\
-\tilde{\beta_t}:=\frac{1-\bar{\alpha}_{t-1}}{1-\bar{\alpha}_t}\beta_t  \;\; (7)
+{\tilde{\mu}}_{t}(x_t,x_0) = \frac{\sqrt{{\bar{\alpha}}_{t-1}} \beta_t}{1-\bar{\alpha}_t}x_0 + \frac {\sqrt{\alpha_t}(1-\bar{\alpha}_{t-1})}{1-{\bar{\alpha}}_t} x_{t} \\ (7) \\\\
+\tilde{\beta_t}:=\frac{1-\bar{\alpha}_{t-1}}{1-\bar{\alpha}_t}\beta_t  \\ (7)
 \end{align}
 ```
 
