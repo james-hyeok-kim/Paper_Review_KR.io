@@ -106,11 +106,8 @@ $$log\ 𝑝_𝜃(𝑥)≥𝐸_{𝑞_𝜙(𝑧∣𝑥)}[log⁡𝑝_𝜃(𝑥∣�
 
 $$L=E_q​[ −logp_θ​(x_0)\]≤E_{q}​[−log\frac{p_θ(x_{0:T})​}{q(x_{1:T​}∣x_0)}\]$$
 
-* 이를 아래와 같이 재 정립 
-$$L=E_q[D_{KL}​(q(x_T|x_0​) \parallel p(x_T))+\displaystyle\sum_{t>1}D_{KL}​(q(x_{t−1}​|x_t​,x_0)\parallel p_θ(x_{t−1}|x_t))−\log p_θ(x_0|x_1)]$$
-
 ### Loss 유도
-$$L=E_q[D_{KL}​(q(x_T|x_0​)\parallel p(x_T))+\displaystyle\sum_{t>1}D_{KL}​(q(x_{t−1}​|x_t​,x_0)\parallel p_θ(x_{t−1}|x_t))−\log p_θ(x_0|x_1)] \;\; (5) $$
+$$L=E_q[D_{KL}​(q(x_T|x_0​)\parallel p(x_T))+\displaystyle\sum_{t>1}D_{KL}​(q(x_{t−1}​|x_t​,x_0)\parallel p_θ(x_{t−1}|x_t))−\log p_θ(x_0|x_1)] \\ (5) $$
 * 유도 (Loss 수식 이해) [Youtube](https://www.youtube.com/watch?v=ybvJbvllgJk)
 * Bayesian Rule $p(x|y) = \frac{p(x,y)}{p(y)}$
 * Markov Chain $q(x_t|x_{t-1},x_{t-2},x_0) = q(x_t|x_{t-1})$
