@@ -247,6 +247,20 @@ q(x_{t−1}∣x_t,x_0) & \propto exp(− \frac{(x_t − \sqrt{1−β_t}x_{t−1}
 
 다변량 정규화 분포 [Blog](https://blog.naver.com/mj93m/221097578389)
 
+* 다변량 정규분포(multivariate normal distribution) 란 말 그대로 복수개의 확률 변수가 존재하고 그것을 한번에 모형화 한 것을 말한다.
+
+<img width="842" height="637" alt="image" src="https://github.com/user-attachments/assets/ad7fd158-351d-4deb-9033-593106d57022" />
+
+
+정규분포 평균:$\mu$, 표준편차:$\sigma$
+
+$$X~N(\mu,\sigma^2)$$
+
+PDF(확률밀도함수)
+
+$$f(x) = \frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(x-\mu)^2}{2\sigma}}$$
+
+
 DDPM (5) -> (8) 이해하기
 
 
