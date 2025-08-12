@@ -211,9 +211,9 @@ $$q(x_{t−1}∣x_t,x_0)=q(x_t∣x_{t−1})\frac{q(x_{t−1}∣x_0)}{q(x_t∣x_0
 
 * 위의 베이즈 정리 식의 각 항을 지수 부분만으로 나타내면 다음과 같습니다.
 
-* 정규분포의 확률밀도 함수는 $f(x) \propto exp(-\frac{(x-\mu)^2}{2\sigma^2})$의 형태를 가진다
+  * 정규분포의 확률밀도 함수는 $f(x) \propto exp(-\frac{(x-\mu)^2}{2\sigma^2})$의 형태를 가진다
 
-* [유도공식](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/)
+  * [유도공식](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/)
 ​
 
 ```math
