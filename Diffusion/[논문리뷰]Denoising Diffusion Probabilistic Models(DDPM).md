@@ -208,6 +208,18 @@ $$q(x_{t-1}|x_t,x_0) = N(x_{t-1}; \tilde{\mu}_t(x_t,x_0), \tilde{\beta}_tI) \\ (
 
 
 $$q(x_{t−1}∣x_t,x_0)=q(x_t∣x_{t−1})\frac{q(x_{t−1}∣x_0)}{q(x_t∣x_0)}$$
+* 유도
+```math
+\begin{align}
+&* Bayesian Rule \\\\
+q(x_{t−1}∣x_t,x_0)&=\frac{q(x_{t−1}, x_t, x_0)}{q(x_t,x_0)} \cdot \frac{q(x_{t-1}, x_0)}{q(x_{t-1}, x_0)} \\\
+q(x_{t−1}∣x_t,x_0)&=\frac{q(x_{t−1}| x_t, x_0)}{q(x_t,x_0)} \cdot q(x_{t-1}, x_0) \\\\
+q(x_{t−1}∣x_t,x_0)&=\frac{q(x_{t−1}| x_t, x_0)}{q(x_t,x_0)} \cdot q(x_{t-1}, x_0) \cdot \frac{q(x_0)}{q(x_0)}  \\\\
+q(x_{t−1}∣x_t,x_0)&=q(x_{t−1}| x_t, x_0) \cdot \frac{q(x_{t-1}| x_0)}{q(x_t|x_0)} \\\\
+&* Markov Chain \\\\
+q(x_{t−1}∣x_t,x_0)&=q(x_t∣x_{t−1})\frac{q(x_{t−1}∣x_0)}{q(x_t∣x_0)}
+\end{align}
+```
 
 * 위의 베이즈 정리 식의 각 항을 지수 부분만으로 나타내면 다음과 같습니다.
 
