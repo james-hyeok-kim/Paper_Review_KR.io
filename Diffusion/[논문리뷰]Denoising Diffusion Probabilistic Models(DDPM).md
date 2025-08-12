@@ -245,6 +245,13 @@ q(x_{t−1}∣x_t,x_0) & \propto exp(− \frac{(x_t − \sqrt{1−β_t}x_{t−1}
 <img width="855" height="855" alt="image" src="https://github.com/user-attachments/assets/0e7faed0-3c02-4e53-8099-ea2993eee963" />
 
 
+다변량 정규화 분포 [Blog](https://blog.naver.com/mj93m/221097578389)
+
+DDPM (5) -> (8) 이해하기
+
+
+---
+
 ### 간소화
 
 * 이를 간소화하여 훈련을 하는데, 역방향 과정 평균 $(\mu_\theta)$ 재매개변수화하여 간소화 한다.
