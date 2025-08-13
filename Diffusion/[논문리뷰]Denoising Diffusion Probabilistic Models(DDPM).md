@@ -245,21 +245,43 @@ q(x_{t−1}∣x_t,x_0) & \propto exp(− \frac{(x_t − \sqrt{1−β_t}x_{t−1}
 <img width="855" height="855" alt="image" src="https://github.com/user-attachments/assets/0e7faed0-3c02-4e53-8099-ea2993eee963" />
 
 
-다변량 정규화 분포 [Blog](https://blog.naver.com/mj93m/221097578389)
+### 다변량 정규화 분포 [Blog](https://blog.naver.com/mj93m/221097578389)
 
 * 다변량 정규분포(multivariate normal distribution) 란 말 그대로 복수개의 확률 변수가 존재하고 그것을 한번에 모형화 한 것을 말한다.
 
 <img width="842" height="637" alt="image" src="https://github.com/user-attachments/assets/ad7fd158-351d-4deb-9033-593106d57022" />
 
 
-정규분포 평균:$\mu$, 표준편차:$\sigma$
+#### 정규분포 평균: $\mu$ , 표준편차: $\sigma$ 
 
-$$X~N(\mu,\sigma^2)$$
+$$X \sim N(\mu,\sigma^2)$$
 
 PDF(확률밀도함수)
 
 $$f(x) = \frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(x-\mu)^2}{2\sigma}}$$
 
+#### 다변량 정규분포 (Multivariate Normal Distribution)
+
+$$X \sim MVN_p(\mu, \Sigma)$$
+
+$$
+\mu = 
+\begin{pmatrix}
+\mu_1 \\
+\vdots \\
+\mu_p 
+\end{pmatrix}
+,\Sigma = 
+\begin{pmatrix}
+\sigma^2_{11} & \dots & \sigma^2_{1p} \\
+\vdots & & \vdots \\
+\sigma^2_{p1} & \dots & \sigma^2_{pp}
+\end{pmatrix}
+$$
+
+PDF(확률밀도함수)
+
+$$f(X) = |2\pi\Sigma|^{-\frac{1}{2}} \exp \left\{ \frac{-(X-\mu)^T\sum^-1(X-\mu)}{2} \right\}$$
 
 DDPM (5) -> (8) 이해하기
 
