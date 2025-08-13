@@ -281,7 +281,7 @@ $$
 
 PDF(확률밀도함수)
 
-$$f(X) = |2\pi\Sigma|^{-\frac{1}{2}} \exp \left( \frac{-(X-\mu)^T\Sigma^-1(X-\mu)}{2} \right)$$
+$$f(X) = |2\pi\Sigma|^{-\frac{1}{2}} \exp \left( \frac{-(X-\mu)^T\Sigma^{-1}(X-\mu)}{2} \right)$$
 
 DDPM (5) -> (8) 이해하기
 
