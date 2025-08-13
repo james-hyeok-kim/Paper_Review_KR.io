@@ -406,13 +406,22 @@ D_{KL}(q(x_{t−1}∣x_t,x_0) \parallel p_θ(x_{t−1}∣x_t))= \frac{1}{2σ_t^2
 
 $$q(x_{t-1}|x_t,x_0) = N(x_{t-1}; \tilde{\mu}_t(x_t,x_0), \tilde{\beta}_tI) \\ (6)$$
 
+```math
+\begin{align}
+L_{t−1} − C &=E_{x_0,\epsilon}\left[\frac{1}{2σ^2_t}\parallel\tilde{µ}_t \left(x_t(x_0,\epsilon),\frac{1}{\sqrt{\bar{α}_t}}(x_t(x_0,\epsilon)− \sqrt{1 − \bar{α}_t}\epsilon) \right) − µ_θ(x_t(x_0,\epsilon), t) \parallel^2 \right] \;\; (9) \\\\
+&= E_{x_0,\epsilon} \left[\frac{1}{2σ^2_t} \parallel \frac{1}{\sqrt{α_t}} \left(x_t(x_0,\epsilon) − \frac{β_t}{\sqrt{1 − \bar{α}_t}}\epsilon\right)− µ_θ(x_t(x_0,\epsilon),t) \parallel^2 \right] \;\; (10) \\\\
+\mu_\theta(x_t, t) &= \tilde{\mu}_t\left(x_t, \frac{1}{\sqrt{\bar{\alpha}_t}}(x_t - \sqrt{1 - \bar{\alpha}_t}\epsilon_\theta(x_t)) \right) = \frac{1}{\sqrt{\alpha_t}}\left(x_t - \frac{\beta_t}{\sqrt{1-\bar{\alpha}_t}}\epsilon_\theta(x_t, t) \right) \;\; (11)
+E_{x_0, \epsilon}\left[ \frac{\beta^2_t}{2\sigma^2_t\alpha_t(1-\bar{\alpha}_t)} \left\| \epsilon - \epsilon_\theta(\sqrt{\bar{\alpha}_t}x_0 + \sqrt{1-\bar{\alpha}_t}\epsilon, t) \right\|^2 \right] \;\; (12)
+\end{align}
+```
+
 ### (9),(10),(11),(12)는 (8)수식과 같은 의미
 
 * $x_t$를 $x_0$와 noise $\epsilon$으로 치환
 
 * $x_{t-1}$은 $x_t$에서 noise$\epsilon$을 1 step 걷어낸다 $\rightarrow$ 걷어낼 noise를 예측한다
  
-* (8) $\rightarrow$ (12)는 평균 $\tilde{\mu}$에서 (이미지) $\epsilon$(노이즈)의 식으로 변환
+* (8) $\rightarrow$ (12)는 평균 $\tilde{\mu}$에서 (이미지) $\epsilon$ (노이즈)의 식으로 변환
 
 #### (8) $\rightarrow$ (9)
 * 기댓값(E)의 대상을 변경 (재매개변수화)
@@ -427,6 +436,8 @@ $$q(x_{t-1}|x_t,x_0) = N(x_{t-1}; \tilde{\mu}_t(x_t,x_0), \tilde{\beta}_tI) \\ (
 $$q(x_t∣x_0)=\mathcal{N}(x_t;\sqrt{\bar{α}_t}x_0,(1-\bar{α}_t)I) \\ (4)$$
 
 $$x_t(x_0∣\epsilon)=\sqrt{\bar{α}_t}x_0,(1-\bar{α}_t)\epsilon), \ \epsilon \sim N(0,I)$$
+
+
 
 ---
 
