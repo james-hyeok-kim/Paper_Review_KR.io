@@ -435,7 +435,7 @@ L_{t−1} − C &=E_{x_0,\epsilon}\left[\frac{1}{2σ^2_t}\parallel\tilde{µ}_t \
 
 $$q(x_t∣x_0)=\mathcal{N}(x_t;\sqrt{\bar{α}_t}x_0,(1-\bar{α}_t)I) \\ (4)$$
 
-$$x_t(x_0∣\epsilon)=\sqrt{\bar{α}_t}x_0,(1-\bar{α}_t)\epsilon), \ \epsilon \sim N(0,I)$$
+$$x_t(x_0∣\epsilon)=\sqrt{\bar{α}_t}x_0 + \sqrt{(1-\bar{α}_t)}\epsilon), \ \epsilon \sim N(0,I)$$
 
 #### (9) $\rightarrow$ (10)
 
