@@ -437,6 +437,10 @@ $$q(x_t∣x_0)=\mathcal{N}(x_t;\sqrt{\bar{α}_t}x_0,(1-\bar{α}_t)I) \\ (4)$$
 
 $$x_t(x_0,\epsilon)=\sqrt{\bar{α}_t}x_0 + \sqrt{(1-\bar{α}_t)}\epsilon, \ \epsilon \sim N(0,I)$$
 
+$$x_t = \sqrt{α_t} x_{t-1} + \sqrt{(1-α_t)}\epsilon_{t-1}$$
+
+t 시점의 이미지는 이전 단계 이미지의 정보를 약간 줄이고$\sqrt{\alpha_t}$, 거기에 약간의 노이즈$\sqrt{1-\alpha_t}$를 더한 것
+
 #### (9) $\rightarrow$ (10)
 
 
