@@ -43,7 +43,7 @@ $$p_θ(x)=∫p_θ(x∣z)p(z)dz$$
 다음과 같은 형태의 확률 생성 모델을 다룹니다
 
 * $𝑧$는 latent variable (잠재 변수)
-* $𝑝(𝑧)$: 간단한 prior 분포 $(ex: 𝑁(0,𝐼))$
+* $𝑝(𝑧)$: 간단한 prior 분포 $(ex: \mathcal{N}(0,𝐼))$
 * $𝑝_𝜃(𝑥∣𝑧)$: decoder (복원 모델)
 * 이 모델에서 $log𝑝_𝜃(𝑥)$ 를 직접 계산하는 건 어렵다. → 추정을 통해 근사.
 
@@ -78,7 +78,7 @@ $$log\ 𝑝_𝜃(𝑥)≥𝐸_{𝑞_𝜙(𝑧∣𝑥)}[log⁡𝑝_𝜃(𝑥∣�
 
 ## Forward Process (Diffusion Process) $q$
 * $q(x_{1:T}|x_0) := \displaystyle\prod_{t=1}^{T}q(x_t|x_{t-1})$
-* $q(x_t|x_{t-1}) := N(x_t;\sqrt{1- \beta_{t}}x_{t-1},\beta_{t}I)$
+* $q(x_t|x_{t-1}) := \mathcal{N}(x_t;\sqrt{1- \beta_{t}}x_{t-1},\beta_{t}I)$
 * 작은 가우시안 노이즈를 T단계에 걸쳐 점차 추가
 * Variance(Noise) Schedule $\beta_1, ... , \beta_T:$
   * 미리 정해둔 노이즈값 (예: 0.0001 ~ 0.02)
@@ -94,10 +94,10 @@ $$log\ 𝑝_𝜃(𝑥)≥𝐸_{𝑞_𝜙(𝑧∣𝑥)}[log⁡𝑝_𝜃(𝑥∣�
 
 ## Reverse Process $p_{\theta}$
 * $p_{\theta}(x_{0:T}) \rightarrow reverse \ process$
-* Markov chain with learned Gaussian transitions, $p(x_T) = N(x_T;0,I):$ (Normal distribution)
+* Markov chain with learned Gaussian transitions, $p(x_T) = \mathcal{N}(x_T;0,I):$ (Normal distribution)
 * 보통 Normal Distribution의 표현 $X \sim N(\mu, \sigma^2)$ 평균 $(\mu)$ , 분산 $(\sigma)^2$ 로 표현
 * $p_{\theta}(x_{0:T}) := p(x_{T})\displaystyle\prod_{t=1}^{T}p_{\theta}(x_{t-1}|x_{t})$
-* $p_{\theta}(x_{t-1}|x_t) :=  N (x_{t-1};\mu_{\theta}(x_t,t),\sum_{\theta}(x_t,t))$
+* $p_{\theta}(x_{t-1}|x_t) :=  \mathcal{N} (x_{t-1};\mu_{\theta}(x_t,t),\sum_{\theta}(x_t,t))$
 
 ---
 
@@ -193,7 +193,7 @@ Loss를 통해 P를 어떻게 구하는지는 알았는데, q는 어떻게 구�
 
 ### $p$가 닮아야할 확률분포 $q$에 대해서 이해하기
 
-$$q(x_{t-1}|x_t,x_0) = N(x_{t-1}; \tilde{\mu}_t(x_t,x_0), \tilde{\beta}_tI) \\ (6)$$
+$$q(x_{t-1}|x_t,x_0) = \mathcal{N}(x_{t-1}; \tilde{\mu}_t(x_t,x_0), \tilde{\beta}_tI) \\ (6)$$
 
 ```math
 \begin{align}
@@ -230,11 +230,11 @@ q(x_{t−1}∣x_t,x_0)&=q(x_t∣x_{t−1})\frac{q(x_{t−1}∣x_0)}{q(x_t∣x_0)
 
 ```math
 \begin{align}
-1. & q(x_t∣x_{t−1})=N(x_t;\sqrt{1−β_t}x_{t−1},β_tI) \;\; (2) \\\\
+1. & q(x_t∣x_{t−1})=\mathcal{N}(x_t;\sqrt{1−β_t}x_{t−1},β_tI) \;\; (2) \\\\
 1-1. & 지수 부분: − \frac{(x_t − \sqrt{1−β_t}x_{t−1})^2}{2β_t} \\\\
-2. & q(x_{t−1}∣x_0) = N(x_{t−1};\sqrt{\bar{\alpha}_{t-1}}x_0, (1- \bar{\alpha}_{t-1}I) \;\; (4) \\\\
+2. & q(x_{t−1}∣x_0) = \mathcal{N}(x_{t−1};\sqrt{\bar{\alpha}_{t-1}}x_0, (1- \bar{\alpha}_{t-1}I) \;\; (4) \\\\
 2-1. & 지수 부분: -\frac{(x_{t−1}-\sqrt{\bar{α}_{t−1}}x_0)^2}{2(1−\bar{α}_{t−1})} \\\\
-3. & q(x_t∣x_0)=N(x_t;\sqrt{\bar{α}_t}x_0,(1-\bar{α}_t)I) \;\; (4) \\\\
+3. & q(x_t∣x_0)=\mathcal{N}(x_t;\sqrt{\bar{α}_t}x_0,(1-\bar{α}_t)I) \;\; (4) \\\\
 3-1. & 지수 부분: −\frac{(x_t − \sqrt{\bar{α}_t}x_0)^2}{2(1−\bar{α}_t)} \\\\
 q(x_{t−1}∣x_t,x_0) & \propto exp(지수_1+지수_2−지수_3) \\\\
 q(x_{t−1}∣x_t,x_0) & \propto exp(− \frac{(x_t − \sqrt{1−β_t}x_{t−1})^2}{2β_t} -\frac{(x_{t−1}−\sqrt{\bar{α}_{t−1}}x_0)^2}{2(1−\bar{α}_{t−1})}−\frac{(x_t − \sqrt{\bar{α}_t}x_0)^2}{2(1−\bar{α}_t)})
@@ -246,7 +246,7 @@ q(x_{t−1}∣x_t,x_0) & \propto exp(− \frac{(x_t − \sqrt{1−β_t}x_{t−1}
 
 
 ---
-## Loss에서 확률분포 p가 닮아야할 q 이해하기 ($(5) \rightarrow (8)$)
+## Loss에서 확률분포 p가 닮아야할 q 이해하기 ( $(5)\rightarrow(8)$ )
 ```math
 \begin{align}
 L_{t-1} &= \displaystyle\sum_{t>1}D_{KL}​(q(x_{t−1}​|x_t​,x_0)\parallel p_θ(x_{t−1}|x_t)) \;\; (5) \\\\
@@ -265,7 +265,7 @@ L_{t-1} &= \displaystyle\sum_{t>1}D_{KL}​(q(x_{t−1}​|x_t​,x_0)\parallel 
 
 #### 정규분포 평균: $\mu$ , 표준편차: $\sigma$ 
 
-$$X \sim N(\mu,\sigma^2)$$
+$$X \sim \mathcal{N}(\mu,\sigma^2)$$
 
 PDF(확률밀도함수)
 
@@ -424,7 +424,7 @@ $$q(x_{t-1}|x_t,x_0) = N(x_{t-1}; \tilde{\mu}_t(x_t,x_0), \tilde{\beta}_tI) \\ (
 
 * $(4)$활용
 
-$$q(x_t∣x_0)=N(x_t;\sqrt{\bar{α}_t}x_0,(1-\bar{α}_t)I) \\ (4)$$
+$$q(x_t∣x_0)=\mathcal{N}(x_t;\sqrt{\bar{α}_t}x_0,(1-\bar{α}_t)I) \\ (4)$$
 
 $$x_t(x_0∣\epsilon)=\sqrt{\bar{α}_t}x_0,(1-\bar{α}_t)\epsilon), \ \epsilon \sim N(0,I)$$
 
