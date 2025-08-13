@@ -477,13 +477,17 @@ $$\tilde{\mu}_t = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{\beta_t}{\sqrt{1-
 
 모델의 평균 μ_θ (식 11)
 
-$$\mu_\theta(x_t, t) = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{\beta_t}{\sqrt{1-\bar{\alpha}_t}} \epsilon_\theta(x_t,t) \right)$$
+```math
+\mu_\theta(x_t, t) = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{\beta_t}{\sqrt{1-\bar{\alpha}_t}} \epsilon_\theta(x_t,t) \right)
+```
 
 차이점은 실제 정답 노이즈인 ε 자리에, 우리 신경망이 예측한 노이즈인 ε_θ 가 들어간 것뿐입니다.
 
 식 (10)의 $\mu_\theta$  자리에 식 (11)을 대입합니다.
 
-True $\tilde{\mu}_t$ - Our Model $\mu_\theta$
+```math
+True \tilde{\mu}_t - Our Model \mu_\theta
+```
 
 $$ L \propto \parallel \frac{1}{\sqrt{α_t}} \left(x_t−\frac{β_t}{\sqrt{1−\bar{α}_t}}ϵ \right) - \frac{1}{\sqrt{α_t}} \left(x_t - \frac{β_t}{\sqrt{1−\bar{α}_t}}ϵ_θ \right) \parallel^2$$
 
