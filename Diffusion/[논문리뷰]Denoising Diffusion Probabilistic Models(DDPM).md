@@ -424,6 +424,9 @@ L_{t−1} − C &=E_{x_0,\epsilon}\left[\frac{1}{2σ^2_t}\parallel\tilde{µ}_t \
 * (8) $\rightarrow$ (12)는 평균 $\tilde{\mu}$에서 (이미지) $\epsilon$ (노이즈)의 식으로 변환
 
 #### (8) $\rightarrow$ (9)
+
+Loss 계산 방식을 추상적인 분포 q에서 구체적인 변수인 $x_0$와 ε에 대한 계산으로 명시적으로 바꾸는 과정입니다.
+
 * 기댓값(E)의 대상을 변경 (재매개변수화)
   * 식 (8)의 $E_q$는 $q(x_t|x_0)$ 분포, 즉 $x_0$에서 $x_t$를 만드는 과정 전체에 대한 기댓값을 의미합니다.
   * 식 (9)의 $E_{x_0, ε}$는 이 과정을 더 구체적으로 풀어쓴 것입니다
@@ -439,10 +442,28 @@ $$x_t(x_0,\epsilon)=\sqrt{\bar{α}_t}x_0 + \sqrt{(1-\bar{α}_t)}\epsilon, \ \eps
 
 $$x_t = \sqrt{α_t} x_{t-1} + \sqrt{(1-α_t)}\epsilon_{t-1}$$
 
-t 시점의 이미지는 이전 단계 이미지의 정보를 약간 줄이고$\sqrt{\alpha_t}$, 거기에 약간의 노이즈$\sqrt{1-\alpha_t}$를 더한 것
+t 시점의 이미지는 이전 단계 이미지의 정보를 약간 줄이고 $\sqrt{\alpha_t}$ , 거기에 약간의 노이즈 $\sqrt{1-\alpha_t}$ 를 더한 것
+
 
 #### (9) $\rightarrow$ (10)
 
+Backward Process의 평균 $\tilde{\mu}_t$ 를 $x_0$ 대신 노이즈 ε을 이용해 표현하는 과정입니다.
+
+1. $\tilde{\mu}_t$ 의 변수 변경
+
+원래 $\tilde{\mu}_t$ 는 $x_t$와 $x_0$ 의 함수, 즉 $\tilde{\mu}_t(x_t, x_0)$ 입니다.
+
+우리는 $x_t = \sqrt{\bar{\alpha}_t}x_0 + \sqrt{1-\bar{\alpha}_t}ε$ 라는 관계식을 알고 있습니다.
+
+이 식을 $x_0$ 에 대해 정리하면 $x_0 = \frac{1}{\sqrt{\bar{\alpha}_t}}(x_t - \sqrt{1-\bar{\alpha}_t}ε)$ 가 됩니다.
+
+이 $x_0$를 원래 $μ̃_t(x_t, x_0)$ 의 정의에 대입하고 복잡한 계산을 통해 정리하면, $μ̃_t$ 를 $x_t$ 와 ε의 함수로 표현할 수 있습니다.
+
+2. 새로운 $μ̃_t$ 의 형태
+
+그렇게 $x_t$와 ε로 정리된 $μ̃_t$ 의 최종 형태가 바로 식 (10)에 나타난 것입니다.
+
+$$\tilde{μ}_t(x_t,x_0) \rightarrow \frac{1}{\sqrt{α}_t} \left( x_t(x_0,ϵ) − \frac{β_t}{\sqrt{1−\bar{α}_t}}ϵ \right)$$
 
 
 ---
