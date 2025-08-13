@@ -294,6 +294,67 @@ DDPM (5) -> (8) 이해하기
 D_{KL}(P_1 \parallel P_2) &= \frac{1}{2} \left( \log\frac{∣Σ_2|}{∣Σ_1|}−d+tr(Σ_2^{-1}Σ_1)+(μ_2−μ_1)^TΣ_2^{-1}(μ_2−μ_1) \right)
 \end{align}
 ```
+
+##### 두 정규분포 $D_{KL}$ 유도
+```math
+\begin{align}
+D_{KL}(P_1 \parallel P_2) &= \int_{−∞}^{∞}p_1(x) \log \left(\frac{p_1(x)}{p_2(x)} \right)dx \\\\
+&= \int p_1(x)log(p_1(x))dx - \int p_1(x)log(p_2(x))dx \\\\
+&= E_{x∼P_1}[log(p_1(x))]−E_{x∼P_1}[log(p_2(x))] \\\\
+\end{align}
+```
+##### 1. $log(p(x))$
+```math
+\begin{align}
+log(p(x))&= \log \left( \frac{1}{\sqrt{2πσ^2}}e^{−\frac{(x−μ)^2}{2σ^2}} \right) \\\\
+&=log \left(\frac{1}{\sqrt{2πσ^2}} \right) − \frac{(x−μ)^2}{2σ^2} \\\\
+&=−\frac{1}{2}log(2πσ^2) − \frac{(x−μ)^2}{2σ^2}  \\\\
+&=−\frac{1}{2}log(2π)−log(σ) − \frac{(x−μ)^2}{2σ^2}  \\\\
+\end{align}
+```
+##### 2. $E[log(p_2(x))]$
+```math
+\begin{align}
+E_{x∼P_1}[log(p_2(x))]&=E_{x∼P_1} \left[−\frac{1}{2}log(2π)−log(σ_2)−\frac{(x−μ_2)^2}{2σ_2^2} \right] \\\\
+&=−\frac{1}{2}log(2π)−log(σ_2)−\frac{1}{2σ_2^2}E_{x∼P_1}[(x−μ_2)^2] \\\\
+\end{align}
+```
+- E_{x \sim P_1}[(x-\mu_2)^2]를 계산, 괄호 안에 μ_1을 +-
+```math
+\begin{align}
+E_{x∼P_1}[(x−μ_1+μ_1−μ_2)^2] &= E_{x∼P_1}[((x−μ_1)+(μ_1−μ_2))^2] \\\\
+&=E_{x∼P_1}[(x−μ_1)^2+2(x−μ_1)(μ_1−μ_2)+(μ_1−μ_2)^2] \\\\
+&=E_{x∼P_1}[(x−μ_1)^2]+2(μ_1−μ_2) E_{x∼P_1}[x−μ_1]+(μ_1−μ_2)^2 \\\\
+\end{align}
+```
+- E_{x \sim P_1}[(x - \mu_1)^2]는 P_1 분포의 정의에 따라 분산 σ_1^2 
+- E_{x \sim P_1}[x - \mu_1]는 E[x] - μ_1 = μ_1 - μ_1 = 0
+- (\mu_1 - \mu_2)²는 상수
+```math
+\begin{align}
+E_{x∼P_1}[log(p_2(x))]&= −\frac{1}{2}log(2π)−log(σ_2)−\frac{σ_1^2+(μ_1−μ_2)^2}{2σ_2^2} \\\\
+\end{align}
+```
+##### 3. $E[log(p_1(x))]$
+```math
+\begin{align}
+E_{x∼P_1}[log(p_1(x))]&=E_{x∼P_1} \left[−\frac{1}{2}log(2π)−log(σ_1)−\frac{(x−μ_1)^2}{2σ_1^2} \right] \\\\
+&=−\frac{1}{2}log(2π)−log(σ_1)−\frac{1}{2σ_1^2}E_{x∼P_1}[(x−μ_1)^2] \\\\
+* & E_{x \sim P_1}[(x-\mu_1)^2] = \sigma_1^2 \\\\
+&=−\frac{1}{2}log(2π)−log(σ_1)−\frac{\sigma_1^2}{2σ_1^2} \\\\
+&= −\frac{1}{2}log(2π)−log(σ_1)−\frac{1}{2} \\\\
+\end{align}
+```
+
+##### 4. 최종 $E[log(p_2(x))] + E[log(p_1(x))]$
+```math
+\begin{align}
+D_{KL}(P_1 \parallel P_2) &= \left( −\frac{1}{2}log(2π)−log(σ_1)−\frac{1}{2} \right) - left( −\frac{1}{2}log(2π)−log(σ_2)−\frac{σ_1^2+(μ_1−μ_2)^2}{2σ_2^2} right) \\\\
+&= −log(σ_1)−\frac{1}{2} −log(σ_2)−\frac{σ_1^2+(μ_1−μ_2)^2}{2σ_2^2} \\\\
+&= \log \frac{\sigma_2}{\sigma_1} + \frac{\sigma_1^2 + (\mu_1 - \mu_2)^2}{2\sigma_2^2} - \frac{1}{2}
+\end{align}
+```
+
 여기서 DDPM의 핵심적인 설계 선택이 들어갑니다. $p_\theta$의 분산을 q의 분산과 동일하게 고정합니다.
 
 즉, $\Sigma_\theta(x_t, t) = \tilde{\beta}_t I$로 설정합니다. 보통 $\tilde{\beta}_t$를 $\sigma_t^2$로 표기하기도 합니다. 따라서 두 분포의 분산은 $\Sigma_1 = \Sigma_2 = \sigma_t^2 I$로 같아집니다.
