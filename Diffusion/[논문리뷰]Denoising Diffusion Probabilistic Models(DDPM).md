@@ -349,7 +349,7 @@ E_{x∼P_1}[log(p_1(x))]&=E_{x∼P_1} \left[−\frac{1}{2}log(2π)−log(σ_1)�
 ##### 4. 최종 $E[log(p_2(x))] + E[log(p_1(x))]$
 ```math
 \begin{align}
-D_{KL}(P_1 \parallel P_2) &= \left( −\frac{1}{2}log(2π)−log(σ_1)−\frac{1}{2} \right) - left( −\frac{1}{2}log(2π)−log(σ_2)−\frac{σ_1^2+(μ_1−μ_2)^2}{2σ_2^2} right) \\\\
+D_{KL}(P_1 \parallel P_2) &= \left( −\frac{1}{2}log(2π)−log(σ_1)−\frac{1}{2} \right) - \left( −\frac{1}{2}log(2π)−log(σ_2)−\frac{σ_1^2+(μ_1−μ_2)^2}{2σ_2^2} \right) \\\\
 &= −log(σ_1)−\frac{1}{2} −log(σ_2)−\frac{σ_1^2+(μ_1−μ_2)^2}{2σ_2^2} \\\\
 &= \log \frac{\sigma_2}{\sigma_1} + \frac{\sigma_1^2 + (\mu_1 - \mu_2)^2}{2\sigma_2^2} - \frac{1}{2}
 \end{align}
