@@ -286,6 +286,102 @@ $$f(X) = |2\pi\Sigma|^{-\frac{1}{2}} \exp \left( \frac{-(X-\mu)^T\Sigma^{-1}(X-\
 DDPM (5) -> (8) 이해하기
 
 
+#### KL Divergence 간소화 (핵심 아이디어)
+두 정규분포 $P_1 = \mathcal{N}(\mu_1, \Sigma_1)$과 $P_2 = \mathcal{N}(\mu_2, \Sigma_2)$ 사이의 KL Divergence 공식은 다음과 같습니다.
+
+```math
+\begin{align}
+D_{KL}(P_1 \parallel P_2) &= \frac{1}{2} \left( \log\frac{∣Σ_2|}{∣Σ_1|}−d+tr(Σ_2^{-1}Σ_1)+(μ_2−μ_1)^TΣ_2^{-1}(μ_2−μ_1) \right)
+\end{align}
+```
+여기서 DDPM의 핵심적인 설계 선택이 들어갑니다. $p_\theta$의 분산을 q의 분산과 동일하게 고정합니다.
+
+즉, $\Sigma_\theta(x_t, t) = \tilde{\beta}_t I$로 설정합니다. 보통 $\tilde{\beta}_t$를 $\sigma_t^2$로 표기하기도 합니다. 따라서 두 분포의 분산은 $\Sigma_1 = \Sigma_2 = \sigma_t^2 I$로 같아집니다.
+
+이 가정을 위 KL Divergence 공식에 대입하면 수식이 극적으로 간소화됩니다.
+
+```math
+\begin{align}
+로그 항: & \log\frac{|\sigma_t^2 I|}{|\sigma_t^2 I|} = \log(1) = 0 \\\\
+Trace 항: & \text{tr}((\sigma_t^2 I)^{-1}(\sigma_t^2 I)) = \text{tr}(I) = d
+\end{align}
+```
+
+* Trace항은 행렬의 대각 합
+
+여기서 d는 데이터의 차원(dimension)입니다.
+
+이제 남은 항들을 정리하면 다음과 같습니다.
+
+```math
+\begin{align}
+D_{KL}(q \parallel p_θ) & =\frac{1}{2} \left( 0−d+d+(μ_θ − \tilde{μ})^T(σ_t^2I)^{−1}(μ_θ−\tilde{μ})\right) \\\\
+& = \frac{1}{2}(μ_θ−\tilde{μ})^T \left(\frac{1}{σ_t^2}I \right)(μ_θ−\tilde{μ}) \\\\
+& =  \frac{1}{2σ_t^2}(μ_θ−\tilde{μ})^T(μ_θ−\tilde{μ})
+\end{align}
+```
+
+벡터 내적 v^T v는 L2-norm의 제곱 \|v\|^2과 같으므로, 최종적으로 KL Divergence는 두 평균 벡터 간의 **제곱 거리(Squared Distance)**에 비례하는 형태로 정리됩니다.
+
+⟹D 
+KL
+​
+ (q(x 
+t−1
+​
+ ∣x 
+t
+​
+ ,x 
+0
+​
+ )∥p 
+θ
+​
+ (x 
+t−1
+​
+ ∣x 
+t
+​
+ ))= 
+2σ 
+t
+2
+​
+ 
+1
+​
+ ∥ 
+μ
+~
+​
+  
+t
+​
+ (x 
+t
+​
+ ,x 
+0
+​
+ )−μ 
+θ
+​
+ (x 
+t
+​
+ ,t)∥ 
+2
+
+
+
+---
+
+---
+
+---
+
 ---
 
 ### 간소화
