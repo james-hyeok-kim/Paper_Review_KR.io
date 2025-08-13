@@ -419,7 +419,7 @@ L_{t−1} − C &=E_{x_0,\epsilon}\left[\frac{1}{2σ^2_t}\parallel\tilde{µ}_t \
 
 * $x_t$를 $x_0$와 noise $\epsilon$으로 치환
 
-* $x_{t-1}$은 $x_t$에서 noise$\epsilon$을 1 step 걷어낸다 $\rightarrow$ 걷어낼 noise를 예측한다
+* $x_{t-1}$은 $x_t$에서 noise $\epsilon$ 을 1 step 걷어낸다 $\rightarrow$ 걷어낼 noise를 예측한다
  
 * (8) $\rightarrow$ (12)는 평균 $\tilde{\mu}$에서 (이미지) $\epsilon$ (노이즈)의 식으로 변환
 
@@ -428,14 +428,16 @@ L_{t−1} − C &=E_{x_0,\epsilon}\left[\frac{1}{2σ^2_t}\parallel\tilde{µ}_t \
   * 식 (8)의 $E_q$는 $q(x_t|x_0)$ 분포, 즉 $x_0$에서 $x_t$를 만드는 과정 전체에 대한 기댓값을 의미합니다.
   * 식 (9)의 $E_{x_0, ε}$는 이 과정을 더 구체적으로 풀어쓴 것입니다
 
-* $x_t$를 $x_t(x_0, ε)$로 명시
-  * 위의 변경에 따라, 수식에 있던 모든 $x_t$를 $x_t(x_0, ε)$로 바꾸어 $x_t$가 $x_0$와 $ε$에 의해 결정된다는 것을 명확하게 보여줍니다.
+* $x_t$를 $x_t(x_0,ε)$로 명시
+  * 위의 변경에 따라, 수식에 있던 모든 $x_t$를 $x_t(x_0,ε)$로 바꾸어 $x_t$가 $x_0$와 $ε$에 의해 결정된다는 것을 명확하게 보여줍니다.
 
 * $(4)$활용
 
 $$q(x_t∣x_0)=\mathcal{N}(x_t;\sqrt{\bar{α}_t}x_0,(1-\bar{α}_t)I) \\ (4)$$
 
 $$x_t(x_0∣\epsilon)=\sqrt{\bar{α}_t}x_0,(1-\bar{α}_t)\epsilon), \ \epsilon \sim N(0,I)$$
+
+#### (9) $\rightarrow$ (10)
 
 
 
