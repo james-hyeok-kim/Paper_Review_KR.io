@@ -486,7 +486,7 @@ $$\tilde{\mu}_t = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{\beta_t}{\sqrt{1-
 식 (10)의 $\mu_\theta$  자리에 식 (11)을 대입합니다.
 
 ```math
-True \tilde{\mu}_t - Our Model \mu_\theta
+True \;\; \tilde{\mu}_t - Our \;\; Model \;\; \mu_\theta
 ```
 
 $$ L \propto \parallel \frac{1}{\sqrt{α_t}} \left(x_t−\frac{β_t}{\sqrt{1−\bar{α}_t}}ϵ \right) - \frac{1}{\sqrt{α_t}} \left(x_t - \frac{β_t}{\sqrt{1−\bar{α}_t}}ϵ_θ \right) \parallel^2$$
