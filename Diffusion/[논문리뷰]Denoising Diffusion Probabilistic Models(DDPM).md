@@ -366,7 +366,7 @@ D_{KL}(P_1 \parallel P_2) &= \left( −\frac{1}{2}log(2π)−log(σ_1)−\frac{1
 ```
 
 
-## Loss에서 확률분포 p가 닮아야할 q 정리 ($(5) \rightarrow (8)$)
+## Loss에서 확률분포 p가 닮아야할 q 정리 ( $(5)\rightarrow(8)$ )
 
 여기서 DDPM의 핵심적인 설계 선택이 들어갑니다. $p_\theta$의 분산을 q의 분산과 동일하게 고정합니다.
 
