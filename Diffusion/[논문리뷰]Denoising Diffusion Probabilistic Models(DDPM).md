@@ -469,7 +469,7 @@ $$\tilde{μ}_t(x_t,x_0) \rightarrow \frac{1}{\sqrt{α}_t} \left( x_t(x_0,ϵ) −
 
 * (10)에서 (11)로 가는 것은 유도가 아니라, 모델의 역할을 재정의하는 설계 단계입니다.
 
-* "노이즈를 예측하는 ε_θ를 이용해서 μ_θ를 어떻게 만들 것인가?"에 대한 정의입니다.
+* "노이즈를 예측하는 $ε_θ$ 를 이용해서 $μ_θ$ 를 어떻게 만들 것인가?"에 대한 정의입니다.
 
 실제 평균  $\tilde{\mu}_t$
 
@@ -481,7 +481,7 @@ $$\tilde{\mu}_t = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{\beta_t}{\sqrt{1-
 \mu_\theta(x_t, t) = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{\beta_t}{\sqrt{1-\bar{\alpha}_t}} \epsilon_\theta(x_t,t) \right)
 ```
 
-차이점은 실제 정답 노이즈인 ε 자리에, 우리 신경망이 예측한 노이즈인 ε_θ 가 들어간 것뿐입니다.
+차이점은 실제 정답 노이즈인 ε 자리에, 우리 신경망이 예측한 노이즈인 $ε_θ$ 가 들어간 것뿐입니다.
 
 식 (10)의 $\mu_\theta$  자리에 식 (11)을 대입합니다.
 
@@ -500,6 +500,24 @@ L & \propto \left\| \frac{1}{\sqrt{\alpha_t}} \left(x_t - \frac{\beta_t}{\sqrt{1
 & = \frac{\beta_t^2}{\alpha_t(1-\bar{\alpha}_t)} \| \epsilon - \epsilon_\theta \|^2
 \end{align}
 ```
+
+#### (11) $\rightarrow$ (12)
+
+(10)에 (11)에서 구한 $\mu_\theta(x_t,t)$ 대입
+
+(4)에서 구한값 대입 $x_t(x_0,\epsilon)=\sqrt{\bar{α}_t}x_0 + \sqrt{(1-\bar{α}_t)}\epsilon, \ \epsilon \sim N(0,I)$
+
+```math
+\begin{align}
+&= E_{x_0,\epsilon} \left[\frac{1}{2σ^2_t} \parallel \frac{1}{\sqrt{α_t}} \left(x_t(x_0,\epsilon) − \frac{β_t}{\sqrt{1 − \bar{α}_t}}\epsilon\right)− µ_θ(x_t(x_0,\epsilon),t) \parallel^2 \right] \;\; (10) \\\\
+\mu_\theta(x_t, t) &= \tilde{\mu}_t\left(x_t, \frac{1}{\sqrt{\bar{\alpha}_t}}(x_t - \sqrt{1 - \bar{\alpha}_t}\epsilon_\theta(x_t)) \right) = \frac{1}{\sqrt{\alpha_t}}\left(x_t - \frac{\beta_t}{\sqrt{1-\bar{\alpha}_t}}\epsilon_\theta(x_t, t) \right) \;\; (11) \\\\
+&= E_{x_0, \epsilon}\left[ \frac{\beta^2_t}{2\sigma^2_t\alpha_t(1-\bar{\alpha}_t)} \left\| \epsilon - \epsilon_\theta(x_t, t) \right\|^2 \right] \;\; (11-1)
+&= E_{x_0, \epsilon}\left[ \frac{\beta^2_t}{2\sigma^2_t\alpha_t(1-\bar{\alpha}_t)} \left\| \epsilon - \epsilon_\theta(\sqrt{\bar{\alpha}_t}x_0 + \sqrt{1-\bar{\alpha}_t}\epsilon, t) \right\|^2 \right] \;\; (12)
+\end{align}
+```
+
+
+
 
 ---
 
