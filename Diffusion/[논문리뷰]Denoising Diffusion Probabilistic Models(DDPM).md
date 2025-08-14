@@ -516,6 +516,18 @@ L & \propto \left\| \frac{1}{\sqrt{\alpha_t}} \left(x_t - \frac{\beta_t}{\sqrt{1
 \end{align}
 ```
 
+### $L_0$ 이해하기
+
+$$L=E_q[D_{KL}​(q(x_T|x_0​)\parallel p(x_T))+\displaystyle\sum_{t>1}D_{KL}​(q(x_{t−1}​|x_t​,x_0)\parallel p_θ(x_{t−1}|x_t))−\log p_θ(x_0|x_1)] \\ (5) $$
+$$L_0 = \log p_θ(x_0|x_1)$$
+
+<img width="1324" height="51" alt="image" src="https://github.com/user-attachments/assets/efb3cb98-11dc-47a0-895e-0881f902bc52" />
+
+Channel 당 8bit 으로 mapping {0,1,...,255}
+
+마지막 Losss는 정수가 되어야해서 식 (13)으로 구해야 하는데, 논문에서는 굳이 따로 안써도 된다고 함, t=1대입해서 그냥 구해도 된다.
+
+<img width="1234" height="226" alt="image" src="https://github.com/user-attachments/assets/9740aaec-da70-4f88-a5f7-470022bf42d7" />
 
 
 
