@@ -106,7 +106,9 @@ $$p(x^{(0:T)})=p(x^{(T)}) \displaystyle\prod_{t=1}^{T} p(x^{(t−1)} ∣x ^{(t)}
 
 직접 $p(x^{(0)})$ 를 계산하기는 어렵지만, forward/reverse 경로의 확률비를 계산해 근사합니다:
 
-$$p(x^{(0)})=E_{q(x^{(1:T)}∣x^{(0)})}\left[\frac{p(x^{(0:T)})}{q(x^{(1:T)}|x^{(0)})} \right] (9) $$
+$$p(x^{(0)})=\int dx^{(1...T)}q\left(x^{(1...T)}|x^{(0)}\right) \cdot p(x^{(T)}) \prod_{t=1}^{T}\frac{p(x^{(t-1)}|x^t)}{q(x^{(t)}|x^{(t-1)})} \\ (9) $$
+
+$$p(x^{(0)})=E_{q(x^{(1:T)}∣x^{(0)})}\left[\frac{p(x^{(0:T)})}{q(x^{(1:T)}|x^{(0)})} \right]$$
 
 이건 Annealed Importance Sampling과 Jarzynski Equality와 유사한 방식입니다.
 
@@ -124,16 +126,22 @@ Likelihood
 ---
 
 ### 2.4 Training (Log-likelihood Bound Maximization)
-로그 가능도(Log likelihood): $𝐿=𝐸_{𝑞(𝑥^{(0)})}[\log ⁡𝑝(𝑥^{(0)})]$
+로그 가능도(Log likelihood): 
+$$L=\int dx^{(0)}q\left(x^{(0)}\right) \log p \left( x^{(0)} \right) \\ (10)$$
+$$𝐿=𝐸_{𝑞(𝑥^{(0)})}[\log ⁡𝑝(𝑥^{(0)})]$$
 
-이는 직접 계산이 어려워서 Jensen's inequality로 lower bound 𝐾를 도입:
+여기에 (9)번식 대입하여 Jensen's inequality로 lower bound 𝐾를 도입:
+
+$$ = \int dx^{(0)}q\left(x^{(0)}\right) \log p(x^{(0)}) \\ (10)$$
+
+$$𝐿≥𝐾=−\displaystyle\sum_{𝑡=2}^{𝑇} \int dx^{(0)}dx^{(t)}q(x^{(0)},x^{(t)}) \cdot [𝐷_{𝐾𝐿}(𝑞(𝑥^{(𝑡−1)}∣𝑥^{(𝑡)},𝑥^{(0)}) \parallel 𝑝(𝑥^{(𝑡−1)}∣𝑥^{(𝑡)}))] + H_q(X^{(T)}|X^{(0)}) - H_q(X^{(1)}|X^{(0)}) - H_p(X^{(T)}) \\ (14)$$
 
 
 $$𝐿≥𝐾=−\displaystyle\sum_{𝑡=2}^{𝑇}𝐸_{𝑞(𝑥^{(0)},𝑥^{(𝑡)})}[𝐷_{𝐾𝐿}(𝑞(𝑥^{(𝑡−1)}∣𝑥^{(𝑡)},𝑥^{(0)})∥𝑝(𝑥^{(𝑡−1)}∣𝑥^{(𝑡)}))]+entropy terms$$
 
 즉, reverse transition과 posterior 간의 KL divergence를 최소화하는 것이 학습의 핵심입니다.
 
-* DKL (Kullback-Leibler Divergence)
+* $D_{KL}$ (Kullback-Leibler Divergence)
 * $D_{KL}(P∣∣Q)=∑_x P(x) \log \frac{P(x)}{Q(x)}$
 
 |제목|내용|
