@@ -72,8 +72,8 @@ $Z=∫ϕ(x)dx$를 계산하기가 거의 불가능합니다.
 #### 2.1 Forward Trajectory (Inference Process)
 
 ##### 2.1.1 핵심 개념:
-데이터 분포 $q(x^(0))$로부터 시작해서, 확산 커널을 반복 적용하여 점점 구조를 무너뜨려 단순한 분포 $π(x^(T))$로 만듭니다.
-$q(x^{(t)}∣x^{(t−1)})=T_{π}(x^{(t)}∣x^{(t−1)};β_t)$
+데이터 분포 $q(x^(0))$로부터 시작해서, 확산 커널을 반복 적용하여 점점 구조를 무너뜨려 단순한 분포 $π(x^{T})$로 만듭니다.
+$$q(x^{(t)}∣x^{(t−1)})=T_{π}(x^{(t)}∣x^{(t−1)};β_t) \\ (2) $$
 
 즉, 노이즈를 점점 추가하는 Markov chain입니다.
 * $T_{π}$: 확산 커널 (Gaussian, Binomial 등)
@@ -82,7 +82,7 @@ $q(x^{(t)}∣x^{(t−1)})=T_{π}(x^{(t)}∣x^{(t−1)};β_t)$
 
 전체 확률 경로:
 
-$$q(x^{(0:T)})=q(x^{(0)}) \displaystyle\prod^{t=1}_{t=1}q(x^{(t)}∣x^{(t−1)})$$
+$$q(x^{(0:T)})=q(x^{(0)}) \displaystyle\prod^{t=1}_{t=1}q(x^{(t)}∣x^{(t−1)}) \\ (5)$$
 
 ---
 
@@ -101,9 +101,12 @@ $$p(x^{(0:T)})=p(x^{(T)}) \displaystyle\prod_{t=1}^{T} p(x^{(t−1)} ∣x ^{(t)}
 ---
 
 ### 2.3 Model Probability (Log-Likelihood)
+
+모델 데이터의 분포는 적분식(6)이므로 tractable 하지 않아, 순방향 경로에 대한 sampling을 평균화 하여 효율적으로 사용
+
 직접 $p(x^{(0)})$ 를 계산하기는 어렵지만, forward/reverse 경로의 확률비를 계산해 근사합니다:
 
-$$p(x^{(0)})=E_{q(x^{(1:T)}∣x^{(0)})}\left[\frac{p(x^{(0:T)})}{q(x^{(1:T)}|x^{(0)})} \right]$$
+$$p(x^{(0)})=E_{q(x^{(1:T)}∣x^{(0)})}\left[\frac{p(x^{(0:T)})}{q(x^{(1:T)}|x^{(0)})} \right] (9) $$
 
 이건 Annealed Importance Sampling과 Jarzynski Equality와 유사한 방식입니다.
 
