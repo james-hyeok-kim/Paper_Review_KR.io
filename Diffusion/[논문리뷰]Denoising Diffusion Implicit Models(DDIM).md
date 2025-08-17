@@ -73,14 +73,14 @@ DDPM의 순방향 확산 과정과 역방향 생성 과정에 대한 수학적 �
 
 
 #### Reverse Process $p_{\theta}$
-* $q(x_t|x_0) := \intq(x_{1:t}|x_0)dx_{1:(t−1)} = \mathcal{N} (x_t;\sqrt{α_t}x_0,(1 − α_t)I)$
+* $q(x_t|x_0) := \int q(x_{1:t}|x_0)dx_{1:(t−1)} = \mathcal{N} (x_t;\sqrt{α_t}x_0,(1 − α_t)I)$
 * $x_t =\sqrt{α_t}x_0 + \sqrt{1 − α_t}\epsilon, where \epsilon \sim \mathcal{N} (0, I)$
 
 #### Loss
 
 * $L_γ(\epsilon_θ) := \sum^T_{t=1}γt\mathcal{E}_{x0∼q(x_0),\epsilon_t∼\mathcal{N}(0,I)} [\parallel \epsilon_^{(t)}_θ(\sqrt{α_t}x_0 + \sqrt{1 − α_t}\epsilon_t) − \epsilon_t \parallel^2_2]$
 
-* DDPM $\lamda = $\frac{β_t^2}{2σ_t^2α_t(1−\bar{α}_t)
+* DDPM $\gamma = $\frac{β_t^2}{2σ_t^2α_t(1−\bar{α}_t)$
 * $γ = 1$도 가능함을 알게됨(다른논문에서)
 
 ### 3.1 DDIM의 순방향 과정 일반화 (Generalization of the Forward Process)
