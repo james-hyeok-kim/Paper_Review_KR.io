@@ -68,12 +68,20 @@ DDPM의 배경과 장점(적대적 학습 불필요)을 소개하고, 느린 샘
 DDPM의 순방향 확산 과정과 역방향 생성 과정에 대한 수학적 정의를 설명합니다.
 
 #### Forward Process (Diffusion Process) $q$
-* $q(x_t|x_{t-1}) := N(x_t;\sqrt{1- \beta_{t}}x_{t-1},\beta_{t}I)$
+
+* $q(x_{1:T}|x_0) := \prod^T_{t=1}q(x_t|x_{t−1}), where q(xt|xt−1) := \mathcal{N} \left( \sqrt{\frac{\alpha_t}{\alpha_{t-1}}x_{t-1}}, \left(1 - \frac{α_t}{α_{t−1}} \right)I \right)$
+
 
 #### Reverse Process $p_{\theta}$
-* $p_{\theta}(x_{t-1}|x_t) :=  N (x_{t-1};\mu_{\theta}(x_t,t),\sum_{\theta}(x_t,t))$
+* $q(x_t|x_0) := \intq(x_{1:t}|x_0)dx_{1:(t−1)} = \mathcal{N} (x_t;\sqrt{α_t}x_0,(1 − α_t)I)$
+* $x_t =\sqrt{α_t}x_0 + \sqrt{1 − α_t}\epsilon, where \epsilon \sim \mathcal{N} (0, I)$
 
+#### Loss
 
+* $L_γ(\epsilon_θ) := \sum^T_{t=1}γt\mathcal{E}_{x0∼q(x_0),\epsilon_t∼\mathcal{N}(0,I)} [\parallel \epsilon_^{(t)}_θ(\sqrt{α_t}x_0 + \sqrt{1 − α_t}\epsilon_t) − \epsilon_t \parallel^2_2]$
+
+* DDPM $\lamda = $\frac{β_t^2}{2σ_t^2α_t(1−\bar{α}_t)
+* $γ = 1$도 가능함을 알게됨(다른논문에서)
 
 ### 3.1 DDIM의 순방향 과정 일반화 (Generalization of the Forward Process)
 반면, DDIM은 비마르코프(Non-Markovian) 과정을 도입합니다. 이 새로운 과정은 다음과 같은 두 가지 확률 분포로 정의됩니다.
