@@ -88,13 +88,25 @@ DDPM의 순방향 확산 과정과 역방향 생성 과정에 대한 수학적 �
 
 ### DDIM 핵심 아이디어 Non Markovian Process
 
-#### 새로운 Reverse 조건부 분포
+#### 새로운 Forward조건부 분포
+
+* $x_t =\sqrt{α_t}x_0 + \sqrt{1 − α_t}\epsilon, \\ where \\ \epsilon \sim \mathcal{N} (0, I) \\ (4)$
+
+(4)를 바탕으로 $x_{t-1}$ 예측하기
 
 * $q_σ(x_{t−1}∣x_t,x_0)=\mathcal{N}(\sqrt{α_{t−1}}x_0 +  \sqrt{1−α_{t−1}−σ_t^2} \cdot \frac{x_t− \sqrt{α_t} x_0}{\sqrt{1−α_t}},σ_t^2I) \\ (7)$
 
 * $\sigma_t : 확률을 조절하는 새로운 파라미터$
 
 
+#### Reverse Process
 
+예측된 $x_0 (Eq. 9)$
+
+$$f_θ^{(t)}(x_t):=(x_t-\sqrt{1−α_t} \cdot ϵ_θ^{(t)}(x_t))/\sqrt{α_t}$$
+​
+이는 $x_t=\sqrt{α_t}x_0+\sqrt{1−α_t}ϵ$ 식을 $x_0$ 에 대해 정리한 것
+
+모델이 예측한 노이즈 $\epsilon_\theta^{(t)}(x_t)$를 실제 노이즈 $ϵ_t$대신 사용
 
 
