@@ -74,37 +74,21 @@ DDPM의 순방향 확산 과정과 역방향 생성 과정에 대한 수학적 �
 
 #### Reverse Process $p_{\theta}$
 * $q(x_t|x_0) := \int q(x_{1:t}|x_0)dx_{1:(t−1)} = \mathcal{N} (x_t;\sqrt{α_t}x_0,(1 − α_t)I)$
-* $x_t =\sqrt{α_t}x_0 + \sqrt{1 − α_t}\epsilon, where \epsilon \sim \mathcal{N} (0, I)$
+* $x_t =\sqrt{α_t}x_0 + \sqrt{1 − α_t}\epsilon, \\ where \\ \epsilon \sim \mathcal{N} (0, I) \\ (4)$
 
 #### Loss
 
-* $L_γ(\epsilon_θ) := \sum^T_{t=1}γt\mathcal{E}_{x0∼q(x_0),\epsilon_t∼\mathcal{N}(0,I)} [\parallel \epsilon_^{(t)}_θ(\sqrt{α_t}x_0 + \sqrt{1 − α_t}\epsilon_t) − \epsilon_t \parallel^2_2]$
+* $L_γ(\epsilon_θ) := \sum^T_{t=1}γ_t \mathcal{E}_{x0∼q(x_0),\epsilon_t \sim \mathcal{N}(0,I)} [\parallel \epsilon^{(t)}_θ(\sqrt{α_t}x_0 + \sqrt{1 − α_t} \epsilon_t) − \epsilon_t \parallel^2_2] \\ (5)$
 
-* DDPM $\gamma = $\frac{β_t^2}{2σ_t^2α_t(1−\bar{α}_t)$
+* DDPM $\gamma = \frac{β_t^2}{2σ_t^2α_t(1−\bar{α}_t)}$
 * $γ = 1$도 가능함을 알게됨(다른논문에서)
 
-### 3.1 DDIM의 순방향 과정 일반화 (Generalization of the Forward Process)
-반면, DDIM은 비마르코프(Non-Markovian) 과정을 도입합니다. 이 새로운 과정은 다음과 같은 두 가지 확률 분포로 정의됩니다.
+#### DDPM vs DDIM
+* $DDPM \\ \bar{\alpha_t} = DDIM \\ \alpha_t$
 
-1. $q_σ(x_t∣x_0)$: 원본 데이터 $x_0$로부터 임의의 단계 t의 노이즈 이미지 $x_t$를 샘플링하는 분포, 이는 DDPM과 동일하게 가우시안 분포로 정의
+### DDIM 핵심 아이디어 Non Markovian Process
 
-```math
-q_σ(x_t∣x_0)=N(x_t;\sqrt{α_t}x_0,(1−α_t)I)
-```
+#### 새로운 Reverse 조건부 분포
 
-2. $q_σ(x_{t−1}∣x_t,x_0)$: 현재 상태 $x_t$와 원본 데이터 $x_0$가 주어졌을 때, 이전 단계 $x_{t-1}$을 추론하는 분포입니다. 이 분포는 다음과 같이 정의됩니다:
+* $q_σ(x_{t−1}∣x_t,x_0)=\mathcal{N}(\sqrt{α_{t−1}}x_0 +  \sqrt{1−α_{t−1}−σ_t^2} \cdot \frac{x_t− \sqrt{α_t} x_0}{\sqrt{1−α_t}},σ_t^2I) \\ (7)$
 
-```math
-q_σ(x_{t−1}∣x_t,x_0)=N(\sqrt{α_{t−1}}x_0 + \sqrt{1−α_{t−1}−σ_t^2}⋅\frac{x_t−\sqrt{α_t}x_0}{\sqrt{1−α_{t}}},σ_t^2I)
-```
-
-$σ_t$는 새로운 하이퍼파라미터로, 생성 과정의 확률성(stochasticity)을 조절하는 역할을 합니다.
-
-이 수식은 $x_t$와 $x_0$가 주어지면 $x_{t-1}$이 결정되므로, $x_{t-1}$은 $x_t$뿐만 아니라 $x_0$에도 의존하는 비마르코프적인 성격을 갖습니다.
-
-
-### 3.2 동일한 학습 목표 (Same Training Objective)
-논문의 핵심은 DDIM이 도입한 이 새로운 비마르코프 순방향 과정이, DDPM에서 사용된 노이즈 예측 손실 함수와 동일한 학습 목표를 공유한다는 점을 수학적으로 증명한 것입니다.
-
-DDIM의 변분 하한(variational lower bound) 목적 함수 $J_\sigma(\epsilon_\theta)$는 DDPM의 단순화된 노이즈 예측 목적 함수 $L_\gamma(\epsilon_\theta)$와 상수 C만큼 차이가 있을 뿐, 본질적으로 동일하다는 것을 증명했습니다 (Theorem 1)
-  
