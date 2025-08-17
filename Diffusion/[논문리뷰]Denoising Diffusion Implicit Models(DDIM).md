@@ -110,3 +110,4 @@ $$f_θ^{(t)}(x_t):=(x_t-\sqrt{1−α_t} \cdot ϵ_θ^{(t)}(x_t))/\sqrt{α_t}$$
 모델이 예측한 노이즈 $\epsilon_\theta^{(t)}(x_t)$를 실제 노이즈 $ϵ_t$대신 사용
 
 
+https://www.youtube.com/watch?v=n2P6EMbN0pc
