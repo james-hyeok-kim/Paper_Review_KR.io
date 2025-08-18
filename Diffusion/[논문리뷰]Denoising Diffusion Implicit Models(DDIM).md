@@ -108,10 +108,8 @@ $$q_σ(x_{t−1}∣x_t,x_0)=\mathcal{N}(\sqrt{α_{t−1}}x_0 +  \sqrt{1−α_{t�
 
 * $q_\sigma(x_t|x_0) = \mathcal{N}(\sqrt{α_t}x_0,(1 − α_t)I)$
 * $q_\sigma(x_{t-1}|x_0) = \mathcal{N}(\sqrt{\alpha_{t-1}}x_0, (1-\alpha_{t-1}I)$
-
-
-* $p(x) = \mathcal{N}(x|\mu,\Lambda^{-1})$
-* $\Lambda : Lambda$
+  * $p(x) = \mathcal{N}(x|\mu,\Lambda^{-1})$
+  * $\Lambda : Lambda$
 * $p(y|x) = \mathcal{N}(y|Ax + b, L^{-1})$
   * y가 x에 대한 선형 변환에 가우시안 노이즈가 더해진 형태 $y=Ax+b+\epsilon$
   * 이때 노이즈 $\epsilon$은 평균 0, 공분산 $L^{-1}$인 가우시안 분포 $\epsilon \sim \mathcal{N}(0, L^{-1})$
