@@ -102,6 +102,16 @@ DDPM의 순방향 확산 과정과 역방향 생성 과정에 대한 수학적 �
 * $\sigma_t : 확률을 조절하는 새로운 파라미터$
 
 
+##### 유도과정
+* $q_\sigma(x_t|x_0) = \mathcal{N}(\sqrt{α_t}x_0,(1 − α_t)I)$
+* $q_\sigma(x_{t-1}|x_0) = \mathcal{N}(\sqrt{\alpha_{t-1}}x_0, (1-\alpha_{t-1}I)$
+
+* $p(x) = \mathcal{N}(x|\mu,A^{-1})$
+* $p(y|x) = \mathcal{N}(y|Ax + b, L^{-1}$
+* $p(y) = \mathcal{N}(y|A\mu + bL^{-1}+AA^{-1}A^{T})$
+* $p(y) \leftarrow q_\sigma(x_{t-1}|x_0)$
+
+
 #### Reverse Process
 
 예측된 $x_0 (Eq. 9)$
