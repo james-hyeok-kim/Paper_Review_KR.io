@@ -82,6 +82,7 @@ DDPM의 순방향 확산 과정과 역방향 생성 과정에 대한 수학적 �
 
 * DDPM $\gamma = \frac{β_t^2}{2σ_t^2α_t(1−\bar{α}_t)}$
 * $γ = 1$도 가능함을 알게됨(다른논문에서)
+* DDIM에서는  $\gamma = 1$을 사용
 
 #### DDPM vs DDIM
 * $DDPM \\ \bar{\alpha_t} = DDIM \\ \alpha_t$
@@ -199,6 +200,30 @@ q_\sigma(x_{t-1}|x_0) &= \mathcal{N}(x_{t-1};\mu_q = \frac{\sqrt{1-\alpha_{t-1}-
 * Trained DDPM을 DDIM non-markovian에서 사용 가능 (retrain x )
 
 $q_\sigma(x_t|x_{t-1},x_0) \neq q_\sigma(x_t|x_{t-1})$
+
+#### Sampling
+
+1. Goal: $x_t$에서 $x_{t-1}$을 만들고 싶다.
+
+2. Problem: 이상적인 방법(q)은 우리가 모르는 원본 이미지($x_0$)나 실제 노이즈(ε)를 필요로 해서 못 쓴다.
+
+3. Solution: q의 수식 형태를 본떠서, 실제 노이즈 ε를 신경망이 예측한 노이즈 4ε_θ$로 대체한 근사 모델 $p_θ$를 만든다.
+
+4. Sampling: $p_θ$라는 정규분포에서 샘플 $x_{t-1}$을 뽑기 위해 리파라미터라이제이션 트릭 (결과 = 평균 + 표준편차 × 랜덤값)을 사용한다.
+
+
+```math
+\begin{align}
+q_\sigma(x_{t-1}|x_0) &= \mathcal{N}(\sqrt{α_{t−1}}x_0 +  \sqrt{1−α_{t−1}−σ_t^2} \cdot \frac{x_t− \sqrt{α_t} x_0}{\sqrt{1−α_t}},σ_{*t}^2I) \;\; (7) \\\\
+q_\sigma(x_t|x_0) &= \mathcal{N}(\sqrt{\alpha_t}x_0, (1-\alpha_t)I) \\\\
+x_t &= \sqrt{\alpha_t}x_0 + \sqrt{1-\alpha_t}\epsilon \\\\
+x_0 = \frac{x_t - \sqrt{1-\alpha_t}\epsilon}{\sqrt{\alpha_t}} \\\\
+q_\sigma(x_{t-1}|x_t,x_0) &= \mathcal{N} \left(\sqrt{\alpha_{t-1}}\frac{x_t-\sqrt{1-\alpha_t}\epsilon}{\sqrt{\alpha_t}} + \sqrt{1-\alpha_{t-1}-\sigma^2_t}\epsilon,\sigma_t^2I \right) \\\\
+p_\theta(x_{t-1}|x_t) &= \mathcal{N} \left(\sqrt{\alpha_{t-1}}\frac{x_t-\sqrt{1-\alpha_t}\epsilon_\theta}{\sqrt{\alpha_t}} + \sqrt{1-\alpha_{t-1}-\sigma^2_t}\epsilon_\theta,\sigma_t^2I \right) \\\\
+x_{t-1} &= \sqrt{\alpha_{t-1}} \left(\frac{x_t-\sqrt{1-\alpha_t}\epsilon_\theta^{(t)}(x_t)}{\sqrt{\alpha_t}} \right) + \sqrt{1-\alpha_{t-1}-\sigma_t^2}\cdot \epsilon_\theta^{(t)}(x_t)+\sigma_t\epsilon_t \;\; (Reparameterization - DDIM) \\\\
+x_{t-1} &= \frac{x_t}{\sqrt{\alpha_t}} - \frac{1-\alpha_t}{(\sqrt{1-\alpha_t})\sqrt{\alpha_t}}\epsilon_\theta^{(t)}(x_t) + \sigma_t\epsilon_t \;\; DDPM Sampling step (Comparison) \\\\
+\end{align}
+```
 
 
 
