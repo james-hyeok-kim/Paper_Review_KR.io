@@ -137,11 +137,9 @@ Cov(y)&=AΛ^{−1}A^{T}+L^{−1} \\\\
 \end{align}
 ```
  
-## 결론 종합 ✍️
-위에서 구한 평균과 공분산을 종합하면, y의 주변 확률 분포 $p(y)$는 다음과 같은 가우시안 분포를 따르게 됩니다.
 ```math
 \begin{align}
-p(y)=\mathcal{N}(y∣\underbrace{Aμ+b}_{평균}, \underbrace{L^{−1}+AΛ^{−1} A^{T})_ {공분산}
+p(y)=\mathcal{N}(y∣\underbrace{Aμ+b}_{평균}, \underbrace{L^{−1}+AΛ^{−1} A^{T}}_ {공분산}
 \end{align}
 ```
 
