@@ -153,17 +153,17 @@ p(y)=\mathcal{N}(y∣\underbrace{Aμ+b}_{평균}, \underbrace{L^{−1}+AΛ^{−1
 
 ```math
 \begin{align}
-* $\mu = \sqrt{\alpha_t}x_0$
-* $\Lambda^{-1} = (1-\alpha_t)I$
-* $A = \sqrt{1-\alpha_{t-1}-\sigma^2_t} \cdot \frac{1}{\sqrt{1-\alpha_t}}$
-* $b = \sqrt{\alpha_{t-1}}x_0 - \sqrt{1-alpha_{t-1}-\sigma_t^2} \ cdot \frac{\sqrt{\alpha_t}x_0}{\sqrt{1-\alpha_t}}$
-* $L^{-1} = \sigma^2_tI$
+\mu &= \sqrt{\alpha_t}x_0 \\\\
+\Lambda^{-1} &= (1-\alpha_t)I \\\\
+A &= \sqrt{1-\alpha_{t-1}-\sigma^2_t} \cdot \frac{1}{\sqrt{1-\alpha_t}} \\\\
+b &= \sqrt{\alpha_{t-1}}x_0 - \sqrt{1-\alpha_{t-1}-\sigma_t^2} \cdot \frac{\sqrt{\alpha_t}x_0}{\sqrt{1-\alpha_t}} \\\\
+L^{-1} &= \sigma^2_tI
 \end{align}
 ```
 
 ```math
 \begin{align}
-A\mu+b &= \sqrt{1-\alpha_{t-1}-\sigma^2_t} \cdot \frac{1}{\sqrt{1-\alpha_t}}\sqrt{\alpha_t}x_0 + \sqrt{\alpha_{t-1}}x_0 - \sqrt{1-alpha_{t-1}-\sigma_t^2} \ cdot \frac{\sqrt{\alpha_t}x_0}{\sqrt{1-\alpha_t}} \\\
+A\mu+b &= \sqrt{1-\alpha_{t-1}-\sigma^2_t} \cdot \frac{1}{\sqrt{1-\alpha_t}}\sqrt{\alpha_t}x_0 + \sqrt{\alpha_{t-1}}x_0 - \sqrt{1-alpha_{t-1}-\sigma_t^2} \cdot \frac{\sqrt{\alpha_t}x_0}{\sqrt{1-\alpha_t}} \\\
 &= \sqrt{\alpha_t}x_0 
 \end{align}
 ```
@@ -171,9 +171,34 @@ A\mu+b &= \sqrt{1-\alpha_{t-1}-\sigma^2_t} \cdot \frac{1}{\sqrt{1-\alpha_t}}\sqr
 ```math
 \begin{align}
 L^{-1} + A\Lambda^{-1}A^T &= \sigma_t^2I + \sqrt{1-\alpha_{t-1}-\sigma^2_t} \cdot \frac{1}{\sqrt{1-\alpha_t}} (1-\alpha_t)I \left(\sqrt{1-\alpha_{t-1}-\sigma^2_t} \cdot \frac{1}{\sqrt{1-\alpha_t}} \right)^T \\\\
-&= \sigma_t^2I + (1-\alpha_{t-1}-\sigma_t^2)I
+&= \sigma_t^2I + (1-\alpha_{t-1}-\sigma_t^2)I \\\\
+&= (1-\alpha_{t-1})I
 \end{align}
 ```
+
+* 최종식 유도
+```math
+\begin{align}
+q_\sigma(x_t|x_0) &= \mathcal{N}(\sqrt{\alpha_t}x0, (1-\alpha_t)I) \\\\
+q_\sigma(x_{t-1}|x_0) &= \mathcal{N}(\sqrt{\alpha_{t-1}}x_0,(1-\alpha_{t-1})I) \\\\
+& 위에서 정의된 식 (DDPM) \\\\
+q_\sigma(x_{t-1}|x_t,x_0) &= \mathcal{N}(x_{t-1}; \mu_q = A_tx_t+B_tx_0,\sigma^2_{*t}I) \;\; 로 정의 \\\\
+p(y) &= \mathcal{N}(y|A\mu + b, L^{-1}+A\Lambda^{-1}A^{T}) \;\; 해당식을 활용하면 \\\\
+\mu &= \sqrt{\alpha_t}x_0 \\\\
+\Lambda^{-1} &= (1-\alpha_t)I \\\\
+A &= \sqrt{1-\alpha_{t-1}-\sigma^2_t} \cdot \frac{1}{\sqrt{1-\alpha_t}} \\\\
+&= A_t \\\\
+b &= \sqrt{\alpha_{t-1}}x_0 - \sqrt{1-\alpha_{t-1}-\sigma_t^2} \cdot \frac{\sqrt{\alpha_t}x_0}{\sqrt{1-\alpha_t}} \\\\
+b &= B_tx_0 \\\\
+L^{-1} &= \sigma^2_tI \\\\
+q_\sigma(x_{t-1}|x_0) &= \mathcal{N}(x_{t-1};\mu_q = \frac{\sqrt{1-\alpha_{t-1}-\sigma^2_t}}{\sqrt{1-\alpha_t}}\sqrt{\alpha_t}x_t + (\sqrt{\alpha_{t-1}} - \sqrt{1-\alpha_{t-1}-\sigma_t^2} \cdot \frac{\sqrt{\alpha_t}}{\sqrt{1-\alpha_t}})x_0, \sigma_{*t}^2I) \\\\
+&= \mathcal{N}(x_{t-1};\mu_q = \sqrt{α_{t−1}}x_0 +  \sqrt{1−α_{t−1}−σ_t^2} \cdot \frac{x_t− \sqrt{α_t} x_0}{\sqrt{1−α_t}},σ_{*t}^2I) \;\; (7)
+\end{align}
+```
+
+* Trained DDPM을 DDIM non-markovian에서 사용 가능 (retrain x )
+
+$q_\sigma(x_t|x_{t-1},x_0) \neq q_\sigma(x_t|x_{t-1})$
 
 
 
