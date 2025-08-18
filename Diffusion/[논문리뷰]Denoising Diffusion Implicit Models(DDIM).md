@@ -90,6 +90,8 @@ DDPM의 순방향 확산 과정과 역방향 생성 과정에 대한 수학적 �
 
 #### 새로운 Forward조건부 분포
 
+[Youtube](https://www.youtube.com/watch?v=n2P6EMbN0pc)
+
 * $x_t =\sqrt{α_t}x_0 + \sqrt{1 − α_t}\epsilon, \\ where \\ \epsilon \sim \mathcal{N} (0, I) \\ (4)$
 
 * $q_\sigma(x_t|x_0) := \mathcal{N}(\sqrt{α_t}x_0,(1 − α_t)I)$ 의 분포를 따를 때,
@@ -111,11 +113,11 @@ DDPM의 순방향 확산 과정과 역방향 생성 과정에 대한 수학적 �
 * $p(x) = \mathcal{N}(x|\mu,\Lambda^{-1})$
 * $\Lambda : Lambda$
 * $p(y|x) = \mathcal{N}(y|Ax + b, L^{-1})$
-* y가 x에 대한 선형 변환에 가우시안 노이즈가 더해진 형태 $y=Ax+b+\epsilon$
-* 이때 노이즈 $\epsilon$은 평균 0, 공분산 $L^{-1}$인 가우시안 분포 $\epsilon \sim \mathcal{N}(0, L^{-1})$
+  * y가 x에 대한 선형 변환에 가우시안 노이즈가 더해진 형태 $y=Ax+b+\epsilon$
+  * 이때 노이즈 $\epsilon$은 평균 0, 공분산 $L^{-1}$인 가우시안 분포 $\epsilon \sim \mathcal{N}(0, L^{-1})$
 * $p(y) = \mathcal{N}(y|A\mu + b, L^{-1}+A\Lambda^{-1}A^{T})$
 
-유도(공분산의 성질을 이용하여 y의 공분산을 계산)
+$p(y|x) = \mathcal{N}(y|Ax + b, L^{-1})$ 유도(공분산의 성질을 이용하여 y의 공분산을 계산)
 
 ```math
 \begin{align}
@@ -151,11 +153,31 @@ p(y)=\mathcal{N}(y∣\underbrace{Aμ+b}_{평균}, \underbrace{L^{−1}+AΛ^{−1
 * $q_\sigma(x_{t-1}|x_0) = \mathcal{N}(y|A\mu + b, L^{-1}+A\Lambda^{-1}A^T)$
 
 
+```math
+\begin{align}
 * $\mu = \sqrt{\alpha_t}x_0$
-* $\Lambda = (1-\alpha_t)I$
+* $\Lambda^{-1} = (1-\alpha_t)I$
 * $A = \sqrt{1-\alpha_{t-1}-\sigma^2_t} \cdot \frac{1}{\sqrt{1-\alpha_t}}$
 * $b = \sqrt{\alpha_{t-1}}x_0 - \sqrt{1-alpha_{t-1}-\sigma_t^2} \ cdot \frac{\sqrt{\alpha_t}x_0}{\sqrt{1-\alpha_t}}$
 * $L^{-1} = \sigma^2_tI$
+\end{align}
+```
+
+```math
+\begin{align}
+A\mu+b &= \sqrt{1-\alpha_{t-1}-\sigma^2_t} \cdot \frac{1}{\sqrt{1-\alpha_t}}\sqrt{\alpha_t}x_0 + \sqrt{\alpha_{t-1}}x_0 - \sqrt{1-alpha_{t-1}-\sigma_t^2} \ cdot \frac{\sqrt{\alpha_t}x_0}{\sqrt{1-\alpha_t}} \\\
+&= \sqrt{\alpha_t}x_0 
+\end{align}
+```
+
+```math
+\begin{align}
+L^{-1} + A\Lambda^{-1}A^T &= \sigma_t^2I + \sqrt{1-\alpha_{t-1}-\sigma^2_t} \cdot \frac{1}{\sqrt{1-\alpha_t}} (1-\alpha_t)I \left(\sqrt{1-\alpha_{t-1}-\sigma^2_t} \cdot \frac{1}{\sqrt{1-\alpha_t}} \right)^T \\\\
+&= \sigma_t^2I + (1-\alpha_{t-1}-\sigma_t^2)I
+\end{align}
+```
+
+
 
 #### Reverse Process
 
