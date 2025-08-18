@@ -139,11 +139,10 @@ Cov(y)&=AΛ^{−1}A^{T}+L^{−1} \\\\
  
 ```math
 \begin{align}
-p(y)=\mathcal{N}(y∣\underbrace{Aμ+b}_{평균}, \underbrace{L^{−1}+AΛ^{−1} A^{T}}_ {공분산}
+p(y)=\mathcal{N}(y∣\underbrace{Aμ+b}_{평균}, \underbrace{L^{−1}+AΛ^{−1} A^{T}}_ {공분산})
 \end{align}
 ```
 
-* 
 * $p(y) \leftarrow q_\sigma(x_{t-1}|x_0)$
 * $p(x) = \mathcal{N}(x|\mu, \Lambda^{-1})$
 * $p(x) \leftarrow q_\sigma(x_t|x_0) = \mathcal{N}(\sqrt{\alpha_t}x_0, (1-\alpha_t)I)$
