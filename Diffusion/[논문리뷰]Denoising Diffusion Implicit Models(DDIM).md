@@ -106,10 +106,16 @@ DDPM의 순방향 확산 과정과 역방향 생성 과정에 대한 수학적 �
 * $q_\sigma(x_t|x_0) = \mathcal{N}(\sqrt{α_t}x_0,(1 − α_t)I)$
 * $q_\sigma(x_{t-1}|x_0) = \mathcal{N}(\sqrt{\alpha_{t-1}}x_0, (1-\alpha_{t-1}I)$
 
-* $p(x) = \mathcal{N}(x|\mu,A^{-1})$
+* $p(x) = \mathcal{N}(x|\mu,\Lambda^{-1})$
+* $\Lambda : Lambda$
 * $p(y|x) = \mathcal{N}(y|Ax + b, L^{-1}$
-* $p(y) = \mathcal{N}(y|A\mu + bL^{-1}+AA^{-1}A^{T})$
+* $p(y) = \mathcal{N}(y|A\mu + bL^{-1}+A\Lambda^{-1}A^{T})$
 * $p(y) \leftarrow q_\sigma(x_{t-1}|x_0)$
+* $p(x) = \mathcal{N}(x|\mu, \Lambda^{-1})$
+* $p(x) \leftarrow q_\sigma(x_t|x_0) = \mathcal{N}(\sqrt{\alpha_t}x_0, (1-\alpha_t)I)$
+* $p(y|x) = \mathcal{N}(y|Ax+b,L^{-1})$
+* $p(y|x) \leftarrow q_\sigma(x_{t-1}|x_t,x_0) = \mathcal{N} \left(\sqrt{a_{t-1}}x_0  + \sqrt{1-\alpah_{t-1}-\sigma^2_t} \cdot \frac{x_t - \sqrt{\alpha_t}x_0}{\sqrt{1-\alpha_t}} , \sigma_t^2 I \right)$
+* $q_\sigma(x_{t-1}|x_0) = \mathcal{N}(y|A\mu + b, L^{-1}+A\Lambda^{-1}A^T)$
 
 
 #### Reverse Process
