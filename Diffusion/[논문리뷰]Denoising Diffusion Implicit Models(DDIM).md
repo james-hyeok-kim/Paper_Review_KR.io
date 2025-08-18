@@ -92,7 +92,7 @@ DDPM의 순방향 확산 과정과 역방향 생성 과정에 대한 수학적 �
 
 * $x_t =\sqrt{α_t}x_0 + \sqrt{1 − α_t}\epsilon, \\ where \\ \epsilon \sim \mathcal{N} (0, I) \\ (4)$
 
-* $q(x_t|x_0) := \mathcal{N}(\sqrt{α_t}x_0,(1 − α_t)I)$ 의 분포를 따를 때,
+* $q_\sigma(x_t|x_0) := \mathcal{N}(\sqrt{α_t}x_0,(1 − α_t)I)$ 의 분포를 따를 때,
 
 (4)를 바탕으로 $x_{t-1}$ 예측하기
 
