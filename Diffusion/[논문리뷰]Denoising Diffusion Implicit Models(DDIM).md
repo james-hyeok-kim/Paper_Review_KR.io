@@ -88,7 +88,7 @@ DDPM의 순방향 확산 과정과 역방향 생성 과정에 대한 수학적 �
 
 ### DDIM 핵심 아이디어 Non Markovian Process
 
-#### 새로운 Forward조건부 분포
+#### 새로운 Forward 조건부 분포 $q$
 
 [Youtube](https://www.youtube.com/watch?v=n2P6EMbN0pc)
 
@@ -98,13 +98,13 @@ DDPM의 순방향 확산 과정과 역방향 생성 과정에 대한 수학적 �
 
 (4)를 바탕으로 $x_{t-1}$ 예측하기
 
-* $q_σ(x_{t−1}∣x_t,x_0)=\mathcal{N}(\sqrt{α_{t−1}}x_0 +  \sqrt{1−α_{t−1}−σ_t^2} \cdot \frac{x_t− \sqrt{α_t} x_0}{\sqrt{1−α_t}},σ_t^2I) \\ (7)$
+$$q_σ(x_{t−1}∣x_t,x_0)=\mathcal{N}(\sqrt{α_{t−1}}x_0 +  \sqrt{1−α_{t−1}−σ_t^2} \cdot \frac{x_t− \sqrt{α_t} x_0}{\sqrt{1−α_t}},σ_t^2I) \\ (7)$$
 
 
 * $\sigma_t$ : 확률을 조절하는 새로운 파라미터
 
 
-##### 유도과정
+##### (7) 유도과정
 
 * $q_\sigma(x_t|x_0) = \mathcal{N}(\sqrt{α_t}x_0,(1 − α_t)I)$
 * $q_\sigma(x_{t-1}|x_0) = \mathcal{N}(\sqrt{\alpha_{t-1}}x_0, (1-\alpha_{t-1}I)$
