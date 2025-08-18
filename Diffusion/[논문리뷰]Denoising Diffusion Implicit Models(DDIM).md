@@ -103,13 +103,49 @@ DDPM의 순방향 확산 과정과 역방향 생성 과정에 대한 수학적 �
 
 
 ##### 유도과정
+
 * $q_\sigma(x_t|x_0) = \mathcal{N}(\sqrt{α_t}x_0,(1 − α_t)I)$
 * $q_\sigma(x_{t-1}|x_0) = \mathcal{N}(\sqrt{\alpha_{t-1}}x_0, (1-\alpha_{t-1}I)$
 
+
 * $p(x) = \mathcal{N}(x|\mu,\Lambda^{-1})$
 * $\Lambda : Lambda$
-* $p(y|x) = \mathcal{N}(y|Ax + b, L^{-1}$
-* $p(y) = \mathcal{N}(y|A\mu + bL^{-1}+A\Lambda^{-1}A^{T})$
+* $p(y|x) = \mathcal{N}(y|Ax + b, L^{-1})$
+* y가 x에 대한 선형 변환에 가우시안 노이즈가 더해진 형태 $y=Ax+b+\epsilon$
+* 이때 노이즈 $\epsilon$은 평균 0, 공분산 $L^{-1}$인 가우시안 분포 $\epsilon \sim \mathcal{N}(0, L^{-1})$
+* $p(y) = \mathcal{N}(y|A\mu + b, L^{-1}+A\Lambda^{-1}A^{T})$
+
+유도(공분산의 성질을 이용하여 y의 공분산을 계산)
+
+```math
+\begin{align}
+Cov(X+c)&=Cov(X) (상수 벡터를 더해도 공분산은 변하지 않음) \\\\
+Cov(X+Y)&=Cov(X)+Cov(Y) (X와 Y가 독립일 경우) \\\\
+Cov(AX)&=A⋅Cov(X)⋅A^T \\\\
+\end{align}
+```
+위 성질 사용
+```math
+\begin{align}
+Cov(y)&=Cov(Ax+b+ϵ) \\\\
+Cov(y)&=Cov(Ax+ϵ)  (상수 b는 공분산에 영향을 주지 않음) \\\\
+Cov(y)&=Cov(Ax)+Cov(ϵ)  \\\\
+Cov(y)&=A⋅Cov(x)⋅A^T  +Cov(ϵ) \\\\
+Cov(x)&=Λ^{−1}(x의 공분산) \\\\
+Cov(ϵ)&=L^{-1} (노이즈의 공분산) \\\\
+Cov(y)&=AΛ^{−1}A^{T}+L^{−1} \\\\
+\end{align}
+```
+ 
+## 결론 종합 ✍️
+위에서 구한 평균과 공분산을 종합하면, y의 주변 확률 분포 $p(y)$는 다음과 같은 가우시안 분포를 따르게 됩니다.
+```math
+\begin{align}
+p(y)=\mathcal{N}(y∣\underbrace{Aμ+b}_{평균}, \underbrace{L^{−1}+AΛ^{−1} A^{T})_ {공분산}
+\end{align}
+```
+
+* 
 * $p(y) \leftarrow q_\sigma(x_{t-1}|x_0)$
 * $p(x) = \mathcal{N}(x|\mu, \Lambda^{-1})$
 * $p(x) \leftarrow q_\sigma(x_t|x_0) = \mathcal{N}(\sqrt{\alpha_t}x_0, (1-\alpha_t)I)$
@@ -117,6 +153,12 @@ DDPM의 순방향 확산 과정과 역방향 생성 과정에 대한 수학적 �
 * $p(y|x) \leftarrow q_\sigma(x_{t-1}|x_t,x_0) = \mathcal{N} \left(\sqrt{a_{t-1}}x_0  + \sqrt{1-\alpha_{t-1}-\sigma^2_t} \cdot \frac{x_t - \sqrt{\alpha_t}x_0}{\sqrt{1-\alpha_t}} , \sigma_t^2 I \right)$
 * $q_\sigma(x_{t-1}|x_0) = \mathcal{N}(y|A\mu + b, L^{-1}+A\Lambda^{-1}A^T)$
 
+
+* $\mu = \sqrt{\alpha_t}x_0$
+* $\Lambda = (1-\alpha_t)I$
+* $A = \sqrt{1-\alpha_{t-1}-\sigma^2_t} \cdot \frac{1}{\sqrt{1-\alpha_t}}$
+* $b = \sqrt{\alpha_{t-1}}x_0 - \sqrt{1-alpha_{t-1}-\sigma_t^2} \ cdot \frac{\sqrt{\alpha_t}x_0}{\sqrt{1-\alpha_t}}$
+* $L^{-1} = \sigma^2_tI$
 
 #### Reverse Process
 
