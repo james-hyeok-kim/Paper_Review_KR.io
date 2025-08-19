@@ -335,6 +335,14 @@ We consider two types of selection procedure for τ given the desired dim($τ$) 
 
 * Local optimal 에 모일수도 있다.
 
+```math
+\begin{align}
+s_\theta(x) \approx \nabla_xlog(p(x)) \\\\
+\frac{1}{2}E_{x\sim p_data} \parallel \nabla_x log(p_{data}(x)) - s_\tehta(x) \parallel^2_2 \\\\
+Minimizing Euclidean Distance between Data Score x and Estimated Score x \\\\
+
+\end{align}
+```
 
 ### Appendix
 $\parallel ⋅ \parallel_2$ : L2 노름 (Euclidean Norm)
