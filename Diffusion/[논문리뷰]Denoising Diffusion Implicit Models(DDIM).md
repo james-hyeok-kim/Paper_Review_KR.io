@@ -225,7 +225,40 @@ x_{t-1} &= \frac{x_t}{\sqrt{\alpha_t}} - \frac{1-\alpha_t}{(\sqrt{1-\alpha_t})\s
 \end{align}
 ```
 
+#### Impact of Variance in DDIM
+DDIM에서 정의하는 Variance (12) 
+$\sigma_t^2 = \frac{(1-\alpha_t)(1-\bar{\alpha}_{t-1})}{1-\bar{\alpha}_t}$
 
+```math
+\begin{align}
+& DDIM x_{t-1} 일반화 \\\\
+x_{t-1} &= \sqrt{\alpha_{t-1}} \left( \underbrace{\frac{x_t-\sqrt{1-\alpha_t}\epsilon_\theta^t(x_t)}{\sqrt{\alpha_t}}}_{predicted \; x_0} \right) + \underbrace{\sqrt{1-\alpha_{t-1}-\sigma^2_t} \cdot \epsilon_\theta^{(t)}(x_t)}_{direction pointing \; to \; x_t} + \underbrace{\sigma_t\epsilon_t}_{random \; noise} \;\; (12) \\\\
+&DDPM 정의 \\\\
+\tilde{\beta}_t &= \frac{1-\alpha_{t-1}}{1-\alpha_t}\beta_t = \frac{1-\alpha_{t-1}}{1-\alpha_t} \left(1-\frac{\alpha_t}{\alpha_{t-1}} \right) \\\\
+& 분산(Variance) = \sigma_t^2 \\\\
+& DDPM = DDIM, \sigma_t^2 = \tilde{\beta_t} \\\\
+\bar{\alpha_t} &= \alpha_t \cdot \bar{\alpha_{t-1}} \\\\
+\sigma_t^2 &= \frac{1-\bar{\alpha_{t-1}}}{1-\bar{\alpha_t}} \left( 1- \frac{\bar{\alpha_t}}{\bar{\alpha_{t-1}}} \right) \\\\
+&=\frac{1-\bar{\alpha_{t-1}}}{1-\bar{\alpha_t}} \left( 1- \frac{\alpha_t \cdot \bar{\alpha_{t-1}}}{\bar{\alpha_{t-1}}} \right)\\\\
+&=\frac{1-\bar{\alpha_{t-1}}}{1-\bar{\alpha_t}} \left( 1- \alpha_t \right)\\\\
+&=\frac{(1-\alpha_t)(1-\bar{\alpha_{t-1}})}{1-\bar{\alpha_t}} \\\\
+\end{align}
+```
+
+* (12)식 정리
+
+```math
+\begin{align}
+\sigma_t^2 &= \frac{(1-\alpha_t)(1-\bar{\alpha_{t-1}})}{1-\bar{\alpha_t}} \\\\
+x_{t-1} &= \sqrt{\alpha_{t-1}} \left( \frac{x_t-\sqrt{1-\alpha_t}\epsilon_\theta^t(x_t)}{\sqrt{\alpha_t}} \right) + \sqrt{1-\alpha_{t-1}-\sigma^2_t} \cdot \epsilon_\theta^{(t)}(x_t) + \sigma_t\epsilon_t \;\; (12) \\\\
+&= \frac{x_t}{\sqrt{\alpha_t}}-\epsilon_\theta^{(t)} \left( \sqrt{\frac{1-\bar{\alpha_t}}{\alpha_t}} - \sqrt{(1-\bar{\alpha}_{t-1}) - \frac{(1-\alpha_t)(1-\bar{\alpha}_{t-1})}{1-\bar{\alpha}_t}} \right) +\sigma_t\epsilon_t \\\\
+&= \frac{x_t}{\sqrt{\alpha_t}}-\epsilon_\theta^{(t)} \left( \sqrt{\frac{1-\bar{\alpha_t}}{\alpha_t}} - \frac{\sqrt{\alpha_t}(1-\bar{\alpha}_{t-1})}{\sqrt{1-\bar{\alpha}_t}} \right) +\sigma_t\epsilon_t \\\\
+&= \frac{x_t}{\sqrt{\alpha_t}}-\epsilon_\theta^{(t)} \left( \frac{1-\bar{\alpha}_t-\alpha_t+\bar{\alpha}_t}{\sqrt{1-\bar{\alpha}_t}\sqrt{\alpha_t}} \right) + \sigma_t\epsilon_t \\\\
+&= \frac{x_t}{\sqrt{\alpha_t}}-\epsilon_\theta^{(t)} \left( \frac{1-\alpha_t}{\sqrt{1-\bar{\alpha}_t}\sqrt{\alpha_t}} \right) + \sigma_t\epsilon_t \\\\
+& DDPM \; Sampling \; Step \\\\
+x_{t-1} &= \frac{x_t}{\sqrt{\alpha_t}} - \frac{(1-\alpha_t)}{(\sqrt{1-\bar{\alpha}_t})\sqrt{\alpha_t}}\epsilon_\theta^{(t)}(x_t)+\sigma_t\epsilon_t \\\\
+\end{align}
+```
 
 #### Reverse Process
 
