@@ -372,10 +372,10 @@ L(\theta) &= \frac{1}{2}E_{x\sim p_data} \parallel \nabla_x log(p_{data}(x)) - s
 & \text{2 항은 계산 불가의 } \nabla_x \log p_{data} \text{ 를 포함, 우리가 부분적분할 대상} \\\\
 & \text{3 항 } s_\theta \text{ 에 대한 항, 계산 가능} \\\\
 & \text{2 항} \\\\
-& \int p_{data}(x)(\nabla_x log p_{data}(x))^T s_\theta(x)dx \\\\
+& - \int p_{data}(x)(\nabla_x log p_{data}(x))^T s_\theta(x)dx \\\\
 \nabla_x log(f(x)) &= (\nabla_x f(x)) / f(x) \text{미분 트릭 적용} \\\\
-& \int p_{data}(x) \left(\frac{\nabla_x log p_{data}(x)}{p_{data}(x)} \right)^T s_\theta(x)dx \\\\
-& \int (\nabla_x p_{data}(x))^Ts_\theta(x)dx \\\\
+& - \int p_{data}(x) \left(\frac{\nabla_x log p_{data}(x)}{p_{data}(x)} \right)^T s_\theta(x)dx \\\\
+& - \int (\nabla_x p_{data}(x))^Ts_\theta(x)dx \\\\
 & \text{다차원 부분적분} \int (\nabla f)^T g dx = - \int f (\nabla \cdot g) dx \\\\
 & + \int p_{data}(x)tr(\nabla_x s_\theta (x))dx \\\\
 L(\theta) &= (상수) + \int  p_{data}(x)tr(\nabla_x s_\theta (x))dx  + \frac{1}{2}\int p_{data} \parallel s_\theta(x) \parallel^2dx \\\\
