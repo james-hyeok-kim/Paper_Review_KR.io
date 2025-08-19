@@ -386,6 +386,11 @@ L(\theta) &= (상수) + \int  p_{data}(x)tr(\nabla_x s_\theta (x))dx  + \frac{1}
 #### $tr(\nabla_x s_\theta(x))$ 계산이 computatively expensive
 
 
+결론적으로, 3번째 줄에서 4번째 줄로의 변환은 다음과 같은 최적화 과정입니다.
+
+문제: 모델이 학습할 목표(∇log q_σ(x̃))가 여전히 계산 불가능하다.
+
+해결: 수학적으로 동일한 해를 주는, 계산 가능한 새로운 목표(∇log q_σ(x̃|x))로 대체한다.
 
 
 ### Appendix
