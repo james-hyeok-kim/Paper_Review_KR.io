@@ -221,7 +221,7 @@ x_0 = \frac{x_t - \sqrt{1-\alpha_t}\epsilon}{\sqrt{\alpha_t}} \\\\
 q_\sigma(x_{t-1}|x_t,x_0) &= \mathcal{N} \left(\sqrt{\alpha_{t-1}}\frac{x_t-\sqrt{1-\alpha_t}\epsilon}{\sqrt{\alpha_t}} + \sqrt{1-\alpha_{t-1}-\sigma^2_t}\epsilon,\sigma_t^2I \right) \\\\
 p_\theta(x_{t-1}|x_t) &= \mathcal{N} \left(\sqrt{\alpha_{t-1}}\frac{x_t-\sqrt{1-\alpha_t}\epsilon_\theta}{\sqrt{\alpha_t}} + \sqrt{1-\alpha_{t-1}-\sigma^2_t}\epsilon_\theta,\sigma_t^2I \right) \\\\
 x_{t-1} &= \sqrt{\alpha_{t-1}} \left(\frac{x_t-\sqrt{1-\alpha_t}\epsilon_\theta^{(t)}(x_t)}{\sqrt{\alpha_t}} \right) + \sqrt{1-\alpha_{t-1}-\sigma_t^2}\cdot \epsilon_\theta^{(t)}(x_t)+\sigma_t\epsilon_t \;\; (Reparameterization - DDIM) \\\\
-x_{t-1} &= \frac{x_t}{\sqrt{\alpha_t}} - \frac{1-\alpha_t}{(\sqrt{1-\alpha_t})\sqrt{\alpha_t}}\epsilon_\theta^{(t)}(x_t) + \sigma_t\epsilon_t \;\; DDPM Sampling step (Comparison) \\\\
+x_{t-1} &= \frac{x_t}{\sqrt{\alpha_t}} - \frac{1-\alpha_t}{(\sqrt{1-\alpha_t})\sqrt{\alpha_t}}\epsilon_\theta^{(t)}(x_t) + \sigma_t\epsilon_t \;\; DDPM \; Sampling \; step \; (Comparison) \\\\
 \end{align}
 ```
 
