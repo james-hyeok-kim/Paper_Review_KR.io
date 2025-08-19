@@ -278,6 +278,9 @@ x_{t-1} &= \frac{x_t}{\sqrt{\alpha_t}} - \frac{(1-\alpha_t)}{(\sqrt{1-\bar{\alph
 \end{align}
 ```
 
+* DDPM = DDIM $sigma_t^2$
+
+$$\therefore q_\sigma(x_t|x_{t-1},x_0) = q_\sigma(x_t|x_{t-1})$$
 
 #### Reverse Process
 
