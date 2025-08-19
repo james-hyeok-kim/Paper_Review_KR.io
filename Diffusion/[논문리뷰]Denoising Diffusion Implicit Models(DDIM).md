@@ -296,9 +296,18 @@ q_{\sigma,\tau} (x_{1:T}|x_0) &= q_{\sigma,\tau}(x_{\tau_S}|x_0) \prod^S_{i=1}q_
 q_{\sigma,\tau}(x_t|x_0) &= \mathcal{N}(\sqrt{\bar{\alpha}_t}x_0,(1-\bar{\alpha}_t)I) \quad \forall t \in \bar{\tau} \cup \{T\} \\\\
 q_{\sigma,\tau}(x_{\tau_i}|x_0) &= \mathcal{N}(\sqrt{\alpha_{\tau_i}}x_0, (1-\alpha_{\tau_i})I) \quad \forall i \in [S] \;\;(54) \\\\
 q_{\sigma,\tau}(x_{\tau_{i-1}}|x_{\tau_i}, x_0) &= \mathcal{N}\left(\sqrt{\alpha_{\tau_{i-1}}}x_0 + \sqrt{1-\alpha_{\tau_{i-1}}-\sigma_{\tau_i}^2} \cdot \frac{x_{\tau_i} - \sqrt{\alpha_{\tau_i}} x_0}{\sqrt{1-\alpha_{\tau_i}}}, \sigma_{\tau_i}^2 I\right) \quad \forall i \in [S] \;\; \text{(7) DDIM} \\\\
-p_{\theta}(x_{0:T}) &:= \underbrace{p_{\theta}(x_T)\prod^S_{i=1}p^{(\tau_i)}_{\theta}(x_{\tau_{i-1}}|x_{\tau_i})}_{\text{"use to produce samples"}} \times \underbrace{\prod_{t \in \bar{\tau}}p^{(t)}_{\theta}(x_0|x_t)}_{\text{"in variational objective"}} \;\; (55)
 \end{align}
 ```
+
+```math
+\begin{align}
+& p_{\theta}(x_{0:T}) \text{"는 가속 샘플링을 위한 생성과정(Generative Process)를 수학적으로 정의"} \\\\
+p_{\theta}(x_{0:T}) &:= \underbrace{p_{\theta}(x_T)\prod^S_{i=1}p^{(\tau_i)}_{\theta}(x_{\tau_{i-1}}|x_{\tau_i})}_{\text{"use to produce samples"}} \times \underbrace{\prod_{t \in \bar{\tau}}p^{(t)}_{\theta}(x_0|x_t)}_{\text{"in variational objective"}} \;\; (55) \\\\
+&= p_\theta(x_T) \text{"사전 분포 (Prior Distribution)"} x \text{"Sampling Path"} x \text{"변분 목적 함수 (Variational Objective Term)"} \\\\
+\end{align}
+```
+
+
 
 #### Reverse Process
 
