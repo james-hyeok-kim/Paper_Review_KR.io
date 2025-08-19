@@ -338,11 +338,59 @@ We consider two types of selection procedure for τ given the desired dim($τ$) 
 ```math
 \begin{align}
 s_\theta(x) \approx \nabla_xlog(p(x)) \\\\
-\frac{1}{2}E_{x\sim p_data} \parallel \nabla_x log(p_{data}(x)) - s_\tehta(x) \parallel^2_2 \\\\
-Minimizing Euclidean Distance between Data Score x and Estimated Score x \\\\
-
+\frac{1}{2}E_{x\sim p_data} \parallel \nabla_x log(p_{data}(x)) - s_\theta(x) \parallel^2_2 \\\\
+\text{Minimizing Euclidean Distance between Data Score x and Estimated Score x} \\\\
+E_{x\sim p_data} \parallel \frac{1}{2} \parallel s_\theta(x) \parallel^2_2 + tr(\nabla_xs_\theta(x)) \\\\
+tr = Trace \text{대각합} 
 \end{align}
 ```
+
+* 대각합으로 변환한 이유
+문제의 근원: p_data(x)의 정체를 모른다는 것
+
+가장 근본적인 문제는 우리가 학습하려는 데이터의 실제 확률 분포, 즉 p_data(x)의 정확한 함수식을 모른다는 점입니다.
+
+우리가 가진 것은 p_data(x)라는 함수 그 자체가 아니라, 그 분포에서 추출된 샘플(sample)들의 집합(예: 이미지 데이터셋)뿐입니다.
+
+함수식을 모르기 때문에, 당연히 log(p_data(x))를 계산할 수 없고, 그것을 미분한 ∇ₓlog(p_data(x)) (스코어) 역시 절대 직접 계산할 수 없습니다.
+
+따라서, 원래의 목적 함수 $||∇ₓlog(p_data(x)) - s_θ(x)||_2²$는 이론적으로는 완벽하지만 실제로는 **계산이 불가능한 '그림의 떡'**인 셈입니다.
+
+수학적 돌파구: '부분적분'을 이용한 미분 옮기기
+
+부분적분 공식은 다음과 같습니다.
+
+$$\int u(x)v′(x)dx=u(x)v(x)−\int u′(x)v(x)dx$$
+
+$$E_{x∼p_{data}}[복잡한 항]≈ \int p_{data}(x)⋅(복잡한 항)dx$$
+
+$p_{data}(x)$를 u역할로 봅니다. 모델과 관련된 나머지 부분을 v' 역할로 봅니다.
+
+
+```math
+\begin{align}
+L(\theta) &= \frac{1}{2}E_{x\sim p_data} \parallel \nabla_x log(p_{data}(x)) - s_\theta(x) \parallel^2_2 \\\\
+& \text{적분형태} \\\\
+&= \frac{1}{2} \int p_{data}(x) \parallel \nabla_x log(p_{data}(x)) - s_\theta(x) \parallel^2_2dx \\\\
+& \text{제곱 항 전개} \\\\
+&= \frac{1}{2} \int p_{data}(x) \text{[} \parallel \nabla_x log(p_{data}(x)) \parallel^2 -2(\nabla_xlogp_{data})^Ts_\theta + \parallel s_\theta(x) \parallel^2 \text{]}dx \\\\
+&= \underbrace{\frac{1}{2} \int p_{data}(x) \parallel \nabla_x log(p_{data}(x)) \parallel^2 dx}_{\text{1 항}} - \underbrace{\int p_{data}(\nabla_xlogp_{data})^Ts_\theta dx}_{\text{2 항}} + \underbrace{\frac{1}{2}\int p_{data} \parallel s_\theta(x) \parallel^2dx}_{\text{3 항}} \\\\
+& \text{1 항} \theta \text{ 와 무관하므로 상수} \\\\
+& \text{2 항은 계산 불가의 } \nabla_x \log p_{data} \text{ 를 포함, 우리가 부분적분할 대상} \\\\
+& \text{3 항 } s_\theta \text{ 에 대한 항, 계산 가능} \\\\
+& \text{2 항} \\\\
+& \int p_{data}(x)(\nabla_x log p_{data}(x))^T s_\theta(x)dx \\\\
+\nabla_x log(f(x)) &= (\nabla_x f(x)) / f(x) \text{미분 트릭 적용} \\\\
+& \int p_{data}(x) \left(\frac{\nabla_x log p_{data}(x)}{p_{data}(x)} \right)^T s_\theta(x)dx \\\\
+& \int (\nabla_x p_{data}(x))^Ts_\theta(x)dx \\\\
+& \text{다차원 부분적분} \int (\nabla f)^T g dx = - \int f (\nabla \cdot g) dx \\\\
+& + \int p_{data}(x)tr(\nabla_x s_\theta (x))dx \\\\
+L(\theta) &= (상수) + \int  p_{data}(x)tr(\nabla_x s_\theta (x))dx  + \frac{1}{2}\int p_{data} \parallel s_\theta(x) \parallel^2dx \\\\
+&= E_{x\sim p_{data}} \left[tr(\nabla_x s_\theta(x)) + \frac{1}{2}\parallel s_\theta (x) \parallel^2 \right] + 상수 \\\\
+\end{align}
+```
+
+
 
 ### Appendix
 $\parallel ⋅ \parallel_2$ : L2 노름 (Euclidean Norm)
