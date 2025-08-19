@@ -383,6 +383,9 @@ L(\theta) &= (상수) + \int  p_{data}(x)tr(\nabla_x s_\theta (x))dx  + \frac{1}
 \end{align}
 ```
 
+#### $tr(\nabla_x s_\theta(x))$ 계산이 computatively expensive
+
+
 
 
 ### Appendix
