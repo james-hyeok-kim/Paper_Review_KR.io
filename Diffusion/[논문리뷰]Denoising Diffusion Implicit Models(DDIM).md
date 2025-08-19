@@ -284,6 +284,28 @@ $$\therefore q_\sigma(x_t|x_{t-1},x_0) = q_\sigma(x_t|x_{t-1})$$
 
 DDPM Posterior와 같은 분산으로 Non-Markovian process(DDIM)이 Markovian forward prcess(DDPM)로 일반화, DDPM과 같아진다
 
+#### Accelerated Sampling in DDIM
+```math
+\begin{align}
+q_\sigma(x_{t-1}|x_0) &= \mathcal{N}(\sqrt{α_{t−1}}x_0 +  \sqrt{1−α_{t−1}−σ_t^2} \cdot \frac{x_t− \sqrt{α_t} x_0}{\sqrt{1−α_t}},σ_{*t}^2I) \;\; (7) DDIM \\\\
+q_\sigma(x_{t-1}|x_0) &= \mathcal{N}(\sqrt{\alpha_{t-1}}x_0, (1-\alpha_{t-1}I) \;\; DDPM \\\\
+q_{σ,τ} (x_{1:T}|x_0) &= q_{σ,τ}(x_{τ_S}|x_0) \prod^S_{i=1}q_{σ,τ} (x_{τ_{i−1}}|x_τ_i, x_0) \prod_{t∈\bar{τ}}q_{σ,τ} (x_t|x_0) \;\; (52) \\\\
+& \text{τ is a sub-sequence of [1, . . . , T] of length S with τS = T}, \{x_\tau_1, ..., x_\tau_s\} \\\\
+\end{align}
+```
+```math
+\begin{align}
+% 유니코드 문자(α, σ, −)를 LaTeX 명령어(\alpha, \sigma, -)로 수정
+q_{\sigma}(x_{t-1}|x_0) &= \mathcal{N}(\sqrt{\alpha_{t-1}}x_0 + \sqrt{1-\alpha_{t-1}-\sigma_t^2} \cdot \frac{x_t- \sqrt{\alpha_t} x_0}{\sqrt{1-\alpha_t}}, \sigma_{t}^2 I) \;\; \text{(7) DDIM} \\\\
+% 닫는 괄호 추가 및 텍스트 처리
+q(x_{t-1}|x_0) &= \mathcal{N}(\sqrt{\alpha_{t-1}}x_0, (1-\alpha_{t-1})I) \;\; \text{DDPM} \\\\
+% 유니코드 문자(σ, τ, −, ∈) 수정 및 잘못된 아래첨자(x_τ_i) 수정
+q_{\sigma,\tau} (x_{1:T}|x_0) &= q_{\sigma,\tau}(x_{\tau_S}|x_0) \prod^S_{i=1}q_{\sigma,\tau} (x_{\tau_{i-1}}|x_{\tau_i}, x_0) \prod_{t\in\bar{\tau}}q_{\sigma,\tau} (x_t|x_0) \;\; \text{(52)} \\\\
+% 유니코드 문자 수정 및 수학/텍스트 서식 정리
+& \text{\tau is a sub-sequence of } [1, \dots, T] \text{ of length S with } \tau_S = T, \{x_{\tau_1}, \dots, x_{\tau_s}\}
+\end{align}
+```
+
 #### Reverse Process
 
 예측된 $x_0 (Eq. 9)$
