@@ -278,9 +278,11 @@ x_{t-1} &= \frac{x_t}{\sqrt{\alpha_t}} - \frac{(1-\alpha_t)}{(\sqrt{1-\bar{\alph
 \end{align}
 ```
 
-* DDPM = DDIM $\sigma_t^2$
+*  $\sigma_t^2$, DDPM = DDIM
 
 $$\therefore q_\sigma(x_t|x_{t-1},x_0) = q_\sigma(x_t|x_{t-1})$$
+
+DDPM Posterior와 같은 분산으로 Non-Markovian process(DDIM)이 Markovian forward prcess(DDPM)로 일반화, DDPM과 같아진다
 
 #### Reverse Process
 
