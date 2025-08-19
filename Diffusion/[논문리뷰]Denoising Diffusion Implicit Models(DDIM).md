@@ -313,15 +313,39 @@ We consider two types of selection procedure for τ given the desired dim($τ$) 
 * Quadratic: we select the timesteps such that $τ_i$ = $\[ci^2\]$ for some c.
 
 
-#### Reverse Process
+### Result
+* Lower is Better
+<img width="1103" height="387" alt="image" src="https://github.com/user-attachments/assets/d26245a4-fc48-4ea5-8407-b63c3bf30d5e" />
 
-예측된 $x_0 (Eq. 9)$
 
-$$f_θ^{(t)}(x_t):=(x_t-\sqrt{1−α_t} \cdot ϵ_θ^{(t)}(x_t))/\sqrt{α_t}$$
+### Diffusion Models as Score Based MOdels vs Stochastical Differential Equation(SDE)
+
+#### Score
+* Given Probability p(x)가 주어졌을때, Score는 $\nabla_xlog(p(x))$ (Gradient and Log density function)
+
+* 이 Gradient Log Density function은 Direction을 나타낸다 (Noise $\rightarrow$ Image)
+
+<img width="500" height="465" alt="image" src="https://github.com/user-attachments/assets/d3c5cece-1530-4868-ba96-5db420d7edae" />
+
+<img width="934" height="545" alt="image" src="https://github.com/user-attachments/assets/6514dcfb-364a-42a2-a5a1-ae3bcd3f9deb" />
+
+* Gradient 방향으로 움직여주면, High Likelyhood로 모인다.
+
+<img width="907" height="543" alt="image" src="https://github.com/user-attachments/assets/9e313d2b-b9b8-4812-a1c9-3c4cdc976541" />
+
+* Local optimal 에 모일수도 있다.
+
+
+### Appendix
+$\parallel ⋅ \parallel_2$ : L2 노름 (Euclidean Norm)
+이 기호는 **L2 노름(norm)**을 나타내며, 벡터의 '크기' 또는 '길이'를 측정하는 가장 일반적인 방법입니다. 우리가 보통 생각하는 두 점 사이의 직선 거리를 계산하는 것과 같습니다.
+
+예를 들어, 2차원 벡터 v = (x, y)가 있다면, L2 노름은 다음과 같이 계산됩니다.
+
+$$\parallel v \parallel_2 = \sqrt{x^2+y^2}$$
+
+$$\parallel v \parallel_2^2 = x^2 + y^2$$
+ 
+
 ​
-이는 $x_t=\sqrt{α_t}x_0+\sqrt{1−α_t}ϵ$ 식을 $x_0$ 에 대해 정리한 것
 
-모델이 예측한 노이즈 $\epsilon_\theta^{(t)}(x_t)$를 실제 노이즈 $ϵ_t$대신 사용
-
-
-https://www.youtube.com/watch?v=n2P6EMbN0pc
