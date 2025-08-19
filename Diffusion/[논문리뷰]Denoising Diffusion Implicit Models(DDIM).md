@@ -307,6 +307,10 @@ p_{\theta}(x_{0:T}) &:= \underbrace{p_{\theta}(x_T)\prod^S_{i=1}p^{(\tau_i)}_{\t
 \end{align}
 ```
 
+We consider two types of selection procedure for τ given the desired dim($τ$) < T:
+
+* Linear: we select the timesteps such that $τ_i$ = $\[ci\]$ for some c;
+* Quadratic: we select the timesteps such that $τ_i$ = $\[ci^2\]$ for some c.
 
 
 #### Reverse Process
