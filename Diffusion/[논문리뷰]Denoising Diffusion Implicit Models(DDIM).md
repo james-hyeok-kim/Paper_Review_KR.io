@@ -45,7 +45,7 @@ Published as a conference paper at ICLR 2021
 
 2. 샘플 일관성 (Sample Consistency):
 
-* DDIM의 생성 과정은 결정론적(deterministic)이므로, 동일한 초기 잠재 변수(x_T)에서 이미지의 고수준 특징(high-level features)이 유사하게 유지됩니다.
+* DDIM의 생성 과정은 결정론적(deterministic)이므로, 동일한 초기 잠재 변수($x_T$)에서 이미지의 고수준 특징(high-level features)이 유사하게 유지됩니다.
 
 3. 의미 있는 이미지 보간 (Semantically Meaningful Image Interpolation):
 
