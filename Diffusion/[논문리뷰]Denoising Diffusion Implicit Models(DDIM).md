@@ -225,6 +225,9 @@ x_{t-1} &= \frac{x_t}{\sqrt{\alpha_t}} - \frac{1-\alpha_t}{(\sqrt{1-\alpha_t})\s
 \end{align}
 ```
 
+* $\sigma_t = \etha\sqrt{\frac{(1-\alpha_{t-1})}{(1-\alpha_t)}(1-\frac{\alpha_{t-1}}{\alpha_t})}$
+* $\etha = 1 \rightarrow DDPM, \etha = 0 \rightarrow DDIM$
+
 #### Impact of Variance in DDIM
 DDIM에서 정의하는 Variance (12) 
 $\sigma_t^2 = \frac{(1-\alpha_t)(1-\bar{\alpha}_{t-1})}{1-\bar{\alpha}_t}$
