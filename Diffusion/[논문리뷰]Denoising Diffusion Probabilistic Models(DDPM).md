@@ -22,6 +22,14 @@
 
 #### GAN은 mode collapse 문제가 있었고, VAE는 샘플 품질이 낮았음.
 
+### Deep Unsupervised Learning using Nonequilibrium Thermodynamics 논문과의 차이점
+
+* 이전 단계의 이미지를 직접 예측하는 대신, 각 단계에서 추가되었던 노이즈(ϵ) 자체를 예측하도록 목표를 바꾼 것
+
+* 손실 함수를 수학적으로 재구성하고 단순화하여, 훨씬 쉽고 직관적이며, 실험적으로도 더 나은 결과 도출
+
+* GAN과 필적하거나 능가하는 고품질의 이미지를 생성
+
 
 ## 초록
 Implementation : [Git](https://github.com/hojonathanho/diffusion)
