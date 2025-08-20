@@ -428,6 +428,7 @@ $$∇_\tilde{x} log q_σ(\tilde{x})=E_{x∼q(x∣\tilde{x})}[∇_\tilde{x} log q
 
 
 ### Appendix
+#### L2 Norm
 $\parallel ⋅ \parallel_2$ : L2 노름 (Euclidean Norm)
 이 기호는 **L2 노름(norm)**을 나타내며, 벡터의 '크기' 또는 '길이'를 측정하는 가장 일반적인 방법입니다. 우리가 보통 생각하는 두 점 사이의 직선 거리를 계산하는 것과 같습니다.
 
@@ -439,4 +440,31 @@ $$\parallel v \parallel_2^2 = x^2 + y^2$$
  
 
 ​
+#### $∇_{\tilde{x}}log(q_σ(\tilde{x}|x)) \rightarrow -(\tilde{x}-x)/σ²$
 
+* 확률밀도 함수
+```math
+\begin{align}
+q_{\sigma}(\tilde{x}|x) &= \frac{1}{\sqrt{(2\pi)^D |\sigma^2 I|}} \exp\left(-\frac{1}{2}(\tilde{x}-x)^T(\sigma^2 I)^{-1}(\tilde{x}-x)\right) \\\\
+\end{align}
+```
+* Log
+  * $(σ²I)⁻¹$는 역행렬이므로 $(1/σ²)I$가 됩니다.
+  * $(x̃-x)ᵀ I (x̃-x)$는 벡터 $(x̃-x)$의 내적(dot product)이므로, 제곱 L2 노름 ||x̃-x||²와 같습니다.
+```math
+\begin{align}
+\log q_{\sigma}(\tilde{x}|x) &= \text{상수} - \frac{1}{2}(\tilde{x}-x)^T(\sigma^2 I)^{-1}(\tilde{x}-x) \\\\
+&= \text{상수} - \frac{1}{2\sigma^2} \parallel \tilde{x} - x \parallel_2^2 \\\\
+\end{align}
+```
+* $∇_{x̃}$ 미분 계산
+  * ∑ 안쪽의 $(x̃ᵢ - xᵢ)²$ 항을 $x̃ᵢ$에 대해 편미분하면, 체인룰(chain rule)에 의해 $2(x̃ᵢ - xᵢ)$가 됩니다.
+  * x̃와 x는 단순히 하나의 숫자가 아니라, 여러 개의 숫자로 이루어진 벡터 $\rightarrow \\ \sum$
+```math
+\begin{align}
+\nabla_{\tilde{x}} \log q_{\sigma}(\tilde{x}|x) &= \nabla_{\tilde{x}} \left[ \text{상수} - \frac{1}{2\sigma^2} \sum_i (\tilde{x}_i - x_i)^2 \right] \\\\
+&= - \frac{1}{2\sigma^2} \cdot \left[ 2(\tilde{x}_1 - x_1), 2(\tilde{x}_2 - x_2), \dots \right] \\\\
+&= - \frac{1}{\sigma^2} \left[ \tilde{x}_1 - x_1, \tilde{x}_2 - x_2, \dots \right] \\\\
+&= - \frac{\tilde{x} - x}{\sigma^2}
+\end{align}
+```
