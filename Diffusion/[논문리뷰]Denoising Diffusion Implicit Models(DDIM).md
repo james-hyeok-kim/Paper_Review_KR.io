@@ -340,7 +340,7 @@ We consider two types of selection procedure for τ given the desired dim($τ$) 
 s_\theta(x) \approx \nabla_xlog(p(x)) \\\\
 \frac{1}{2}E_{x\sim p_data} \parallel \nabla_x log(p_{data}(x)) - s_\theta(x) \parallel^2_2 \\\\
 \text{Minimizing Euclidean Distance between Data Score x and Estimated Score x} \\\\
-E_{x\sim p_data} \parallel \frac{1}{2} \parallel s_\theta(x) \parallel^2_2 + tr(\nabla_xs_\theta(x)) \\\\
+E_{x\sim p_data} \left[ \frac{1}{2} \parallel s_\theta(x) \parallel^2_2 + tr(\nabla_xs_\theta(x)) \right] \\\\
 tr = Trace \text{대각합} 
 \end{align}
 ```
@@ -348,8 +348,8 @@ tr = Trace \text{대각합}
 * 대각합으로 변환한 이유
 
   * 문제의 근원: $p_data(x)$의 정체를 모른다는 것
-  * 우리가 학습하려는 데이터의 실제 확률 분포$p_data(x)$의 정확한 함수식을 모른다는 점
-  * 우리가 가진 것은 $p_data(x)$라는 함수 자체가 아니라, 그 분포에서 추출된 샘플(sample)들의 집합 뿐
+  * 우리가 학습하려는 데이터의 실제 확률 분포 $p_data(x)$ 의 정확한 함수식을 모른다는 점
+  * 우리가 가진 것은 $p_data(x)$ 라는 함수 자체가 아니라, 그 분포에서 추출된 샘플(sample)들의 집합 뿐
   * 함수식을 모르기 때문에, 당연히 $log(p_data(x))$를 계산할 수 없고, 그것을 미분한 $∇ₓlog(p_data(x))$ (스코어) 역시 절대 직접 계산할 수 없습니다.
   * 따라서, 원래의 목적 함수 $||∇ₓlog(p_data(x)) - s_θ(x)||_2²$는 이론적으로는 완벽하지만 실제로는 **계산이 불가능한 '그림의 떡'**인 셈입니다.
 
@@ -383,7 +383,20 @@ L(\theta) &= (상수) + \int  p_{data}(x)tr(\nabla_x s_\theta (x))dx  + \frac{1}
 \end{align}
 ```
 
+
 #### $tr(\nabla_x s_\theta(x))$ 계산이 computatively expensive
+
+```math
+\begin{align}
+L(\theta) &= E_{x\sim p_{data}} \left[\frac{1}{2}\parallel s_\theta (x) \parallel_2^2  +  \text{tr}(\nabla_x s_\theta(x)) \right]\\\\
+& q_\sigma(\tilde{x}) \rightarrow \text{Noise가 추가된 x의 q 확률 밀도함수} \\\\
+&q_\sigma(\tilde{x}) = \int q_\sigma(\tilde{x}|x) p_{data}(x) dx \\\\
+&= \frac{1}{2}E_{\tilde{x} \sim q_{\sigma}} \left[ \parallel \nabla_{\tilde{x}}\log q_\sigma(\tilde{x}) - s_\theta(\tilde{x}) \parallel_2^2 \right] \\\\
+\end{align}
+```
+
+두함수의 최소값(최적값)은 같다
+
 
 
 결론적으로, 3번째 줄에서 4번째 줄로의 변환은 다음과 같은 최적화 과정입니다.
