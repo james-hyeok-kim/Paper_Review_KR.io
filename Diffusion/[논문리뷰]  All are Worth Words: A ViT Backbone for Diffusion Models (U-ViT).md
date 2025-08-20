@@ -1,3 +1,9 @@
+---
+layout: post
+title: "[논문리뷰]  All are Worth Words: A ViT Backbone for Diffusion Models (U-ViT)"
+image:
+---
+
 #  All are Worth Words: A ViT Backbone for Diffusion Models (U-ViT) - 2
 https://kimjy99.github.io/%EB%85%BC%EB%AC%B8%EB%A6%AC%EB%B7%B0/u-vit/
 
