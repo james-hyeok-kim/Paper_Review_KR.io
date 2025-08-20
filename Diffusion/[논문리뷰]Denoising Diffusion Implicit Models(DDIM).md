@@ -318,9 +318,9 @@ We consider two types of selection procedure for τ given the desired dim($τ$) 
 <img width="1103" height="387" alt="image" src="https://github.com/user-attachments/assets/d26245a4-fc48-4ea5-8407-b63c3bf30d5e" />
 
 
-### Diffusion Models as Score Based MOdels vs Stochastical Differential Equation(SDE)
+## Diffusion Models as Score Based Models vs Stochastical Differential Equation(SDE)
 
-#### Score
+### Score Based Model
 * Given Probability p(x)가 주어졌을때, Score는 $\nabla_xlog(p(x))$ (Gradient and Log density function)
 
 * 이 Gradient Log Density function은 Direction을 나타낸다 (Noise $\rightarrow$ Image)
@@ -384,7 +384,7 @@ L(\theta) &= (상수) + \int  p_{data}(x)tr(\nabla_x s_\theta (x))dx  + \frac{1}
 ```
 
 
-#### $tr(\nabla_x s_\theta(x))$ 계산이 computatively expensive
+### $tr(\nabla_x s_\theta(x))$ 계산이 computatively expensive
 
 * "모델이 깨끗한 데이터의 스코어를 배우게 하는 대신, 약간의 노이즈를 섞은 데이터의 스코어를 배우게 하면 더 안정적이고 효과적이지 않을까?"
 
@@ -404,14 +404,14 @@ L(\theta) &= E_{x\sim p_{data}} \left[\frac{1}{2}\parallel s_\theta (x) \paralle
 ```
 
 
-####  $∇_{x̃}log(q_σ(x̃))$를 계산하려면 여전히 $p_{data}$를 알아야 함. 즉, 또다시 계산 불가능한 문제
+###  $∇_{x̃}log(q_σ(x̃))$를 계산하려면 여전히 $p_{data}$를 알아야 함. 즉, 또다시 계산 불가능한 문제
 * 핵심은 목표 스코어를 $∇_{\tilde{x}}log(q_σ(x̃))$에서 $∇_{\tilde{x}}log(q_σ(\tilde{x}|x))$로 바꾼 것입니다.
 
 * 계산 가능한 목표 (✅): $q_σ(\tilde{x}|x)$는 "깨끗한 데이터 x가 주어졌을 때, 노이즈 낀 데이터 $\tilde{x}$가 나올 확률"입니다. 이것은 우리가 직접 정의하는 간단한 가우시안 분포 $N(\tilde{x}|x,σ²I)$입니다.
 
 * 우리는 이 함수의 정확한 식을 알고 있기 때문에, 스코어 $∇_{\tilde{x}}log(q_σ(\tilde{x}|x))$를 쉽게 계산할 수 있습니다. 그 결과가 바로 $-(\tilde{x}-x)/σ²$ 입니다.
 
-####  $∇_{x̃}log(q_σ(x̃)) \rightarrow ∇_{x̃}log(q_σ(x̃|x))$
+###  $∇_{x̃}log(q_σ(x̃)) \rightarrow ∇_{x̃}log(q_σ(x̃|x))$
 
 $$∇_\tilde{x} log q_σ(\tilde{x})=E_{x∼q(x∣\tilde{x})}[∇_\tilde{x} log q_σ(\tilde{x}∣x)] $$
 
@@ -424,7 +424,53 @@ $$∇_\tilde{x} log q_σ(\tilde{x})=E_{x∼q(x∣\tilde{x})}[∇_\tilde{x} log q
 \end{align}
 ```
 
+### $\tilde{x} = x+\epsilon (noise)$
 
+```math
+\begin{align}
+L_\theta &= \frac{1}{2}E_{\tilde{x} \sim q_{\sigma}} \left[ \parallel \nabla_{\tilde{x}}\log q_\sigma(\tilde{x}) - s_\theta(\tilde{x}) \parallel_2^2 \right] \\\\
+&= \frac{1}{2}E_{x\simP_{data}, \\ \tilde{x} \sim q_{\sigma}(\tilde{x}|x)} \left[ \parallel \nabla_{\tilde{x}}\log q_\sigma(\tilde{x}|x) - s_\theta(\tilde{x}) \parallel_2^2 \right] \\\\
+&= \frac{1}{2}E_{x\simP_{data}, \\ \tilde{x} \sim q_{\sigma}(\tilde{x}|x)} \left[ \parallel -\frac{\epsilon}{\sigma^2} - s_\theta(\tilde{x}) \parallel_2^2 \right] \\\\
+\end{align}
+```
+
+### Score Based Model
+
+<img width="1105" height="660" alt="image" src="https://github.com/user-attachments/assets/5af61fda-8ba3-4c4b-8789-f8657c7a6026" />
+
+* Noise conditional score Sampling is very similar to Diffusion reverse process
+
+<img width="1119" height="447" alt="image" src="https://github.com/user-attachments/assets/b98051d7-1005-4a6d-bb97-11284db77dbc" />
+
+---
+
+### Stochastic Differential Equation
+$$dx = f(x, t)dt + g(t)dw$$
+
+시간이 아주 미세하게 ($dt$) 변할때, 데이터 x가 얼마나 미세하게 ($dx$) 변하는지 설명
+
+* $f(x,t)dt$ : Drift 항
+  * 데이터 x와 시간 t에 따라 데이터가 어떤 정해진 방향으로 미세하기 움직이도록
+* $g(t)dw$ : Diffusion 항
+  * 무작위적인 부분 담당
+
+```math
+\begin{align}
+q(x_t|x_{t−1}) &:= N (x_t;\sqrt{1 − β_t}x_{t−1}, β_tI \;\; \text{DDPM Transition, Forward} \\\\
+& x_t\text{정의} \\\\
+x_{t} &= \sqrt{1-\beta_t}x_{t-1} + \sqrt{\beta_t}z_t \\\\
+& \sqrt{1-\beta_t} \approx 1- \frac{\beta_t}{2}  \;\; \text{approximate 사용} \\\\
+dx &= -\frac{1}{2}\beta(t)xdt + \sqrt{\beta(t)}dw \;\; \text{DDPM SDE} \\\\
+dx &= [f(x,t) - g(t)^2\nabla_xlogp_t(x)]dt + g(t)d\bar{w} \;\; \text{General Form of Reverse SDE}  \\\\
+dx &= [-\frac{1}{2} \beta(t)x - \beta(t) \nabla_xlogp_t(x)]dt + \sqrt{\beta(t)}dw  \\\\
+& \frac{1}{\sqrt{1-\beta_t}} \approx 1+\frac{\beta_t}{2} \;\; \text{approximate 사용하여 } x_{t-1} \text{ 표현} \\\\
+x_{t-1} &= \frac{1}{\sqrt{\alpha_t}}\left(x_{t-1} -\frac{1-\alpha_t}{\sqrt{1-\bar{\alpha}_t}}\epsilon_\theta(x_t,t)\right) + \sigma_tz \\\\
+&= \frac{1}{\sqrt{1-\beta_t}}(x_t+\beta_t s_\theta(x_t)) + \sqrt{\beta_t}z_t \\\\
+\end{align}
+```
+
+
+---
 
 
 ### Appendix
