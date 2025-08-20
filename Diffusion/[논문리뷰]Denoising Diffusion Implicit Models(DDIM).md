@@ -511,9 +511,9 @@ dx &= [f(x,t) - g(t)^2\nabla_xlogp_t(x)]dt + g(t)d\bar{w} \;\; \text{(General Fo
 d\mathbf{x} &= \left[\mathbf{f}(\mathbf{x}, t) - \frac{1}{2}g(t)^2 \nabla_{\mathbf{x}} \log p_t(\mathbf{x})\right] dt \text{  (Reverse SDE)} \\\\
 \end{align}
 ```
-* 1/2이 있는 식은 확률 흐름 ODE(Probability Flow ODE)**이고, **1/2이 없는 식은 일반적인 역방향 SDE(Reverse SDE)
+* 1/2이 있는 식은 확률 흐름 ODE(Probability Flow ODE)이고, 1/2이 없는 식은 일반적인 역방향 SDE(Reverse SDE)
 
-순방향 SDE dx = f dt + g dw를 거꾸로 되돌리는 방법에는 크게 두 가지가 있습니다.
+순방향 SDE dx = f dt + g dw를 거꾸로 되돌리는 방법에는 크게 두 가지가 있습니다. (noise 유무)
 
 1. 역방향 SDE (Reverse SDE)
 
