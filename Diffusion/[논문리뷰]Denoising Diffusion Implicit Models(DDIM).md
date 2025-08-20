@@ -76,6 +76,16 @@ DDPM의 순방향 확산 과정과 역방향 생성 과정에 대한 수학적 �
 * $q(x_t|x_0) := \int q(x_{1:t}|x_0)dx_{1:(t−1)} = \mathcal{N} (x_t;\sqrt{α_t}x_0,(1 − α_t)I)$
 * $x_t =\sqrt{α_t}x_0 + \sqrt{1 − α_t}\epsilon, \\ where \\ \epsilon \sim \mathcal{N} (0, I) \\ (4)$
 
+```math
+\begin{align}
+p_{\theta}(x_{t-1}|x_t) = 
+\begin{cases} 
+N(f_{\theta}^{(1)}(x_1), \sigma_1^2I) & \text{if } t=1 \\
+q_{\sigma}(x_{t-1}|x_t, f_{\theta}^{(t)}(x_t)) & \text{otherwise}
+\end{cases}
+\end{align}
+```
+
 #### Loss
 
 * $L_γ(\epsilon_θ) := \sum^T_{t=1}γ_t \mathcal{E}_{x0∼q(x_0),\epsilon_t \sim \mathcal{N}(0,I)} [\parallel \epsilon^{(t)}_θ(\sqrt{α_t}x_0 + \sqrt{1 − α_t} \epsilon_t) − \epsilon_t \parallel^2_2] \\ (5)$
