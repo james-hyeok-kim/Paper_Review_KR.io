@@ -1,7 +1,6 @@
 ---
 layout: post
 title: "[논문리뷰]  All are Worth Words: A ViT Backbone for Diffusion Models (U-ViT)"
-image:
 ---
 
 #  All are Worth Words: A ViT Backbone for Diffusion Models (U-ViT) - 2
