@@ -429,8 +429,8 @@ $$∇_\tilde{x} log q_σ(\tilde{x})=E_{x∼q(x∣\tilde{x})}[∇_\tilde{x} log q
 ```math
 \begin{align}
 L_\theta &= \frac{1}{2}E_{\tilde{x} \sim q_{\sigma}} \left[ \parallel \nabla_{\tilde{x}}\log q_\sigma(\tilde{x}) - s_\theta(\tilde{x}) \parallel_2^2 \right] \\\\
-&= \frac{1}{2}E_{x\simP_{data}, \\ \tilde{x} \sim q_{\sigma}(\tilde{x}|x)} \left[ \parallel \nabla_{\tilde{x}}\log q_\sigma(\tilde{x}|x) - s_\theta(\tilde{x}) \parallel_2^2 \right] \\\\
-&= \frac{1}{2}E_{x\simP_{data}, \\ \tilde{x} \sim q_{\sigma}(\tilde{x}|x)} \left[ \parallel -\frac{\epsilon}{\sigma^2} - s_\theta(\tilde{x}) \parallel_2^2 \right] \\\\
+&= \frac{1}{2}E_{x\sim P_{data}, \\ \tilde{x} \sim q_{\sigma}(\tilde{x}|x)} \left[ \parallel \nabla_{\tilde{x}}\log q_\sigma(\tilde{x}|x) - s_\theta(\tilde{x}) \parallel_2^2 \right] \\\\
+&= \frac{1}{2}E_{x\sim P_{data}, \\ \tilde{x} \sim q_{\sigma}(\tilde{x}|x)} \left[ \parallel -\frac{\epsilon}{\sigma^2} - s_\theta(\tilde{x}) \parallel_2^2 \right] \\\\
 \end{align}
 ```
 
@@ -456,16 +456,29 @@ $$dx = f(x, t)dt + g(t)dw$$
 
 ```math
 \begin{align}
-q(x_t|x_{t−1}) &:= N (x_t;\sqrt{1 − β_t}x_{t−1}, β_tI \;\; \text{DDPM Transition, Forward} \\\\
+q(x_t|x_{t−1}) &:= N (x_t;\sqrt{1 − β_t}x_{t−1}, β_tI \;\; \text{(DDPM Transition, Forward)} \\\\
 & x_t\text{정의} \\\\
 x_{t} &= \sqrt{1-\beta_t}x_{t-1} + \sqrt{\beta_t}z_t \\\\
-& \sqrt{1-\beta_t} \approx 1- \frac{\beta_t}{2}  \;\; \text{approximate 사용} \\\\
-dx &= -\frac{1}{2}\beta(t)xdt + \sqrt{\beta(t)}dw \;\; \text{DDPM SDE} \\\\
-dx &= [f(x,t) - g(t)^2\nabla_xlogp_t(x)]dt + g(t)d\bar{w} \;\; \text{General Form of Reverse SDE}  \\\\
-dx &= [-\frac{1}{2} \beta(t)x - \beta(t) \nabla_xlogp_t(x)]dt + \sqrt{\beta(t)}dw  \\\\
-& \frac{1}{\sqrt{1-\beta_t}} \approx 1+\frac{\beta_t}{2} \;\; \text{approximate 사용하여 } x_{t-1} \text{ 표현} \\\\
-x_{t-1} &= \frac{1}{\sqrt{\alpha_t}}\left(x_{t-1} -\frac{1-\alpha_t}{\sqrt{1-\bar{\alpha}_t}}\epsilon_\theta(x_t,t)\right) + \sigma_tz \\\\
+& \sqrt{1-\beta_t} \approx 1- \frac{\beta_t}{2}  \;\; \text{(approximate 사용)} \\\\
+dx &= -\frac{1}{2}\beta(t)xdt + \sqrt{\beta(t)}dw \;\; \text{(DDPM SDE)} \\\\
+dx &= [f(x,t) - g(t)^2\nabla_xlogp_t(x)]dt + g(t)d\bar{w} \;\; \text{(General Form of Reverse SDE)}  \\\\
+dx &= [-\frac{1}{2} \beta(t)x - \beta(t) \nabla_xlogp_t(x)]dt + \sqrt{\beta(t)}dw  \text{(General to DDPM SDE)} \\\\
+& \frac{1}{\sqrt{1-\beta_t}} \approx 1+\frac{\beta_t}{2} \;\; \text{(approximate 사용하여 } x_{t-1} \text{ 표현)} \\\\
+x_{t-1} &= \frac{1}{\sqrt{\alpha_t}}\left(x_{t-1} -\frac{1-\alpha_t}{\sqrt{1-\bar{\alpha}_t}}\epsilon_\theta(x_t,t)\right) + \sigma_tz \;\; \text{(DDPM Sampling algorithm 2)}\\\\
 &= \frac{1}{\sqrt{1-\beta_t}}(x_t+\beta_t s_\theta(x_t)) + \sqrt{\beta_t}z_t \\\\
+& x_{t-1} 유도 \\\\
+
+% Definitions
+\alpha_t &= 1 - \beta_t \\\\
+s_{\theta}(x_t) &= -\frac{1}{\sqrt{1-\bar{\alpha}_t}} \epsilon_{\theta}(x_t, t) \\\\
+\epsilon_{\theta}(x_t, t) &= -\sqrt{1-\bar{\alpha}_t} \cdot s_{\theta}(x_t) \\\\
+% Derivation
+x_{t-1} &= \frac{1}{\sqrt{\alpha_t}}\left(x_t - \frac{1-\alpha_t}{\sqrt{1-\bar{\alpha}_t}} \epsilon_{\theta}(x_t, t)\right) + \sigma_t z \\\\
+&= \frac{1}{\sqrt{\alpha_t}}\left(x_t - \frac{1-\alpha_t}{\sqrt{1-\bar{\alpha}_t}} \left(-\sqrt{1-\bar{\alpha}_t} \cdot s_{\theta}(x_t)\right)\right) + \sigma_t z \\\\
+&= \frac{1}{\sqrt{\alpha_t}}\left(x_t + (1-\alpha_t)s_{\theta}(x_t)\right) + \sigma_t z \\\\
+&= \frac{1}{\sqrt{1-\beta_t}}\left(x_t + \beta_t s_{\theta}(x_t)\right) + \sigma_t z \\\\
+&= \frac{1}{\sqrt{1-\beta_t}}\left(x_t + \beta_t s_{\theta}(x_t)\right) + \sqrt{\beta_t} z_t
+
 \end{align}
 ```
 
