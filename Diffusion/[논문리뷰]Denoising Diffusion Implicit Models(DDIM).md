@@ -345,7 +345,7 @@ tr = Trace \text{대각합}
 \end{align}
 ```
 
-* 대각합으로 변환한 이유
+* 대각합으로 변환한 이유 ($∇ₓlog(p_{data}(x))$ 계산할 방법이 없어)
 
   * 문제의 근원: $p_{data}(x)$의 정체를 모른다는 것
   * 우리가 학습하려는 데이터의 실제 확률 분포 $p_{data}(x)$ 의 정확한 함수식을 모른다는 점
@@ -386,6 +386,14 @@ L(\theta) &= (상수) + \int  p_{data}(x)tr(\nabla_x s_\theta (x))dx  + \frac{1}
 
 #### $tr(\nabla_x s_\theta(x))$ 계산이 computatively expensive
 
+* "모델이 깨끗한 데이터의 스코어를 배우게 하는 대신, 약간의 노이즈를 섞은 데이터의 스코어를 배우게 하면 더 안정적이고 효과적이지 않을까?"
+
+* Original Score Matching $\rightarrow$ Denoising Score Matching
+
+* 이제 모델 $s_θ$는 깨끗한 데이터 x가 아닌, 노이즈 낀 데이터 $x̃$ 를 입력받습니다.
+
+* 목표 스코어도 $∇ₓlog(p_{data}(x))$ 가 아닌, 노이즈 낀 데이터의 분포 $q_σ(x̃)$ 의 스코어인 $∇_{x̃}log(q_σ(x̃))$ 로 바뀌었습니다.
+
 ```math
 \begin{align}
 L(\theta) &= E_{x\sim p_{data}} \left[\frac{1}{2}\parallel s_\theta (x) \parallel_2^2  +  \text{tr}(\nabla_x s_\theta(x)) \right]\\\\
@@ -395,15 +403,28 @@ L(\theta) &= E_{x\sim p_{data}} \left[\frac{1}{2}\parallel s_\theta (x) \paralle
 \end{align}
 ```
 
-두함수의 최소값(최적값)은 같다
+
+####  $∇_{x̃}log(q_σ(x̃))$를 계산하려면 여전히 $p_{data}$를 알아야 함. 즉, 또다시 계산 불가능한 문제
+* 핵심은 목표 스코어를 $∇_{x̃}log(q_σ(x̃))$에서 $∇_{x̃}log(q_σ(x̃|x))$로 바꾼 것입니다.
+
+* 계산 가능한 목표 (✅): $q_σ(x̃|x)$는 "깨끗한 데이터 x가 주어졌을 때, 노이즈 낀 데이터 x̃가 나올 확률"입니다. 이것은 우리가 직접 정의하는 간단한 가우시안 분포 $N(x̃|x, σ²I)$입니다.
+
+* 우리는 이 함수의 정확한 식을 알고 있기 때문에, 스코어 $∇_{x̃}log(q_σ(x̃|x))$를 쉽게 계산할 수 있습니다. 그 결과가 바로 $-(x̃ - x) / σ²$ 입니다.
+
+####  $∇_{x̃}log(q_σ(x̃)) \rightarrow ∇_{x̃}log(q_σ(x̃|x))$
+
+$$∇_\tilde{x} log q_σ(\tilde{x})=E_{x∼q(x∣\tilde{x})}[∇_\tilde{x} log q_σ(\tilde{x}∣x)] $$
+
+*  손실 함수 L(θ)를 파라미터 θ로 미분한 값, 즉 **기울기 $∇_θ L(θ)$**를 사용합니다. 만약 두 손실 함수의 기울기가 같다면 $(∇_θ L_{hard} = ∇_θ L_{easy})$, 두 함수를 최적화하는 것은 완벽하게 동일한 과정이 됩니다.
+```math
+\begin{align}
+∇_θL_{hard} &= E_\tilde{x}[−2(∇_\tilde{x}log q_σ(\tilde{x}) − s_θ(\tilde{x}))∇_θs_θ(\tilde{x})] \\\\
+&=E_\tilde{x}[−2(E_{x\sim q(x|\tilde{x})} [∇_\tilde{x}log q_σ(\tilde{x}|x)] − s_θ(\tilde{x}))∇_θs_θ(\tilde{x})] \\\\
+&=E_\tilde{x}[−2(∇_\tilde{x}log q_σ(\tilde{x}|x) − s_θ(\tilde{x}))∇_θs_θ(\tilde{x})] = \nabla_\theta L_{easy} \\\\ 
+\end{align}
+```
 
 
-
-결론적으로, 3번째 줄에서 4번째 줄로의 변환은 다음과 같은 최적화 과정입니다.
-
-문제: 모델이 학습할 목표(∇log q_σ(x̃))가 여전히 계산 불가능하다.
-
-해결: 수학적으로 동일한 해를 주는, 계산 가능한 새로운 목표(∇log q_σ(x̃|x))로 대체한다.
 
 
 ### Appendix
