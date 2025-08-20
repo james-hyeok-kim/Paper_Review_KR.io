@@ -45,3 +45,6 @@ DDPM의 성공 이후, 생성 속도를 높이고 샘플링 방식을 개선하�
 중요성: Stable Diffusion의 탄생. 🌟 고화질 이미지의 픽셀 공간에서 직접 확산을 진행하는 대신, VAE(Variational Autoencoder)를 이용해 저차원의 **잠재 공간(Latent Space)**에서 확산을 진행하는 방식을 제안했습니다. 이를 통해 계산량을 획기적으로 줄여, 적은 컴퓨팅 자원으로도 고해상도 이미지를 빠르고 효율적으로 생성할 수 있게 되었습니다.
 
 이 리스트를 순서대로 따라가시면 확산 모델의 역사와 핵심 아이디어를 체계적으로 이해하는 데 큰 도움이 될 것입니다.
+
+
+📜Tackiling the Generative Learning Trilemma with Denoising Diffusion GANs  (2022) ???
