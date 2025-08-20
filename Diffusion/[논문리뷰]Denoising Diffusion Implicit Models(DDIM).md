@@ -69,7 +69,7 @@ DDPM의 순방향 확산 과정과 역방향 생성 과정에 대한 수학적 �
 
 #### Forward Process (Diffusion Process) $q$
 
-* $q(x_{1:T}|x_0) := \prod^T_{t=1}q(x_t|x_{t−1}),\\ where \\ q(xt|xt−1) := \mathcal{N} \left( \sqrt{\frac{\alpha_t}{\alpha_{t-1}}x_{t-1}}, \left(1 - \frac{α_t}{α_{t−1}} \right)I \right)$
+* $q(x_{1:T}|x_0) := \prod^T_{t=1}q(x_t|x_{t−1}),\\ where \\ q(xt|xt−1) := \mathcal{N} \left( \sqrt{\frac{\alpha_t}{\alpha_{t-1}}x_{t-1}}, \left(1 - \frac{α_t}{α_{t−1}} \right)I \right) \\ (3)$
 
 
 #### Reverse Process $p_{\theta}$
