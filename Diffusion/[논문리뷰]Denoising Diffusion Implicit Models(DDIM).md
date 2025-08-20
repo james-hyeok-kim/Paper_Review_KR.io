@@ -482,6 +482,36 @@ x_{t-1} &= \frac{1}{\sqrt{\alpha_t}}\left(x_t - \frac{1-\alpha_t}{\sqrt{1-\bar{\
 \end{align}
 ```
 
+#### $x_{t-1} - x_t$ 수학적 근사 $\rightarrow$ Reverse SDE 근사
+
+```math
+\begin{align*}
+d\mathbf{x} &= \mathbf{f}(\mathbf{x}, t)dt + g(t)d\mathbf{w} \text{(Forward SDE)}\\\\
+d\mathbf{x} &= \left[\mathbf{f}(\mathbf{x}, t) - \frac{1}{2}g(t)^2 \nabla_{\mathbf{x}} \log p_t(\mathbf{x})\right] dt \text{(Reverse SDE)} \\\\
+dx &= -\frac{1}{2}\beta(t)x \, dt + \sqrt{\beta(t)} \, dw \quad (\text{DDPM Forward SDE})
+\end{align*}
+```
+```math
+\frac{1}{\sqrt{1-\beta_t}} \approx 1 + \frac{\beta_t}{2} \quad \text{as } \beta_t \to 0
+```
+
+```math
+\begin{align*}
+x_{t-1} &= \sqrt{\bar{\alpha}_{t-1}}\left(\frac{x_t - \sqrt{1-\bar{\alpha}_t}\epsilon_\theta^{(t)}(x_t)}{\sqrt{\bar{\alpha}_t}}\right) + \sqrt{1-\bar{\alpha}_{t-1}-\sigma_t^2} \cdot \epsilon_\theta^{(t)}(x_t) + \sigma_t \epsilon_t \text{(DDIM 의 일반적 Sampling 알고리즘)} \\\\
+x_{t-1} &= \frac{x_t}{\sqrt{1-\beta_t}} - \left(\sqrt{\frac{1-\bar{\alpha}_t}{1-\beta_t}} - \sqrt{1-\bar{\alpha}_{t-1}}\right)\epsilon_\theta(x_t)  (\alpha_t = 1-\beta_t \text{ 를 활용하여 정리)} \\\\
+x_{t-1} &= \frac{x_t}{\sqrt{1-\beta_t}} - \left(\sqrt{\frac{1-\bar{\alpha}_t}{1-\beta_t}} - \sqrt{\frac{1-\bar{\alpha}_t}{1-\beta_t}}\right)\epsilon_\theta(x_t) \\\\
+x_{t-1} &= \left(1+\frac{\beta_t}{2}\right)x_t - \frac{\beta_t}{2\sqrt{1-\bar{\alpha}_t}}\epsilon_\theta(x_t) \\\\
+x_{t-1}-x_t &= \left(\frac{\beta_t}{2}\right)x_t - \frac{\beta_t}{2\sqrt{1-\bar{\alpha}_t}}\epsilon_\theta(x_t)
+\end{align*}
+```
+
+* $x_{t-1} - x_t  ↔  dx$ (미세한 변화량)
+
+* 알고리즘의 $(β_t/2)x_t$ 항  ↔  역방향 SDE의 드리프트 항
+
+* 알고리즘의 $ε_θ$ 항  ↔  역방향 SDE의 스코어 $(∇ₓlog p_t(x))$ 항
+
+* SDE를 푸는 더 발전된 수치해석 기법을 도입하여 샘플링 속도나 품질을 개선하는 연구가 가능
 
 ---
 
