@@ -478,7 +478,6 @@ x_{t-1} &= \frac{1}{\sqrt{\alpha_t}}\left(x_t - \frac{1-\alpha_t}{\sqrt{1-\bar{\
 &= \frac{1}{\sqrt{\alpha_t}}\left(x_t + (1-\alpha_t)s_{\theta}(x_t)\right) + \sigma_t z \\\\
 &= \frac{1}{\sqrt{1-\beta_t}}\left(x_t + \beta_t s_{\theta}(x_t)\right) + \sigma_t z \\\\
 &= \frac{1}{\sqrt{1-\beta_t}}\left(x_t + \beta_t s_{\theta}(x_t)\right) + \sqrt{\beta_t} z_t
-
 \end{align}
 ```
 
@@ -505,6 +504,26 @@ x_{t-1}-x_t &= \left(\frac{\beta_t}{2}\right)x_t - \frac{\beta_t}{2\sqrt{1-\bar{
 * 알고리즘의 $ε_θ$ 항  ↔  역방향 SDE의 스코어 $(∇ₓlog p_t(x))$ 항
 
 * SDE를 푸는 더 발전된 수치해석 기법을 도입하여 샘플링 속도나 품질을 개선하는 연구가 가능
+
+```math
+\begin{align}
+dx &= [f(x,t) - g(t)^2\nabla_xlogp_t(x)]dt + g(t)d\bar{w} \;\; \text{(General Form of Reverse SDE)}  \\\\
+d\mathbf{x} &= \left[\mathbf{f}(\mathbf{x}, t) - \frac{1}{2}g(t)^2 \nabla_{\mathbf{x}} \log p_t(\mathbf{x})\right] dt \text{  (Reverse SDE)} \\\\
+\end{align}
+```
+* 1/2이 있는 식은 확률 흐름 ODE(Probability Flow ODE)**이고, **1/2이 없는 식은 일반적인 역방향 SDE(Reverse SDE)
+
+순방향 SDE dx = f dt + g dw를 거꾸로 되돌리는 방법에는 크게 두 가지가 있습니다.
+
+1. 역방향 SDE (Reverse SDE)
+
+수식: $dx = [f(x,t) − g(t)²∇ₓlog p_t(x)]dt + g(t)dw̄$
+
+2. 확률 흐름 ODE (Probability Flow ODE)
+
+수식: $dx = [f(x, t) - (1/2)g(t)²∇ₓlog p_t(x)]dt$
+
+
 
 ---
 
