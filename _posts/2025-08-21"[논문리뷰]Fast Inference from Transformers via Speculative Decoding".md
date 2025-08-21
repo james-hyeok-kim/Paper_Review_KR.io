@@ -1,3 +1,8 @@
+---
+layout: post
+title: "[논문리뷰]Fast Inference from Transformers via Speculative Decoding"
+---
+
 # Speculative Decoding
 
 ## Fast Inference from Transformers via Speculative Decoding
