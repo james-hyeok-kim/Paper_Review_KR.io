@@ -1,3 +1,10 @@
+
+---
+layout: post
+title: "[논문리뷰]Denoising Diffusion Implicit Models(DDIM).md"
+---
+
+여기에 본문 내용이 시작됩니다...
 # Denoising Diffusion Implicit Models
 
 저자 : Jiaming Song, Chenlin Meng, Stefano Ermon
