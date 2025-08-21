@@ -1,6 +1,6 @@
 
 ---
-layout: post
+layout: default
 title: "[논문리뷰]Denoising Diffusion Implicit Models(DDIM).md"
 ---
 
