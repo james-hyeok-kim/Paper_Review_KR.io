@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://james-hyeok-kim/Paper_Review_KR.io/_sitemap.xml
+Sitemap: https://james-hyeok-kim/Paper_Review_KR.io/sitemap.xml
