@@ -1,3 +1,8 @@
+---
+layout: post
+title: "[논문리뷰]Denoising Diffusion Probabilistic Models(DDPM)"
+---
+
 # Denoising Diffusion Probabilistic Models (DDPM)
 저자(소속) : Jonathan Ho (UC Berkeley), Ajay Jain(UC Berkeley), Pieter Abbeel(UC Berkeley)
 
