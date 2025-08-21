@@ -1,6 +1,11 @@
+# 플러그인 설정
 plugins:
   - jekyll-remote-theme
-remote_theme: pages-themes/orderedlist
+
+# 원격 테마 설정 (minimal 테마로 변경)
+remote_theme: pages-themes/minimal
+
+# 사이트 기본 정보
 title: James Kim
 description: Paper Review Page
 url: "https://james-hyeok-kim.github.io"
