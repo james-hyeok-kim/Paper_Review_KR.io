@@ -1,10 +1,5 @@
-# 1. 아래 라인을 추가하거나 기존 plugins 목록에 추가하세요.
-plugins:
-  - jekyll-remote-theme
-
-# 2. theme: 라인을 지우고 아래 라인으로 대체하세요.
-remote_theme: orderedlist/jekyll-theme-orderedlist
-
+plugins: - jekyll-remote-theme
+remote_theme: pages-themes/orderedlist
 title: James Kim
 description: Paper Review Page
 url: "https://james-hyeok-kim.github.io"
