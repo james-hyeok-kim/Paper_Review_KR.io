@@ -1,3 +1,8 @@
+---
+layout: post
+title: "[논문리뷰]Deep Unsupervised Learning using Nonequilibrium Thermodynamics (2015 ICML).md"
+---
+
 ## Deep Unsupervised Learning using Nonequilibrium Thermodynamics
 ---
 
