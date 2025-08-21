@@ -17,11 +17,8 @@ layout: null
 {%- assign changefreq = post.sitemap.changefreq | default: 'weekly' -%}
 <changefreq>{{ changefreq }}</changefreq>
 
-      {% if post.sitemap.priority == null %}
-          <priority>0.5</priority>
-      {% else %}
-        <priority>{{ post.sitemap.priority }}</priority>
-      {% endif %}
+{%- assign changefreq = post.sitemap.changefreq | default: 'weekly' -%}
+<changefreq>{{ changefreq }}</changefreq>
 
     </url>
   {% endfor %}
