@@ -1,4 +1,5 @@
-plugins: - jekyll-remote-theme
+plugins:
+  - jekyll-remote-theme
 remote_theme: pages-themes/orderedlist
 title: James Kim
 description: Paper Review Page
