@@ -6,7 +6,27 @@ plugins:
 remote_theme: pages-themes/minimal
 
 # 사이트 기본 정보
-title: James Kim
-description: Paper Review Page
+title: AI 리부팅
+name : Bits to Brains
+description: 엔지니어의 AI 번역기
 url: "https://james-hyeok-kim.github.io"
 baseurl: "/Paper_Review_KR.io"
+
+# Analytics
+analytics:
+  provider               : false # 구글 어날리틱스 등록 false (default), "google", "google-universal", "custom"
+  google:
+    tracking_id          :
+    anonymize_ip         : # true, false (default)
+
+# Site Author
+author:
+  name             : "Bits to Brains"
+  avatar           : ""
+  bio              : "엔지니어의 AI 번역기"
+  location         : "South Korea"
+  email            : "younghyeok25@gmail.com"
+  links:
+    - label: "Email"
+      icon: "fas fa-fw fa-envelope-square"
+      url: mailto:younghyeok25@gmail.com
