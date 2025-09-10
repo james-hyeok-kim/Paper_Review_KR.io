@@ -12,6 +12,25 @@
 * Forward Process를 연속적인 시간의 흐름으로 보고 이 과정을 수학적으로 완벽히 되돌리면 노이즈에서 실제 이미지가 발생
 * 이모든 과정을 확률적 미분 방정식(SDE)를 통해 구현
 
+---
+
+## Background
+
+### SMLD
+* Denoising Score Matching with Langevin Dynamics, SMLD
+* SMLD는 데이터에 노이즈를 점진적으로 주입하고, 그 과정을 역전시켜 데이터를 생성하는 것을 학습하는 방식
+
+#### SMLD 핵심
+1. Noise 주입, 데이터 분포 $p_{data}(x)$ 에 가우시안 노이즈 주입, 교란된 데이터 생성 $p_{\sigma}(\tilde{x})$, $p_{\sigma}(\tilde{x}|x) := \mathcal{N}(\tilde{x};x,\sigma^2I)$ 정규분포 따라는 교란 커널 사용(Perturbation Kernel)
+2. $\sigma_{min} ~ \sigma{max}$ 모두 양수 노이즈 시퀀스 사용, $\sigma_1 < \sigma_2 < ... < \sigma_N$
+3. $\sigma_{min}$은 $p_{data}(x)$와 거의 동일하게 작고, $\sigma_{max}$는 $N(x; 0, \sigma_{max}^2I)$ 의 가우시안 분포를 따른다
+4. 스코어 확률 밀도 그래디언트 $\nabla \log p_\sigma(x)$를 추정하기 위해 노이즈 조건부 스코어 네트워크 (NCSN, Noise Conditional Score Network) $s_\theta(x,\sigma)$ 라는 신경망을 훈련
+
+$$
+\theta^{\circ} = \arg \min_{\theta} \displaystyle\sum^{N}_{i=1} \sigma_i^2 \mathcal{E}_{p_{data}(x)}\mathcal{E}_{p_{\sigma_i}}(\tilde{x}|x) [\parallel s_{\theta}(\tilde{x}, \sigma_i) - \nabla_{\tilde{x}} \log p_{\sigma_i}(\tilde{x}|x) \parallel^2_2] \quad \quad (1)
+$$
+
+---
  
  역방향 SDE를 풀기 위해 필요한 정보는 단 하나, 바로 스코어(score) 함수입니다.
 
@@ -42,3 +61,13 @@ $$
 * 시간이 지남에 따라 랜덤성의 영향이 커지거나 작아지게 할 수 있습니다.
 * 비유: 강물 위의 나뭇잎이 물의 소용돌이나 바람 때문에 예측 불가능하게 이리저리 흔들리는 움직임이 바로 확산입니다.
 
+
+### 역방향 SDE
+* 역방향 SDE (Reverse SDE): 노이즈 분포에서 시작하여 노이즈를 천천히 제거하여 원래의 데이터 분포를 생성하는 과정입니다. 
+* 앤더슨(Anderson, 1982)의 연구에 따르면, 확산 과정의 역과정 또한 확산 과정이며, 다음 역방향 SDE로 주어집니다
+
+$$
+dx = [f(x, t) - g(t)^2 \nabla x log p_t(x)]dt + g(t)d \bar{W}  \quad \quad (6)
+$$
+
+여기서 $p_t(x)$ 는 시간 t에서의 교란된 데이터 분포의 확률 밀도이며, $\nabla x log p_t(x)$가 바로 스코어 함수입니다
