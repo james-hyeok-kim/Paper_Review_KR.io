@@ -21,14 +21,36 @@
 * SMLD는 데이터에 노이즈를 점진적으로 주입하고, 그 과정을 역전시켜 데이터를 생성하는 것을 학습하는 방식
 
 #### SMLD 핵심
-1. Noise 주입, 데이터 분포 $p_{data}(x)$ 에 가우시안 노이즈 주입, 교란된 데이터 생성 $p_{\sigma}(\tilde{x})$, $p_{\sigma}(\tilde{x}|x) := \mathcal{N}(\tilde{x};x,\sigma^2I)$ 정규분포 따라는 교란 커널 사용(Perturbation Kernel)
+* Noise 주입
+1. 데이터 분포 $p_{data}(x)$ 에 가우시안 노이즈 주입, 교란된 데이터 생성 $p_{\sigma}(\tilde{x})$, $p_{\sigma}(\tilde{x}|x) := \mathcal{N}(\tilde{x};x,\sigma^2I)$ 정규분포 따라는 교란 커널 사용(Perturbation Kernel)
 2. $\sigma_{min} \sim \sigma_{max}$ 모두 양수 노이즈 시퀀스 사용, $\sigma_1 < \sigma_2 < ... < \sigma_N$
 3. $\sigma_{min}$은 $p_{data}(x)$와 거의 동일하게 작고, $\sigma_{max}$는 $N(x; 0, \sigma_{max}^2I)$ 의 가우시안 분포를 따른다
-4. 스코어 확률 밀도 그래디언트 $\nabla \log p_\sigma(x)$를 추정하기 위해 노이즈 조건부 스코어 네트워크 (NCSN, Noise Conditional Score Network) $s_\theta(x,\sigma)$ 라는 신경망을 훈련
+
+* 스코어 함수 추정
+1. 스코어 확률 밀도 그래디언트 $\nabla \log p_\sigma(x)$를 추정하기 위해 노이즈 조건부 스코어 네트워크 (NCSN, Noise Conditional Score Network) $s_\theta(x,\sigma)$ 라는 신경망을 훈련
 
 $$
 \theta^{*} = \arg \min_{\theta} \displaystyle\sum^{N}_{i=1} \sigma_i^2 \mathcal{E}_{p_{data}(x)}\mathcal{E}_{p_{\sigma_i}}(\tilde{x}|x) [\parallel s_{\theta}(\tilde{x}, \sigma_i) - \nabla_{\tilde{x}} \log p_{\sigma_i}(\tilde{x}|x) \parallel^2_2] \quad \quad (1)
 $$
+
+2. 충분한 데이터와 모델 용량이 주어지면, 최적의 스코어 기반 모델 $s_\theta(x, \sigma)$는 $\nabla_x \log p_\sigma(x)$와 거의 일치하게 된다.
+
+* 샘플 생성 (Langevin Dynamics)
+
+1. 학습된 스코어 네트워크를 사용하여 새로운 데이터를 생성할 때는 랑주뱅 MCMC(Markov Chain Monte Carlo) 동역학
+2. 샘플링은 $\sigma_{max}$에 해당하는 단순한 가우시안 노이즈 $N(x | 0, \sigma_{max}^2I)$에서 $x_N$을 샘플링하는 것으로 시작
+3. 이후 노이즈 스케일을 N부터 1까지 점진적으로 줄여나가면서 일련의 랑주뱅 MCMC 단계를 순차적으로 실행하여 $x_1$을 얻습니다.
+4. 이 과정은 식 (2)에 설명되어 있습니다.
+    ◦ M이 무한대로 가고 스텝 크기 εi가 0으로 갈 때, xM1은 pσmin(x) 또는 p_data(x)에서 정확한 샘플이 됩니다.
+
+$$
+x_i^m = x_i^{m-1}+\epsilon_i s_{\theta}^{*}(x_i^{m-1},\sigma_i) + \sqrt{2\epsilon_i}z_i^m, \quad \quad m=1, 2, \cdots, M, \quad \quad (2)
+$$
+
+$$
+M \to \infty, \epsilon_i \to 0, x_1^M \to p_{\sigma_{min}}(x) \quad \text{or} \quad p_{data}(x)
+$$
+   
 
 ---
  
