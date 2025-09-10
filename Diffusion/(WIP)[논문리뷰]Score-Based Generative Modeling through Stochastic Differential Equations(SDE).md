@@ -50,7 +50,11 @@ $$
 $$
 M \to \infty, \quad \epsilon_i \to 0, \quad x_1^M \to p_{\sigma_{min}}(x) \approx p_{data}(x)
 $$
-   
+
+---
+
+랑주뱅 MCMC동역학
+랑주뱅 동역학은 물리 현상을 설명하기 위한 모델이고, 랑주뱅 MCMC 동역학은 그 모델을 통계적 샘플링을 위한 알고리즘으로 응용한 것
 
 ---
  
