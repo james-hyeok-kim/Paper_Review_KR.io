@@ -48,7 +48,7 @@ x_i^m = x_i^{m-1}+\epsilon_i s_{\theta}^{*}(x_i^{m-1},\sigma_i) + \sqrt{2\epsilo
 $$
 
 $$
-M \to \infty, \epsilon_i \to 0, x_1^M \to p_{\sigma_{min}}(x) \quad \text{or} \quad p_{data}(x)
+M \to \infty, \quad \epsilon_i \to 0, \quad x_1^M \to p_{\sigma_{min}}(x) \approx p_{data}(x)
 $$
    
 
