@@ -41,7 +41,7 @@ $$
 2. 샘플링은 $\sigma_{max}$에 해당하는 단순한 가우시안 노이즈 $N(x | 0, \sigma_{max}^2I)$에서 $x_N$을 샘플링하는 것으로 시작
 3. 이후 노이즈 스케일을 N부터 1까지 점진적으로 줄여나가면서 일련의 랑주뱅 MCMC 단계를 순차적으로 실행하여 $x_1$을 얻습니다.
 4. 이 과정은 식 (2)에 설명되어 있습니다.
-    ◦ M이 무한대로 가고 스텝 크기 εi가 0으로 갈 때, xM1은 pσmin(x) 또는 p_data(x)에서 정확한 샘플이 됩니다.
+* M이 무한대로 가고 스텝 크기 $ε_i$가 0으로 갈 때, $x_M^1$은 $p_{σ_{min}}(x)$ 또는 $p_{data}(x)$ 에서 정확한 샘플이 됩니다.
 
 $$
 x_i^m = x_i^{m-1}+\epsilon_i s_{\theta}^{*}(x_i^{m-1},\sigma_i) + \sqrt{2\epsilon_i}z_i^m, \quad \quad m=1, 2, \cdots, M, \quad \quad (2)
@@ -103,6 +103,22 @@ $$
 여기서 $p_t(x)$ 는 시간 t에서의 교란된 데이터 분포의 확률 밀도이며, $\nabla x log p_t(x)$가 바로 스코어 함수입니다
 
 ### DDPM
+
+$$
+p_{\alpha_i}(\mathbf{x}_i | \mathbf{x}_0) = \mathcal{N}(\mathbf{x}_i; \sqrt{\alpha_i}\mathbf{x}_0, (1 - \alpha_i)\mathbf{I}), \text{ where } \alpha_i := \prod_{j=1}^i (1 - \beta_j), \quad \beta_j = \text{positive noise scale}
+$$
+
+(2)식에 위 내용을 적용하면 아래와 같다
+
+$$
+\boldsymbol{\theta}^* = \arg\min_{\boldsymbol{\theta}} \sum_{i=1}^N (1 - \alpha_i) \mathbb{E}_{p_{\text{data}}(\mathbf{x})} \mathbb{E}_{p_{\alpha_i}(\tilde{\mathbf{x}}|\mathbf{x})} \left[ \left\| \mathbf{s}_{\boldsymbol{\theta}}(\tilde{\mathbf{x}}, i) - \nabla_{\tilde{\mathbf{x}}} \log p_{\alpha_i}(\tilde{\mathbf{x}} | \mathbf{x}) \right\|_2^2 \right]. \quad \quad (3)
+$$
+
+식 (3)을 통해 $s_{\theta^{*}}(x, i)$를 학습한 후, 노이즈로 부터 새로운 데이터를 생성(역방향 프로세스)
+
+
+
+
 
 #### SDE(Stochastic Differential Equation) 프레임워크와의 연결
 
