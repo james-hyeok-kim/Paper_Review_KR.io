@@ -106,7 +106,7 @@ $$
 
 #### SDE(Stochastic Differential Equation) 프레임워크와의 연결
 
-* DDPM에서 사용되는 노이즈 교란은 분산 보존(Variance Preserving, VP) SDE $(dx = -1/2 \beta(t)x dt + \sqrt{\beta}(t) dw)$ 의 이산화로 간주될 수 있습니다.
+* DDPM에서 사용되는 노이즈 교란은 분산 보존(Variance Preserving, VP) SDE $(dx = -\frac{1}{2} \beta(t)x dt + \sqrt{\beta}(t) dw)$ 의 이산화로 간주될 수 있습니다.
 * 즉, 이산적인 노이즈 스케일 시퀀스 $\beta_i$는 연속적인 시간 함수 $\beta(t)$ 로 일반화됩니다.
 
 
