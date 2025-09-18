@@ -256,13 +256,6 @@ $$dx = -\frac{1}{2}\beta(t)x \, dt + \sqrt{\beta(t)\left(1 - e^{-2 \int_{0}^{t} 
 * 수정(Corrector): 예측된 샘플을 score 기반 MCMC 방법(예: Langevin MCMC)을 사용해 한 번 더 정교하게 다듬어 오류를 수정합니다.
 * 방식은 기존 SMLD(수정 단계 위주)와 DDPM(예측 단계 위주)의 샘플링 방식을 통합하고 개선하는 효과가 있습니다.
 
-#### 4.3 PROBABILITY FLOW AND CONNECTION TO NEURAL ODES
-
-* SDE와 동일한 확률 분포를 따르지만, 무작위성이 없는 결정론적(deterministic)인 상미분 방정식(ODE)을 사용하는 방법입니다.
-
-* 이 접근법은 샘플링 과정이 결정론적이므로 정확한 가능도(likelihood) 계산이 가능해지고, 잠재 공간(latent space)을 다루기 용이하며, 더 효율적인 샘플링이 가능하다는 장점이 있습니다
-
-
 <img width="1251" height="236" alt="image" src="https://github.com/user-attachments/assets/2d68f664-4f38-4c0d-ab04-e7696583b3ee" />
 
 이 표는 CIFAR-10 데이터셋에서 위 방법들의 이미지 생성 품질을 FID 점수(낮을수록 좋음)로 비교한 결과입니다.
@@ -291,16 +284,115 @@ $$dx = -\frac{1}{2}\beta(t)x \, dt + \sqrt{\beta(t)\left(1 - e^{-2 \int_{0}^{t} 
   * 가장 낮은 FID 점수인 3.06을 기록하며 최고의 성능을 달성했습니다
 
 
+#### 4.3 PROBABILITY FLOW AND CONNECTION TO NEURAL ODES
+
+* SDE와 동일한 확률 분포를 따르지만, 무작위성이 없는 결정론적(deterministic)인 상미분 방정식(ODE)을 사용하는 방법입니다.
+
+* 이 접근법은 샘플링 과정이 결정론적이므로 정확한 가능도(likelihood) 계산이 가능해지고, 잠재 공간(latent space)을 다루기 용이하며, 더 효율적인 샘플링이 가능하다는 장점이 있습니다
+
+* 쉽게 비유하자면, 강물에 잉크를 떨어뜨렸을 때(데이터), 잉크 입자들이 물 분자와 무작위로 충돌하며 퍼져나가는 과정(SDE)이 있습니다. 반면, 각 지점에서 물의 평균적인 흐름 방향과 속도만을 따라 잉크 입자가 이동하는 경로를 생각할 수 있는데, 이것이 바로 확률 흐름 ODE에 해당합니다
+
+* ODE equation
+
+$$dx = \left[ f(x,t) - \frac{1}{2} g(t)^2 \nabla_x \log p_t(x) \right] \quad (13) dt$$
+
+* $dx$: x의 미소(infinitesimal) 변화량
+
+* $f(x,t)$: 순방향 SDE의 드리프트 계수(drift coefficient). x가 평균적으로 어떻게 변하는지를 나타내는 항. 예를 들어, VP SDE의 경우  $f(x,t)=−\frac{1}{2}\beta(t)x$ 인데, 이는 시간이 흐를수록 데이터가 원점(0) 방향으로 점차 수축하는 경향을 보인다는 의미입니다.
+
+* $g(t)$: 순방향 SDE의 확산 계수(diffusion coefficient). 주입되는 노이즈의 강도를 조절하는 함수
+
+* $\nabla_x \log p_t(x)$: 점수 함수(score function). 특정 시간 t에서의 데이터 분포 $p_t(x)$에 대해 로그를 취한 뒤, 데이터 x에 대해 그래디언트(gradient)를 계산한 것. 이 값은 확률 밀도가 높은 방향, 즉 데이터가 존재할 가능성이 높은 방향을 가리키는 벡터입니다. 모델은 이 점수 함수를 신경망으로 근사하여 학습합니다.
+
+* $- \frac{1}{2} g(t)^2 \nabla_x \log p_t(x)$ : 이 항은 SDE의 무작위 확산(diffusion) 항을 결정론적인 흐름으로 변환하는 역할을 합니다. 점수 함수가 가리키는 방향(확률이 높아지는 방향)으로 x를 이동시켜, 노이즈를 제거하고 원본 데이터의 형태를 복원하는 핵심적인 부분입니다.
+
+* 결론적으로, 방정식 (13)은 순방향 SDE의 평균적인 움직임(f(x,t))과 점수 함수를 통해 추정된 데이터 생성 방향$- \frac{1}{2} g(t)^2 \nabla_x \log p_t(x)$을 결합하여, 노이즈( $x(T)$ )에서 시작해 원본 데이터( $x(0)$ )로 변환되는 결정론적인 경로를 제시합니다.
+
+##### Neural ODEs
+
+* 점수 함수 $\nabla_x \log p_t(x)$는 실제로 알 수 없기 때문에, 이를 신경망 모델 $s_\theta(x, t)$로 근사
+
+$$\frac{dx}{dt} = f(x,t) - \frac{1}{2} g(t)^2 s_\theta(x,t)$$
+
+* 정확한 가능도 계산 (Exact Likelihood Computation): 신경망 ODE의 특징인 '순간 변수 변환 공식(instantaneous change of variables formula)'을 사용하여 어떤 데이터에 대한 정확한 로그 가능도(log-likelihood)를 계산할 수 있습니다.
+
+* 잠재 표현 조작 (Manipulating Latent Representations): 이 ODE를 순방향으로 풀면 데이터(x(0))를 잠재 공간의 표현(x(T))으로 인코딩할 수 있고, 역방향으로 풀면 다시 디코딩할 수 있습니다. 이는 이미지 보간(interpolation)과 같은 다양한 편집 작업을 가능하게 합니다.
+
+* 고유하게 식별 가능한 인코딩 (Uniquely Identifiable Encoding): 순방향 과정(SDE)은 학습 가능한 파라미터가 없으므로, 완벽하게 학습된 점수 모델이 주어지면 어떤 데이터에 대한 잠재 표현은 유일하게 결정됩니다.
+
+* 효율적인 샘플링 (Efficient Sampling): 범용 ODE 솔버(black-box ODE solver)를 사용하면 샘플링 속도와 정확도 사이의 균형을 유연하게 조절할 수 있습니다. 예를 들어, 오차 허용치를 높이면 계산량을 90% 이상 줄이면서도 시각적 품질 저하 없이 샘플을 생성할 수 있습니다
+
+### 4.4 ARCHITECTURE IMPROVEMENTS
+
+저자들은 주로 Ho et al. (2020)의 DDPM 아키텍처를 기반으로 다음과 같은 요소들을 추가하고 실험했습니다.
+
+
+1. FIR을 이용한 안티앨리어싱 (Anti-aliasing with FIR): 이미지를 업샘플링하거나 다운샘플링할 때 발생하는 계단 현상이나 깨짐(aliasing)을 줄이기 위해 FIR(Finite Impulse Response) 필터를 사용했습니다. 이는 StyleGAN-2에서 효과가 입증된 기법입니다.
+
+2. 스킵 연결 리스케일링 (Skip Connection Rescaling): 모델 내의 모든 스킵 연결(skip connection)의 가중치를 $1/\sqrt{2}$로 조정했습니다. 이는 ProgressiveGAN, StyleGAN 등 성공적인 GAN 모델들에서 학습 안정성과 성능을 높이기 위해 사용된 기법입니다.
+
+3. BigGAN 잔차 블록 (BigGAN Residual Blocks): 기존 DDPM의 잔차 블록(residual block)을 더 성능이 좋은 것으로 알려진 BigGAN의 잔차 블록으로 교체했습니다.
+
+4. 잔차 블록 수 증가 (Increased Residual Blocks): 각 해상도 레벨마다 사용되는 잔차 블록의 수를 2개에서 4개로 늘려 모델의 깊이와 표현력을 향상시켰습니다.
+
+5. 점진적 성장 아키텍처 (Progressive Growing): 저해상도부터 고해상도까지 점진적으로 이미지를 생성하는 아키텍처를 도입했습니다. StyleGAN-2에서 영감을 받아 입력과 출력에 "input skip", "residual" 등 다양한 방식을 적용했습니다.
+
+
+* 최적의 아키텍처: NCSN++와 DDPM++
+
+* VE SDE (SMLD 계열): 위에서 언급된 모든 개선 사항이 평균적으로 성능 향상에 기여했습니다. 이 요소들을 조합하여 최적화된 아키텍처를 NCSN++라고 명명했습니다.
+
+* VP SDE (DDPM 계열): VE SDE와는 약간 다르게, FIR 필터나 점진적 성장 아키텍처를 사용하지 않은 구성이 가장 좋은 성능을 보였습니다. 이 최적의 아키텍처는 DDPM++로 명명되었습니다
+
+
+### 5 CONTROLLABLE GENERATION
+
+* 핵심 아이디어: 조건부 역방향 SDE
+* 역방향 과정에 '가이드'를 추가하는 개념
+
+* 기존의 역방향 SDE 수식(Eq. 6)을 다음과 같이 수정합니다 (Eq. 14)
+
+$$dx = \left\{ f(x,t) - g(t)^2 \left[ \nabla_x \log p_t(x) + \nabla_x \log p_t(y|x) \right] \right\} dt + g(t) d\bar{w} \quad (14)$$
+
+
+* $\nabla_x \log p_t(x)$: 기존의 (무조건부) 점수 함수입니다. 데이터가 존재할 확률이 높은 방향을 알려줍니다.
+* $\nabla_x \log p_t(y|x)$: 조건부 점수 함수입니다. 현재의 노이즈 섞인 이미지 $x(t)$가 우리가 원하는 조건 y를 만족할 확률이 가장 높아지는 방향을 알려주는 '가이드' 역할을 합니다.
+
+
+#### 주요 응용 분야
+
+1. 클래스 조건부 생성 (Class-Conditional Generation)
+* "말 이미지를 만들어줘"와 같이 특정 클래스의 이미지를 생성하는 기술
+* 작동 방식: 먼저, 다양한 노이즈 레벨의 이미지(x(t))를 보고 해당 이미지의 클래스(y)를 맞추는 시간 의존적인 분류기(time-dependent classifier)를 별도로 학습, 분류기를 '가이드'로 사용
+
+2. 이미지 인페인팅 (Image Inpainting)
+* 빈 공간을 자연스럽게 채워 넣는 기술
+* 작동 방식: 여기서 조건(y)은 이미지의 '알려진 부분(known pixels)'이 됩니다. 모델은 알려진 픽셀 정보는 유지하면서, 알려지지 않은 '빈 공간(unknown dimensions)'에 대해서만 생성 과정을 진행
+
+3. 이미지 컬러화 (Colorization) 
+* 조건(y)은 '흑백 정보'가 됩니다. 모델은 주어진 흑백 정보를 바탕으로 비어있는 '색상 정보' 채널을 채워 넣는, 즉 인페인팅을 수행합
+
+### 6. CONCLUSION
+
+#### 성과 
+
+* 기존 연구 통합 (SMLD + DDPM)
+* 새로운 샘플링 알고리즘: 예측기-교정기(Predictor-Corrector)
+* 정확한 가능도 계산: 확률 흐름 ODE를 통해 모델의 가능도(likelihood)를 정확하게 계산
+* 잠재 공간 활용: 데이터를 잠재 코드로 고유하게 인코딩하고, 이를 조작하여 이미지를 편집하는 등 다양한 활용이 가능해졌습니다.
+* 제어 가능한 생성: 클래스 조건부 생성, 인페인팅, 컬러화 등 사용자가 원하는 조건에 맞는 이미지를 생성
+
+#### 한계점 및 향후 연구 방향
+* 샘플링 속도: 제안된 샘플링 방법들이 성능을 개선했지만, 여전히 GAN과 같은 모델에 비해 샘플링 속도가 느립니다. 따라서 점수 기반 모델의 안정적인 학습과 GAN의 빠른 샘플링 능력을 결합하는 연구가 중요한 과제로 남아있습니다.
+
+* 하이퍼파라미터: 다양한 샘플러를 사용할 수 있게 되면서, 조정해야 할 하이퍼파라미터의 수가 늘어났습니다. 앞으로 이러한 하이퍼파라미터를 자동으로 선택하고 조정하는 방법을 개선하고, 각 샘플러의 장단점을 더 깊이 연구할 필요가 있습니다
 
 
 
-#### SDE(Stochastic Differential Equation) 프레임워크와의 연결
-
-* DDPM에서 사용되는 노이즈 교란은 분산 보존(Variance Preserving, VP) SDE $(dx = -\frac{1}{2} \beta(t)x dt + \sqrt{\beta}(t) dw)$ 의 이산화로 간주될 수 있습니다.
-* 즉, 이산적인 노이즈 스케일 시퀀스 $\beta_i$는 연속적인 시간 함수 $\beta(t)$ 로 일반화됩니다.
 
 
-    ◦ DDPM 모델에서 βi는 일반적으로 **등차수열(arithmetic sequence)**을 따르며, βi = β̄min/N + (i-1)/(N(N-1))(β̄max - β̄min)와 같이 정의됩니다. N이 무한대로 갈 때, β(t) = β̄min + t(β̄max - β̄min)로 수렴합니다. 실험에서는 β̄min = 0.1, β̄max = 20과 같은 특정 값이 사용됩니다.
-• 수치적 고려사항: DDPM에 해당하는 VP SDE는 t=0에서 불연속성 문제는 없지만, t→0일 때 x(t)의 분산이 소멸되어 훈련 및 샘플링 시 수치적 불안정성 문제가 발생할 수 있습니다. 따라서 실제 계산에서는 t를 [ε, 1] 범위로 제한하며, 샘플링에는 ε = 10^-3, 훈련 및 가능도 계산에는 ε = 10^-5와 같은 작은 상수가 사용됩니다.
-• 일반화 및 개선: 새로운 SDE 기반 프레임워크는 DDPM의 원래 샘플링 방법인 선조 샘플링을 **예측기(predictor)**로 사용하고, 항등 함수(identity function)를 **교정기(corrector)**로 사용하는 예측기-교정기(Predictor-Corrector, PC) 샘플러로 일반화 및 개선합니다.
-요약하자면, β1에서 βN까지의 노이즈 스케일 시퀀스는 DDPM의 핵심적인 부분으로, 데이터를 점진적으로 노이즈로 손상시키고 이를 역전시키는 확률적 과정을 정의하며, 연속적인 SDE 프레임워크에서는 β(t) 함수로 일반화되어 모델의 훈련과 샘플링에 중요한 역할을 합니다.
+
+
+
+
+
