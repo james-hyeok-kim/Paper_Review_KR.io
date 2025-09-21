@@ -21,27 +21,35 @@
 * SMLD는 데이터에 노이즈를 점진적으로 주입하고, 그 과정을 역전시켜 데이터를 생성하는 것을 학습하는 방식
 
 #### SMLD 핵심
-* Noise 주입
+##### Noise 주입
 1. 데이터 분포 $p_{data}(x)$ 에 가우시안 노이즈 주입, 교란된 데이터 생성 $p_{\sigma}(\tilde{x})$, $p_{\sigma}(\tilde{x}|x) := \mathcal{N}(\tilde{x};x,\sigma^2I)$ 정규분포 따라는 교란 커널 사용(Perturbation Kernel)
 2. $\sigma_{min} \sim \sigma_{max}$ 모두 양수 노이즈 시퀀스 사용, $\sigma_1 < \sigma_2 < ... < \sigma_N$
 3. $\sigma_{min}$은 $p_{data}(x)$와 거의 동일하게 작고, $\sigma_{max}$는 $N(x; 0, \sigma_{max}^2I)$ 의 가우시안 분포를 따른다
 
-* 스코어 함수 추정
+##### 스코어 함수 추정
 1. 스코어 확률 밀도 그래디언트 $\nabla \log p_\sigma(x)$를 추정하기 위해 노이즈 조건부 스코어 네트워크 (NCSN, Noise Conditional Score Network) $s_\theta(x,\sigma)$ 라는 신경망을 훈련
 
 $$
 \theta^{*} = \arg \min_{\theta} \displaystyle\sum^{N}_{i=1} \sigma_i^2 \mathcal{E}_{p_{data}(x)}\mathcal{E}_{p_{\sigma_i}}(\tilde{x}|x) [\parallel s_{\theta}(\tilde{x}, \sigma_i) - \nabla_{\tilde{x}} \log p_{\sigma_i}(\tilde{x}|x) \parallel^2_2] \quad \quad (1)
 $$
 
+##### 훈련 과정
+
+1-1. 데이터에 노이즈 추가: 원본 고양이 사진(x)에 다양한 세기(σ)의 노이즈를 일부러 섞어 약간 망가진 이미지(x̃)를 만듭니다.
+
+1-2. 신경망에 질문: 신경망 $s_θ$에게 이 망가진 이미지$(x̃)$를 보여주며, "이 이미지를 다시 원본처럼 만들려면 어느 방향으로 수정해야 할까?"라고 묻습니다.
+
+1-3. 정답과 비교 및 학습: 신경망의 예측(스코어)이 실제 정답(원본으로 돌아가는 방향)과 같아지도록 계속 훈련시킵니다
+
 2. 충분한 데이터와 모델 용량이 주어지면, 최적의 스코어 기반 모델 $s_\theta(x, \sigma)$는 $\nabla_x \log p_\sigma(x)$와 거의 일치하게 된다.
 
-* 샘플 생성 (Langevin Dynamics)
+##### 샘플 생성 (Langevin Dynamics)
 
 1. 학습된 스코어 네트워크를 사용하여 새로운 데이터를 생성할 때는 랑주뱅 MCMC(Markov Chain Monte Carlo) 동역학
 2. 샘플링은 $\sigma_{max}$에 해당하는 단순한 가우시안 노이즈 $N(x | 0, \sigma_{max}^2I)$에서 $x_N$을 샘플링하는 것으로 시작
 3. 이후 노이즈 스케일을 N부터 1까지 점진적으로 줄여나가면서 일련의 랑주뱅 MCMC 단계를 순차적으로 실행하여 $x_1$을 얻습니다.
 4. 이 과정은 식 (2)에 설명되어 있습니다.
-* M이 무한대로 가고 스텝 크기 $ε_i$가 0으로 갈 때, $x_M^1$은 $p_{σ_{min}}(x)$ 또는 $p_{data}(x)$ 에서 정확한 샘플이 됩니다.
+* M이 무한대로 가고 스텝 크기 $ε_i$가 0으로 갈 때, $x^M_1$은 $p_{σ_{min}}(x)$ 또는 $p_{data}(x)$ 에서 정확한 샘플이 됩니다.
 
 $$
 x_i^m = x_i^{m-1}+\epsilon_i s_{\theta}^{*}(x_i^{m-1},\sigma_i) + \sqrt{2\epsilon_i}z_i^m, \quad \quad m=1, 2, \cdots, M, \quad \quad (2)
@@ -53,12 +61,27 @@ $$
 
 ---
 
-랑주뱅 MCMC동역학
+##### 랑주뱅 MCMC동역학
+
 랑주뱅 동역학은 물리 현상을 설명하기 위한 모델이고, 랑주뱅 MCMC 동역학은 그 모델을 통계적 샘플링을 위한 알고리즘으로 응용한 것
 
 * 랑주뱅 다이내믹스의 업데이트 규칙을 반복적으로 적용하여 마르코프 연쇄를 구성하는 샘플링 방법론 또는 알고리즘
 * 랑주뱅 MCMC는 SDE(Stochastic Differential Equation) 솔버가 다음 타임스텝의 샘플에 대한 초기 추정치를 제공하는 "예측기(predictor)" 단계 이후에, 추정된 샘플의 주변 분포를 "교정(corrector)"하는 역할을 합니다.
 * 예를 들어, SMLD(Score Matching with Langevin Dynamics)에서는 각 노이즈 스케일에서 스코어를 추정한 다음, 생성 과정 동안 점진적으로 노이즈 스케일을 줄여가며 랑주뱅 다이내믹스를 사용하여 샘플링합니다.
+
+## 알고리즘과 활용
+이 두 가지 힘을 합친 랑주뱅 MCMC의 기본 업데이트 규칙은 다음과 같습니다.
+
+$$x_{k+1} = x_k + \epsilon \nabla \log p(x_k) + \sqrt{2\epsilon} \cdot z_k$$
+
+ 
+* $x_{k+1}$: 공의 다음 위치
+
+* $x_k$: 공의 현재 위치
+
+* $\epsilon \nabla \log p(x_k)$: 그래디언트 항. 확률이 높은 쪽으로 이동시킵니다. $ϵ$는 이동 거리(step size)를 조절합니다.
+
+* $\sqrt{2\epsilon} \cdot z_k$: 노이즈 항. $z_k$는 평균이 0인 가우시안 분포에서 추출한 무작위 벡터(방향)입니다.
 
 ---
  
@@ -200,6 +223,16 @@ $$dx = \sqrt{\frac{d}{dt}[\sigma^2(t)]} \, dw \quad (9)$$
 
 * $\sqrt{\frac{d[\sigma^2(t)]}{dt}}$ : 확산 계수(diffusion coefficient)라 불리며, 시간 t에 얼마나 강한 노이즈를 추가할지를 결정합니다. 이는 이산적인 과정에서의 $\sqrt{\sigma_{i}^{2}-\sigma_{i-1}^{2}}$에 해당합니다. 즉, 시간 $t$에 따른 분산( $\sigma^2(t)$ )의 변화율에 따라 노이즈의 크기가 결정됩니다. 이 식에는 $dt$ 항이 없습니다. 이는 데이터를 특정 방향으로 이끄는 드리프트(drift)가 없고, 순수하게 노이즈만 추가되는 과정임을 의미합니다.
 
+
+##### 왜 dt 항이 없는가? (Drift가 없는 이유)
+* 일반적인 SDE는 $dx = f(x,t)dt + g(t)dw$ 형태로, dt가 포함된 드리프트(drift) 항과 dw가 포함된 확산(diffusion) 항으로 구성됩니다.
+
+* 드리프트 항 $(f(x,t)dt)$: 이미지를 특정 방향으로 꾸준히 밀어주는 힘입니다. 
+
+* 확산 항 $(g(t)dw)$: 이미지를 무작위로 흔드는 힘입니다.
+
+* 제시하신 수식 $dx = g(t)dw$ (여기서 $g(t) = d/dt[σ²(t)]$)에는 드리프트 항이 없습니다. 이는 이미지를 특정 방향으로 이끌지 않고, 순수하게 무작위 노이즈만 추가하여 점점 더 흐릿하게 만드는 과정
+
 ### 2. Variance Preserving (VP) SDE: DDPM의 연속적 일반화
 
 * DDPM도 데이터에 노이즈를 추가하지만 SMLD와는 약간 다른 방식
@@ -225,6 +258,24 @@ $$dx = -\frac{1}{2}\beta(t)x \, dt + \sqrt{\beta(t)} \, dw \quad(11)$$
 
 * $\sqrt{\beta(t)}dw$ : 이 항은 확산 항(diffusion term)으로, 노이즈를 추가하는 역할을 합니다.
 
+##### DDPM $\rightarrow$ SDE 확장 과정
+
+1. 변화량 분리하기
+* 먼저, DDPM의 한 단계 업데이트 식에서 이미지의 변화량($x_i - x_{i-1}$)만 따로 분리해 봅니다.
+
+$$x_i = \sqrt{1-\beta_i} x_{i-1} + \sqrt{\beta_i} z_{i-1}$$
+$$x_i - x_{i-1} = (\sqrt{1-\beta_i} - 1) x_{i-1} + \sqrt{\beta_i} z_{i-1}$$
+
+이 식은 '한 번의 단계 동안 이미지가 이만큼 변한다'는 의미입니다.
+
+2. '아주 작은 시간'으로 근사하기 (핵심 단계)
+* 이제 $N \rightarrow \infty$, 즉 시간 단계를 아주 잘게 쪼갠다고 가정합시다. 그러면 노이즈의 강도 $\beta_i$는 아주 작은 값이 됩니다.
+
+* 수학적 트릭: $\beta_i$가 0에 매우 가까울 때, 우리는 테일러 근사식을 사용할 수 있습니다: $\sqrt{1-\beta_i} \approx 1 - \frac{1}{2}\beta_i$
+
+$$x_i - x_{i-1} \approx \left( (1 - \frac{1}{2}\beta_i) - 1 \right) x_{i-1} + \sqrt{\beta_i} z_{i-1}$$
+
+$$x_i - x_{i-1} \approx -\frac{1}{2}\beta_i x_{i-1} + \sqrt{\beta_i} z_{i-1}$$
 
 ### 3. Sub-VP SDE: 새로운 제안 ("BEYOND")
 * 논문은 기존 모델들을 SDE로 통합하는 것에서 더 나아가, 이 프레임워크를 기반으로 새로운 SDE를 제안합니다. 이것이 바로 sub-VP SDE
@@ -294,7 +345,7 @@ $$dx = -\frac{1}{2}\beta(t)x \, dt + \sqrt{\beta(t)\left(1 - e^{-2 \int_{0}^{t} 
 
 * ODE equation
 
-$$dx = \left[ f(x,t) - \frac{1}{2} g(t)^2 \nabla_x \log p_t(x) \right] \quad (13) dt$$
+$$dx = \left[ f(x,t) - \frac{1}{2} g(t)^2 \nabla_x \log p_t(x) \right]dt \quad (13)$$
 
 * $dx$: x의 미소(infinitesimal) 변화량
 
