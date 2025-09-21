@@ -349,13 +349,11 @@ $$\frac{dx}{dt} = f(x,t) - \frac{1}{2} g(t)^2 s_\theta(x,t)$$
 
 * 핵심 아이디어: 조건부 역방향 SDE
 * 역방향 과정에 '가이드'를 추가하는 개념
-
 * 기존의 역방향 SDE 수식(Eq. 6)을 다음과 같이 수정합니다 (Eq. 14)
 
 $$
-dx = \left\{ f(x,t) - g(t)^2 \left[ \nabla_x \log p_t(x) + \nabla_x \log p_t(y|x) \right] \right\} dt + g(t) d\bar{w} \quad (14)
+dx = \left\{ f(x,t) - g(t)^2 \left[ \nabla_x \log p_t(x) + \nabla_x \log p_t(y \mid x) \right] \right\} dt + g(t) d\bar{w} \quad (14)
 $$
-
 
 * $\nabla_x \log p_t(x)$: 기존의 (무조건부) 점수 함수입니다. 데이터가 존재할 확률이 높은 방향을 알려줍니다.
 * $\nabla_x \log p_t(y|x)$: 조건부 점수 함수입니다. 현재의 노이즈 섞인 이미지 $x(t)$가 우리가 원하는 조건 y를 만족할 확률이 가장 높아지는 방향을 알려주는 '가이드' 역할을 합니다.
