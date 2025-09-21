@@ -352,7 +352,9 @@ $$\frac{dx}{dt} = f(x,t) - \frac{1}{2} g(t)^2 s_\theta(x,t)$$
 
 * 기존의 역방향 SDE 수식(Eq. 6)을 다음과 같이 수정합니다 (Eq. 14)
 
-$$dx = \left\{ f(x,t) - g(t)^2 \left[ \nabla_x \log p_t(x) + \nabla_x \log p_t(y|x) \right] \right\} dt + g(t) d\bar{w} \quad (14)$$
+$$
+dx = \left\{ f(x,t) - g(t)^2 \left[ \nabla_x \log p_t(x) + \nabla_x \log p_t(y|x) \right] \right\} dt + g(t) d\bar{w} \quad (14)
+$$
 
 
 * $\nabla_x \log p_t(x)$: 기존의 (무조건부) 점수 함수입니다. 데이터가 존재할 확률이 높은 방향을 알려줍니다.
