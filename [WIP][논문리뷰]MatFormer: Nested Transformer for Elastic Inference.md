@@ -10,6 +10,8 @@
 <img width="733" height="352" alt="image" src="https://github.com/user-attachments/assets/f1b87824-5c5b-4995-96da-b3b41b640adb" />
 </p>
 
+---
+
 ### Introduction
 
 * 해당 논문은 하나의 모델로 여러 크기의 모델을 지원하고자함
@@ -18,6 +20,7 @@
 * 폭넓은 적용성
   * 언어와 비전모델 모두 적용가능한 모델
 
+---
 
 ### Related Work
 #### 기존 연구의 한계 
@@ -43,6 +46,7 @@
 
 * 이전 연구는 대부분 기하급수적으로 많은 하위 모델을 최적화 하려고 노력하지만 MatFormer는 4개와 같이 매우 적은 수의 중첩된 하위 모델만 명시적으로 최적화
 
+---
 
 ### MatFormer
 
@@ -69,4 +73,30 @@
 * 동적 환경에서는 시스템 부하에 따라 모델 크기 조정
 * 그럼에도 불구하고 높은 일관성 유지
 
+---
 
+### 실험결과
+
+<p align = "center">
+<img width="875" height="334" alt="image" src="https://github.com/user-attachments/assets/b3da8b5b-980b-421c-9beb-5889148a577c" />
+</p>
+
+* MatFormer기반 언어모델(MatLM) vs OFA vs DynaBERT
+* 78M ~ 850M 파라미터까지 다양한 크기 학습
+* 평가 지표 : 검증 손실(validation loss), 25개 영어과제 1-shot 평가
+
+#### 주요결과
+
+##### MatLM
+
+<p align = "center">
+<img width="445" height="212" alt="image" src="https://github.com/user-attachments/assets/e9006990-a4ed-43ac-8d5a-557b8d34e91f" />
+</p>
+
+* LAMBADA 데이터셋, TriviaQA 데이터셋
+* Speculative Decoding 보다 빠르다
+
+##### MatVit
+* 적응형 이미지 검색 (Adaptive Image Retrieval)
+
+* 계산 비용을 40% 줄이면서도 검색 정확도 하락은 0.5% 미만으로 유지할 수있다.
