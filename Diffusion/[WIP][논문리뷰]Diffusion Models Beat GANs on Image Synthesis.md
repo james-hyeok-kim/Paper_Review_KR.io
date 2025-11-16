@@ -147,5 +147,6 @@ $$p_{\theta,\phi}(x_t | x_{t+1}, y) \propto \underbrace{p_{\theta}(x_t | x_{t+1}
 * 기존 분포: $\mathcal{N}(\mu, \Sigma)$
 * 안내된 분포 (근사): $\mathcal{N}(\mathbf{\mu + \Sigma g}, \Sigma)$
 
+* Algorithm 1 에서 샘플링 시 평균에 $s\Sigma \nabla_{x_t} \log p_{\phi}(y|x_t)$ (즉, $s\Sigma \mathbf{g}$)를 더해주는 이유
 
 <img width="787" height="237" alt="image" src="https://github.com/user-attachments/assets/0d205809-49b1-41d8-b9fe-350a2fc517df" />
