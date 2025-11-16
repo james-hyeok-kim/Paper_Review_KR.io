@@ -149,4 +149,22 @@ $$p_{\theta,\phi}(x_t | x_{t+1}, y) \propto \underbrace{p_{\theta}(x_t | x_{t+1}
 
 * Algorithm 1 에서 샘플링 시 평균에 $s\Sigma \nabla_{x_t} \log p_{\phi}(y|x_t)$ (즉, $s\Sigma \mathbf{g}$)를 더해주는 이유
 
+$$
+\begin{aligned}
+\log p_\phi(y|x_t) &\approx \log p_\phi(y|x_t)|_{x_t=\mu} + (x_t - \mu) \nabla_{x_t} \log p_\phi(y|x_t)|_{x_t=\mu} \quad &(5) \\
+&= (x_t - \mu)g + C_1 \quad &(6)
+\end{aligned}
+$$
+
+$g = \nabla_{x_t} \log p_\phi(y|x_t)|_{x_t=\mu}$, and $C_1$ is a constant
+
+$$
+\begin{aligned}
+\log(p_\theta(x_t|x_{t+1})p_\phi(y|x_t)) &\approx -\frac{1}{2}(x_t - \mu)^T \Sigma^{-1} (x_t - \mu) + (x_t - \mu)g + C_2 \quad &(7) \\
+&= -\frac{1}{2}(x_t - \mu - \Sigma g)^T \Sigma^{-1} (x_t - \mu - \Sigma g) + \frac{1}{2}g^T \Sigma g + C_2 \quad &(8) \\
+&= -\frac{1}{2}(x_t - \mu - \Sigma g)^T \Sigma^{-1} (x_t - \mu - \Sigma g) + C_3 \quad &(9) \\
+&= \log p(z) + C_4, \quad z \sim \mathcal{N}(\mu + \Sigma g, \Sigma) \quad &(10)
+\end{aligned}
+$$
+
 <img width="787" height="237" alt="image" src="https://github.com/user-attachments/assets/0d205809-49b1-41d8-b9fe-350a2fc517df" />
