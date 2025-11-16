@@ -50,6 +50,13 @@
 * Learned Variance
   * DDPM에서는 분산이 상수로 고정했지만 이 논문은 분산을 학습 하도록 했음
   * 50단계 미만의 샘플링은 DDIM 방식을 채택
+
+$$\Sigma_\theta(x_t, t) = \exp(v \log \beta_t + (1 - v) \log \tilde{\beta}_t)$$
+
+* $\beta_t, \tilde{\beta}_t$ 사이 interpolation
+* $\Sigma_\theta(x_t, t), \epsilon_\theta(x_t, t)$ 둘다 학습
+ 
+
 #### 성능 평가 지표
 * FID(Frechet Inception Distance) : 이미지 품질과 다양성 판단
 * IS(Inception Score) : 특정 클래스 분류 되는지 품질과 다양성 측정
