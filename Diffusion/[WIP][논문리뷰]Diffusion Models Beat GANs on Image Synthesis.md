@@ -222,7 +222,7 @@ $$
 
 ### Scaling Classifier Gradients
 
-$$\hat{\epsilon}(x_t) := \epsilon_\theta(x_t) - \sqrt{1-\bar{\alpha}_t} \cdot \red{s} \cdot \nabla_{x_t} \log p_\phi(y|x_t)$$
+$$\hat{\epsilon}(x_t) := \epsilon_\theta(x_t) - \sqrt{1-\bar{\alpha}_t} \cdot s \cdot \nabla_{x_t} \log p_\phi(y|x_t)$$
 
 * 단순히 $s=1$을 사용하면 생성된 이미지가 클래스 조건($y$)을 따르기는 하지만, 여전히 모호하거나 해당 클래스의 가장 전형적인 특징을 보여주지 못하는 경우가 많음
 
