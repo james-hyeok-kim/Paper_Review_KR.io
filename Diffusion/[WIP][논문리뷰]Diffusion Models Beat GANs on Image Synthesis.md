@@ -156,6 +156,8 @@ $$
 \end{aligned}
 $$
 
+*  $\log p_\phi(y|x_t)$를 평균 $\mu$ 에서 테일러 급수를 사용한 1차 항 근사 (식 5~6)
+
 $g = \nabla_{x_t} \log p_\phi(y|x_t)|_{x_t=\mu}$, and $C_1$ is a constant
 
 $$
@@ -167,4 +169,46 @@ $$
 \end{aligned}
 $$
 
+* 식 7
+  * 좌변, Diffusion의 역과정(Reverse process) 확률 $p_\theta$와 분류기 확률 $p_\phi$를 곱한 것의 로그
+  * 우변 첫째항, Diffusion 모델의 역과정 $p_\theta(x_t|x_{t+1})$은 정규분포 $\mathcal{N}(\mu, \Sigma)$를 따릅니다. 정규분포의 로그 취하면 2차 형식(Quadratic form)인 $-\frac{1}{2}(x-\mu)^T\Sigma^{-1}(x-\mu)$
+  * 우변의 두 번째 항 ($(x_t - \mu)g$): 식 (6)에서 구한 분류기의 근사값
+
+* 식 8~9 완전 제곱식 만들기
+  * $-\frac{1}{2}(x-\mu)^T\Sigma^{-1}(x-\mu) + (x-\mu)g$ 형태를 정리하면, 평균이 이동된 새로운 2차 형식 $-\frac{1}{2}(x - (\mu + \Sigma g))^T \Sigma^{-1} (x - (\mu + \Sigma g))$ 꼴로 바꿀 수
+  * 남는 찌꺼기 항들($\frac{1}{2}g^T \Sigma g$ 등)은 $x_t$와 무관하므로 상수로 처리되어 $C_3$로 흡수
+
+* 식 10
+  * 이는 평균이 $\mu + \Sigma g$이고 공분산이 $\Sigma$인 정규분포의 로그 확률 밀도 함수(log-pdf)와 모양이 같음
+  * 분류기 정보( $y$ )를 반영하여 샘플링할 분포는 원래의 평균 $\mu$에서 $\Sigma g$만큼 이동한 정규분포
+
+* Key Takeaway
+  * $\mu' = \mu + \Sigma \cdot \nabla \log p(y|x_t)$
+
+### Conditional Sampling for DDIM
+
 <img width="787" height="237" alt="image" src="https://github.com/user-attachments/assets/0d205809-49b1-41d8-b9fe-350a2fc517df" />
+
+* DDPM 방식에서 DDIM 샘플링 과정 적용 관련 내용
+  * 위에 조건부 샘플링, Stochastic한 샘플링에서만 유효
+  * DDIM 같은 Deterministic한 샘플링 에는 적용 불가
+
+* DDPM과 DDIM의 공통적 관계
+* 모델이 예측한 노이즈 $\epsilon_\theta(x_t)$는 데이터 분포의 로그 기울기(Score)와 비례
+
+$$\nabla_{x_t} \log p(x_t) \propto - \frac{\epsilon_\theta(x_t)}{\sqrt{1-\bar{\alpha}_t}}$$
+
+$$\nabla_{x_t} \log p(x_t|y) = \underbrace{\nabla_{x_t} \log p(x_t)}_{\text{Unconditional Score}} + \underbrace{\nabla_{x_t} \log p(y|x_t)}_{\text{Classifier Gradient}}$$
+
+* 이를 이용해 조건부 노이즈 예측값 정의
+
+
+
+$$
+\begin{aligned}
+\nabla_{x_t} \log(p_\theta(x_t)p_\phi(y|x_t)) &= \nabla_{x_t} \log p_\theta(x_t) + \nabla_{x_t} \log p_\phi(y|x_t) \quad &(12) \\
+&= -\frac{1}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_\theta(x_t) + \nabla_{x_t} \log p_\phi(y|x_t) \quad &(13) \\
+\hat{\epsilon}(x_t) := \epsilon_\theta(x_t) - \sqrt{1 - \bar{\alpha}_t} \nabla_{x_t} \log p_\phi(y|x_t) \quad (14)
+\end{aligned}
+$$
+
