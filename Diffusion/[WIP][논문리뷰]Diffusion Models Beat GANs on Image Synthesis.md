@@ -81,7 +81,9 @@ $$L_{\text{simple}} + \lambda L_{\text{vlb}}$$
 4. BigGAN의 residual block을 upsampling과 downsampling에 사용
 5. Residual connection을 $\frac{1}{\sqrt{2}}$로 rescale
 
+<p align="center">
 <img width="736" height="274" alt="image" src="https://github.com/user-attachments/assets/7dc5bc62-f001-4eac-87f9-d2976f11f53a" />
+</p>
 
 #### 주요 발견 및 결정사항
 * 너비 > 깊이
@@ -104,8 +106,9 @@ $$AdaGN(h, y) = y_s \cdot GroupNorm(h) + y_b$$
 
 * 성능 저자들은 이 AdaGN 방식이 기존의 단순 덧셈 방식(Ho et al. [25])보다 FID를 확실하게 향상시키는 것을 Table 3에서 확인
 
+<p align="center">
 <img width="796" height="170" alt="image" src="https://github.com/user-attachments/assets/4274fae2-4575-40e6-9987-fed11f368e6f" />
-
+</p>
 
  ### Classifier Guidance
  * GAN은 클래스 정보를 적극적으로 활용하여(예: 클래스 조건부 정규화) 품질을 높임
@@ -131,7 +134,9 @@ $$AdaGN(h, y) = y_s \cdot GroupNorm(h) + y_b$$
 
 ### Conditional Reverse Noising Process
 
+<p align="center">
 <img width="787" height="230" alt="image" src="https://github.com/user-attachments/assets/e8cdcd9c-5b47-4bdb-ad2e-ce7cb9d212ba" />
+</p>
 
 $$p_{\theta,\phi}(x_t | x_{t+1}, y) \propto \underbrace{p_{\theta}(x_t | x_{t+1})}_{\text{A. 확산 모델}} \cdot \underbrace{p_{\phi}(y | x_t)}_{\text{B. 분류기}}$$
 
@@ -187,7 +192,9 @@ $$
 
 ### Conditional Sampling for DDIM
 
+<p align="center">
 <img width="787" height="237" alt="image" src="https://github.com/user-attachments/assets/0d205809-49b1-41d8-b9fe-350a2fc517df" />
+</p>
 
 * DDPM 방식에서 DDIM 샘플링 과정 적용 관련 내용
   * 위에 조건부 샘플링, Stochastic한 샘플링에서만 유효
@@ -224,7 +231,9 @@ $$\hat{\epsilon}(x_t) := \epsilon_\theta(x_t) - \sqrt{1-\bar{\alpha}_t} \cdot \r
 * $s \approx 1$ 분류기 개입이 적고, 다양성 높고, 이미지 특징이 약하거나 흐릿
 * $s > 1$ 분류기 강하게 개입, 품질/충실도 높음, 다양성 감소
 
+<p align="center">
 <img width="667" height="205" alt="image" src="https://github.com/user-attachments/assets/c9afcf09-e104-4f7d-b2f2-b31dafbc4d1b" />
+</p>
 
 * Metrics (지표)
   * FID ($\downarrow$): 낮을수록 좋음 (이미지 품질 + 다양성 종합 점수)
@@ -235,7 +244,9 @@ $$\hat{\epsilon}(x_t) := \epsilon_\theta(x_t) - \sqrt{1-\bar{\alpha}_t} \cdot \r
 
 ### Result
 
+<p align="center">
 <img width="598" height="502" alt="image" src="https://github.com/user-attachments/assets/3ca1d688-65a6-4aaa-9b37-bfc705c02160" />
+</p>
 
 #### SOTA 달성
 
