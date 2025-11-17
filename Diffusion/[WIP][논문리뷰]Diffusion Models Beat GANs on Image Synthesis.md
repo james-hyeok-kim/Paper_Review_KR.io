@@ -212,3 +212,60 @@ $$
 \end{aligned}
 $$
 
+
+### Scaling Classifier Gradients
+
+$$\hat{\epsilon}(x_t) := \epsilon_\theta(x_t) - \sqrt{1-\bar{\alpha}_t} \cdot \red{s} \cdot \nabla_{x_t} \log p_\phi(y|x_t)$$
+
+* 단순히 $s=1$을 사용하면 생성된 이미지가 클래스 조건($y$)을 따르기는 하지만, 여전히 모호하거나 해당 클래스의 가장 전형적인 특징을 보여주지 못하는 경우가 많음
+
+* 강아지일 수도 있는 이미지를 누가봐도 확실한 강아지 이미지를 생성하려고 노력
+
+* $s \approx 1$ 분류기 개입이 적고, 다양성 높고, 이미지 특징이 약하거나 흐릿
+* $s > 1$ 분류기 강하게 개입, 품질/충실도 높음, 다양성 감소
+
+<img width="667" height="205" alt="image" src="https://github.com/user-attachments/assets/c9afcf09-e104-4f7d-b2f2-b31dafbc4d1b" />
+
+* Metrics (지표)
+  * FID ($\downarrow$): 낮을수록 좋음 (이미지 품질 + 다양성 종합 점수)
+  * IS ($\uparrow$): 높을수록 좋음 (이미지의 선명도 및 클래스 명확성)
+  * Precision ($\uparrow$): 높을수록 좋음 (이미지 품질/충실도)
+  * Recall ($\uparrow$): 높을수록 좋음 (이미지 다양성)
+
+
+### Result
+
+<img width="598" height="502" alt="image" src="https://github.com/user-attachments/assets/3ca1d688-65a6-4aaa-9b37-bfc705c02160" />
+
+#### SOTA 달성
+
+* ImageNet에서, Diffusion 모델이 당시 최고 성능의 모델들을 제치고 1등을
+
+* ADM (Ablated Diffusion Model) 저자들이 만든 모델
+
+* 경쟁 상대: BigGAN-deep (당시 최강의 GAN), VQ-VAE-2 (Likelihood 기반 모델)
+
+* 결과 (ImageNet 256x256)
+  * ADM-G (Guidance 적용): FID 3.97을 기록하며 BigGAN-deep(FID 6.95)을 큰 차이로 이겼습니다.
+  * ADM (Guidance 미적용): 가이드 없이도 FID 10.94를 기록하여 Diffusion 자체의 강력함을 보여주었습니다.
+
+* 의미: "Diffusion 모델은 생성 속도가 느리고 화질이 흐릿하다"는 편견을 깨고, "GAN보다 더 진짜 같은 이미지를 만들 수 있다"는 것을 최초로 입증했습니다.
+
+#### Fidelity(품질) vs Diversity(다양성) 트레이드오프 분석
+
+* Precision(품질) - Recall(다양성) 곡선
+
+* GAN : 품질은 좋지만 다양성이 떨어지는(Recall이 낮은) 영역
+* Diffusion : Diffusion은 Scale $s$를 조절함으로써, "다양성을 중시하는 모드(High Recall)"와 "고화질을 중시하는 모드(High Precision)" 사이를 자유롭게 오갈 수 있음
+
+#### 고해상도 (ImageNet 512x512)
+
+* 방식: 512x512 이미지를 한 번에 생성하는 것은 계산 비용이 너무 큽니다. 따라서 Upsampling(업샘플링) 방식을 사용했습니다.
+
+* 먼저 저해상도 모델로 이미지를 생성합니다.
+* 별도로 훈련된 Upsampler Diffusion Model을 사용해 이를 512x512로 키웁니다.
+* 결과: 이 방식(Guidance 포함)으로 FID 3.85를 기록하며, 역시 BigGAN-deep을 능가
+
+#### 정성적 평가 (Qualitative Results)
+* GAN: 종종 기괴한 텍스처나 무너진 구조(Artifacts)가 나타나는 경향이 있습니다.
+* Diffusion (ADM-G): 전체적인 구조(Global Structure)가 매우 안정적이며, 털 질감이나 그림자 같은 세부 묘사가 훨씬 자연스럽습니다. 특히 Guidance를 강하게 줄수록(Scale이 높을수록) 물체가 더 명확해지는 현상을 시각적으로 확인
