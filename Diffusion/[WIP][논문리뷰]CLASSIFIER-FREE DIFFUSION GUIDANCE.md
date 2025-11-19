@@ -19,7 +19,7 @@
 
 ---
 
-### Introduction
+### 1. Introduction
 
 #### 기존 문제점
 
@@ -35,7 +35,7 @@
 
 ---
 
-### Background
+### 2. Background
 #### Forward Process Noise
 
 $$
@@ -134,3 +134,71 @@ $$
 * 조건부 모델링: 클래스 조건(예: '강아지' 사진 생성)을 줄 때는, 모델 입력에 클래스 정보 $c$만 추가하면 됩니다 ( $\epsilon_\theta(z_\lambda, c)$ ).
 
 
+---
+
+### 3. GUIDANCE
+
+* GAN이나 Flow 모델 같은 경우, '트렁케이션(truncation)'이나 '저온 샘플링(low temperature sampling)'을 통해 입력 노이즈의 분산을 줄임으로써 이미지 품질을 높임
+* 확산 모델의 문제: 하지만 확산 모델에서는 단순히 노이즈의 분산을 줄이거나 점수(Score)를 스케일링하면, 이미지가 선명해지는 것이 아니라 흐릿하고 품질이 낮은 결과
+* 가이던스(Guidance)라는 특별한 기법이 필요
+
+#### 3.1 Classifier Guidance (기존 방식)
+
+$$
+\hat{\epsilon}_\theta(\mathbf{z}_\lambda, c) = \epsilon_\theta(\mathbf{z}_\lambda, c) - w \sigma_\lambda \nabla_{\mathbf{z}_\lambda} \log p_\theta(c|\mathbf{z}_\lambda) \approx -\sigma_\lambda \nabla_{\mathbf{z}_\lambda} [\log p(\mathbf{z}_\lambda|c) + w \log p_\theta(c|\mathbf{z}_\lambda)]
+$$
+
+* $\epsilon_{\theta}(z_{\lambda},c)$: 확산 모델이 예측한 조건부 스코어 (즉, 데이터가 있어야 할 방향)입니다
+* $\nabla_{z_{\lambda}}\log~p_{\theta}(c|z_{\lambda})$: 보조 분류기가 예측한 클래스 $c$에 대한 로그 우도의 그래디언트입니다. 이 항은 모델이 "분류기가 선호하는 방향"으로 움직이도록 만듭니다
+* $w$는 가이던스 강도(strength)를 조절하는 파라미터
+
+
+$$
+\tilde{p}_\theta(\mathbf{z}_\lambda|\mathbf{c}) \propto p_\theta(\mathbf{z}_\lambda|\mathbf{c}) \cdot p_\theta(\mathbf{c}|\mathbf{z}_\lambda)^w
+$$
+
+$$
+\epsilon_\theta(\mathbf{z}_\lambda, c) \rightarrow \tilde{\epsilon}_\theta(\mathbf{z}_\lambda, c)
+$$
+
+* 샘플링 시 $\tilde{\epsilon}$ 사용하면 위에서 언급된 방식의 샘플을 생성하는 것과 동일합니다.
+
+<img width="813" height="293" alt="image" src="https://github.com/user-attachments/assets/a356691e-eff5-46ed-960e-b3826073fc31" />
+
+* 가이던스 강도($w$)를 높일수록 데이터 분포가 넓게 퍼져 있는 형태에서 특정 지점으로 좁게 모이는(집중되는) 현상. 이는 다양성이 줄어들고 품질(확실성)이 높아짐을 시각적으로 보여줍
+
+
+$$
+\begin{align}
+&\epsilon_\theta(\mathbf{z}_\lambda) - (w+1)\sigma_\lambda \nabla_{\mathbf{z}_\lambda} \log p_\theta(c | \mathbf{z}_\lambda) \approx - \sigma_\lambda \nabla_{\mathbf{z}_\lambda} \left[ \log p(\mathbf{z}_\lambda) + (w+1) \log p_\theta(c | \mathbf{z}_\lambda) \right] \\
+&\qquad = - \sigma_\lambda \nabla_{\mathbf{z}_\lambda} \left[ \log p(\mathbf{z}_\lambda)p_\theta(c | \mathbf{z}_\lambda) + w \log p_\theta(c | \mathbf{z}_\lambda) \right] \\
+&\qquad = - \sigma_\lambda \nabla_{\mathbf{z}_\lambda} \left[ \log p(\mathbf{z}_\lambda | c) + w \log p_\theta(c | \mathbf{z}_\lambda) \right]
+\end{align}
+$$
+
+* Unconditional model에 가중치 w+1로 classifier guidance를 적용하면 이론적으로 가중치 w 로 conditional model에 적용하는 것과 동일한 결과가 나타난다.
+
+
+
+#### 3.2 Classifier-Free Guidance
+
+* $\epsilon_\theta(\mathbf{z}_\lambda, c)$ 를 수정하여 Classifier 없이 Classifier Guidance와 같은 효과를 얻고자 함
+
+##### Algorithm 1
+
+<img width="808" height="257" alt="image" src="https://github.com/user-attachments/assets/f1f4c17c-d656-4cf7-99a9-1eedd5bef339" />
+
+* 별도의 분류기를 훈련하는 대신 단일 모델 사용, 조건부 확산 모델( $\epsilon_{\theta}(z_{\lambda},c)$ )과 비조건부 확산 모델( $\epsilon_{\theta}(z_{\lambda})$)을 단일 네트워크로 통합
+* 비조건부 훈련: 훈련 중 일정 확률 $p_{uncond}$로 조건 정보 $c$(클래스 라벨)를 널 토큰(null token, $\emptyset$)으로 설정하여 제거
+  * $c=\emptyset$일 때 모델은 비조건부 점수 추정치( $\epsilon_{\theta}(z_{\lambda})$ )를 학습
+  * 장점: 이 방식은 훈련 파이프라인을 복잡하게 만들지 않고, 총 모델 파라미터 수를 늘리지 않아 매우 간단합니다
+
+# Here!!
+
+##### Sampling, 점수 결합
+
+$$\tilde{\epsilon}_{\theta}(z_{\lambda},c)=(1+w)\epsilon_{\theta}(z_{\lambda},c)-w\epsilon_{\theta}(z_{\lambda}) \quad \text{[cite: 120]} \quad (6)$$
+
+* $\epsilon_{\theta}(z_{\lambda},c)$: 클래스 $c$를 조건으로 한 조건부 점수 (클래스 $c$ 쪽으로 이동)
+* $\epsilon_{\theta}(z_{\lambda})$: 조건이 없는 비조건부 점수 (모든 데이터 쪽으로 이동).$w$: 가이던스 강도를 조절하는 매개변수입니다. $w$가 클수록 가이던스가 강해집니다
+* 효과 해석: 이 수식은 **"조건부 확률($\epsilon_{\theta}(z_{\lambda},c)$)의 방향을 비조건부 확률($\epsilon_{\theta}(z_{\lambda})$)의 방향보다 $w$만큼 더 강조"**하라는 의미로, 클래스 $c$에 해당하는 특징을 증폭시키는 효과를 가져옵니다.
