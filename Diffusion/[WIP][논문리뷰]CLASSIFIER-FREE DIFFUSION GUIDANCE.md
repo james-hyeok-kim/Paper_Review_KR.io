@@ -188,17 +188,186 @@ $$
 
 <img width="808" height="257" alt="image" src="https://github.com/user-attachments/assets/f1f4c17c-d656-4cf7-99a9-1eedd5bef339" />
 
-* 별도의 분류기를 훈련하는 대신 단일 모델 사용, 조건부 확산 모델( $\epsilon_{\theta}(z_{\lambda},c)$ )과 비조건부 확산 모델( $\epsilon_{\theta}(z_{\lambda})$)을 단일 네트워크로 통합
-* 비조건부 훈련: 훈련 중 일정 확률 $p_{uncond}$로 조건 정보 $c$(클래스 라벨)를 널 토큰(null token, $\emptyset$)으로 설정하여 제거
-  * $c=\emptyset$일 때 모델은 비조건부 점수 추정치( $\epsilon_{\theta}(z_{\lambda})$ )를 학습
+* 별도의 분류기를 훈련하는 대신 단일 모델 사용, 조건부 확산 모델( $\epsilon_{\theta}(z_{\lambda},c)$ )과 비조건부 확산 모델( $\epsilon_{\theta}(z_{\lambda})$ )을 단일 네트워크로 통합
+* 비조건부 훈련: 훈련 중 일정 확률 $p_{uncond}$ 로 조건 정보 $c$ (클래스 라벨)를 널 토큰(null token, $\emptyset$ )으로 설정하여 제거
+  * $c=\emptyset$ 일 때 모델은 비조건부 점수 추정치( $\epsilon_{\theta}(z_{\lambda})$ )를 학습
   * 장점: 이 방식은 훈련 파이프라인을 복잡하게 만들지 않고, 총 모델 파라미터 수를 늘리지 않아 매우 간단합니다
 
-# Here!!
+$$\epsilon_\theta(\mathbf{z}_{\lambda}) = \epsilon_\theta(\mathbf{z}_{\lambda}, c=\emptyset)$$
 
 ##### Sampling, 점수 결합
 
 $$\tilde{\epsilon}_{\theta}(z_{\lambda},c)=(1+w)\epsilon_{\theta}(z_{\lambda},c)-w\epsilon_{\theta}(z_{\lambda}) \quad \text{[cite: 120]} \quad (6)$$
 
 * $\epsilon_{\theta}(z_{\lambda},c)$: 클래스 $c$를 조건으로 한 조건부 점수 (클래스 $c$ 쪽으로 이동)
-* $\epsilon_{\theta}(z_{\lambda})$: 조건이 없는 비조건부 점수 (모든 데이터 쪽으로 이동).$w$: 가이던스 강도를 조절하는 매개변수입니다. $w$가 클수록 가이던스가 강해집니다
-* 효과 해석: 이 수식은 **"조건부 확률($\epsilon_{\theta}(z_{\lambda},c)$)의 방향을 비조건부 확률($\epsilon_{\theta}(z_{\lambda})$)의 방향보다 $w$만큼 더 강조"**하라는 의미로, 클래스 $c$에 해당하는 특징을 증폭시키는 효과를 가져옵니다.
+* $\epsilon_{\theta}(z_{\lambda})$: 조건이 없는 비조건부 점수 (모든 데이터 쪽으로 이동)
+* $w$: 가이던스 강도를 조절하는 매개변수입니다. $w$가 클수록 가이던스가 강해집니다
+* 효과 해석: 이 수식은 "조건부 확률( $\epsilon_{\theta}(z_{\lambda},c)$ )의 방향을 비조건부 확률( $\epsilon_{\theta}(z_{\lambda})$ )의 방향보다 $w$만큼 더 강조"하라는 의미로, 클래스 $c$ 에 해당하는 특징을 증폭시키는 효과를 가져옵니다.
+
+##### 의의
+* $\nabla_{z_{\lambda}}\log~p_{\theta}(c|z_{\lambda})$ 별도의 Classifier 없음으로 $\tilde{\epsilon}_{\theta}$ 으로 가는 것이 Gradient-based Adversarial Attack이라고 볼수 없다
+
+##### 암묵적 분류기(Implicit Classifier)로부터의 영감
+* 이상적인 경우: 정확한 점수( $\epsilon^{*}$ )의 사용
+* 만약 우리가 학습된 모델의 추정치 $\epsilon_{\theta}$ 대신, 확률 분포 $p(z_{\lambda}|c)$ 와 $p(z_{\lambda})$ 의 정확한 점수( $\epsilon^{*}$ )를 알고 있다고 가정하면 다음과 같은 관계가 성립
+* 암묵적 분류기의 정의: 베이즈 정리(Bayes' rule)를 사용하여 암묵적 분류기 $p^{i}(c|z_{\lambda})$를 정의
+
+$$p^{i}(c|z_{\lambda}) \propto \frac{p(z_{\lambda}|c)}{p(z_{\lambda})}$$
+
+* 암묵적 분류기의 그래디언트: 이 암묵적 분류기의 로그 우도 그래디언트는 정확한 점수를 사용하여 다음과 같이 표현됩니다
+
+$$
+\nabla_{\mathbf{z}_{\lambda}}\log p(c|\mathbf{z}_{\lambda}) \approx -\frac{1}{\sigma_{\lambda}}[\epsilon_{\theta}(\mathbf{z}_{\lambda}, c) - \epsilon_{\theta}(\mathbf{z}_{\lambda})]
+$$
+
+* 이상적인 분류기 가이던스 $\tilde{\epsilon}_{\theta}$
+  * 이 그래디언트를 분류기 가이던스 수식에 대입하면, 이상적인 가이던스 점수 $\tilde{\epsilon}_{\theta}$ 는 CFG 수식과 정확히 동일한 형태를 갖습니다.
+
+$$
+\tilde{\epsilon}_{\theta}(\mathbf{z}_{\lambda}, c) = (1+w)\epsilon_{\theta}(\mathbf{z}_{\lambda}, c) - w\epsilon_{\theta}(\mathbf{z}_{\lambda})
+$$
+
+* 암묵적 분류기
+
+$$
+p^{i}(c|z) \propto p(z|c)/p(z)
+$$
+
+* 이상적인 분류기 가이던스
+
+$$
+\nabla_{z_{\lambda}}\log p^{i}(c|z_{\lambda}) = -\frac{1}{\sigma_{\lambda}}[\epsilon_{\ast}(z_{\lambda}, c) - \epsilon_{\ast}(z_{\lambda})]
+$$
+
+* 확산 모델은 기본적으로 점수 함수(Score Function)를 학습
+* 점수 함수는 확률 분포의 로그 우도 그래디언트와 관련됩니다.
+
+$$
+\nabla_{z}\log p(z) = -\frac{1}{\sigma_{\lambda}}\epsilon^{*}(z)
+$$
+
+암묵적 분류기 $p^{i}(c|z) \propto p(z|c)/p(z)$에 로그를 취하고 그래디언트를 적용
+
+* 로그 취하기
+
+$$
+\log p^{i}(c|z_{\lambda}) = \log p(z_{\lambda}|c) - \log p(z_{\lambda}) + \text{상수}
+$$
+
+* 그래디언트 취하기: (상수 항의 그래디언트는 0입니다.
+
+$$
+\nabla_{z_{\lambda}}\log p^{i}(c|z_{\lambda}) = \nabla_{z_{\lambda}}\log p(z_{\lambda}|c) - \nabla_{z_{\lambda}}\log p(z_{\lambda})
+$$
+
+* **점수 함수($\epsilon^{*}$)로 치환:** (위의 관계 $\nabla \log p(z) = -\frac{1}{\sigma}\epsilon^{*}(z)$ 를 적용)
+
+$$
+\nabla_{z_{\lambda}}\log p^{i}(c|z_{\lambda}) = \left( -\frac{1}{\sigma_{\lambda}}\epsilon^{*}(z_{\lambda}, c) \right) - \left( -\frac{1}{\sigma_{\lambda}}\epsilon^{*}(z_{\lambda}) \right)
+$$
+
+* **최종 정리**
+
+$$
+\nabla_{z_{\lambda}}\log p^{i}(c|z_{\lambda}) = -\frac{1}{\sigma_{\lambda}}[\epsilon^{*}(z_{\lambda}, c) - \epsilon^{*}(z_{\lambda})]
+$$
+
+---
+
+* **Step 1: 암묵적 분류기 그래디언트 (B)를 가이던스 수식 (A)에 대입**
+
+$$
+\tilde{\epsilon}^{*}(z_{\lambda}, c) = \epsilon^{*}(z_{\lambda}, c) - w\sigma_{\lambda} \left[ \nabla_{z_{\lambda}}\log p^{i}(c|z_{\lambda}) \right]
+$$
+
+* **B를 대괄호 안에 대입**
+
+$$
+\tilde{\epsilon}^{*}(z_{\lambda}, c) = \epsilon^{*}(z_{\lambda}, c) - w\sigma_{\lambda} \left[ -\frac{1}{\sigma_{\lambda}}(\epsilon^{*}(z_{\lambda}, c) - \epsilon^{*}(z_{\lambda})) \right]
+$$
+
+---
+
+* **Step 2: $\sigma_{\lambda}$와 부호 정리**
+
+    * 첫 번째로, $\sigma_{\lambda}$와 $\frac{1}{\sigma_{\lambda}}$는 서로 **상쇄**되어 사라집니다.
+    * 두 번째로, $-w$와 대괄호 안의 $-$ 부호가 곱해져 **$+$**가 됩니다.
+
+$$
+\tilde{\epsilon}^{*}(z_{\lambda}, c) = \epsilon^{*}(z_{\lambda}, c) + w \left[ \epsilon^{*}(z_{\lambda}, c) - \epsilon^{*}(z_{\lambda}) \right]
+$$
+
+---
+
+* **Step 3: $w$를 분배하고 동류항 정리**
+
+    * $w$를 대괄호 안에 분배합니다.
+
+$$\tilde{\epsilon}^{*}(z_{\lambda}, c) = \epsilon^{*}(z_{\lambda}, c) + w\epsilon^{*}(z_{\lambda}, c) - w\epsilon^{*}(z_{\lambda})$$
+
+    * 좌측 두 항 ($\epsilon^{*}(z_{\lambda}, c)$와 $w\epsilon^{*}(z_{\lambda}, c)$)에서 $\epsilon^{*}(z_{\lambda}, c)$를 묶어냅니다.
+
+$$
+\tilde{\epsilon}^{*}(z_{\lambda}, c) = (1+w)\epsilon^{*}(z_{\lambda}, c) - w\epsilon^{*}(z_{\lambda})
+$$
+
+* **결론적으로 유도된 수식은 다음과 같습니다**
+
+$$
+\tilde{\epsilon}^{*}(z_{\lambda}, c) = (1+w)\epsilon^{*}(z_{\lambda}, c) - w\epsilon^{*}(z_{\lambda})
+$$* **점수 함수($\epsilon^{*}$)로 치환:** (위의 관계 $\nabla \log p(z) = -\frac{1}{\sigma}\epsilon^{*}(z)$ 를 적용)
+
+$$
+\nabla_{z_{\lambda}}\log p^{i}(c|z_{\lambda}) = \left( -\frac{1}{\sigma_{\lambda}}\epsilon^{*}(z_{\lambda}, c) \right) - \left( -\frac{1}{\sigma_{\lambda}}\epsilon^{*}(z_{\lambda}) \right)
+$$
+
+* **최종 정리**
+
+$$
+\nabla_{z_{\lambda}}\log p^{i}(c|z_{\lambda}) = -\frac{1}{\sigma_{\lambda}}[\epsilon^{*}(z_{\lambda}, c) - \epsilon^{*}(z_{\lambda})]
+$$
+
+---
+
+* **Step 1: 암묵적 분류기 그래디언트 (B)를 가이던스 수식 (A)에 대입**
+
+$$
+\tilde{\epsilon}^{*}(z_{\lambda}, c) = \epsilon^{*}(z_{\lambda}, c) - w\sigma_{\lambda} \left[ \nabla_{z_{\lambda}}\log p^{i}(c|z_{\lambda}) \right]
+$$
+
+* **B를 대괄호 안에 대입**
+
+$$
+\tilde{\epsilon}^{*}(z_{\lambda}, c) = \epsilon^{*}(z_{\lambda}, c) - w\sigma_{\lambda} \left[ -\frac{1}{\sigma_{\lambda}}(\epsilon^{*}(z_{\lambda}, c) - \epsilon^{*}(z_{\lambda})) \right]
+$$
+
+---
+
+* **Step 2: $\sigma_{\lambda}$와 부호 정리**
+
+    * 첫 번째로, $\sigma_{\lambda}$와 $\frac{1}{\sigma_{\lambda}}$는 서로 **상쇄**되어 사라집니다.
+    * 두 번째로, $-w$와 대괄호 안의 $-$ 부호가 곱해져 **$+$**가 됩니다.
+
+$$
+\tilde{\epsilon}^{*}(z_{\lambda}, c) = \epsilon^{*}(z_{\lambda}, c) + w \left[ \epsilon^{*}(z_{\lambda}, c) - \epsilon^{*}(z_{\lambda}) \right]
+$$
+
+---
+
+* **Step 3: $w$를 분배하고 동류항 정리**
+
+    * $w$를 대괄호 안에 분배합니다.
+
+$$\tilde{\epsilon}^{*}(z_{\lambda}, c) = \epsilon^{*}(z_{\lambda}, c) + w\epsilon^{*}(z_{\lambda}, c) - w\epsilon^{*}(z_{\lambda})$$
+
+    * 좌측 두 항 ($\epsilon^{*}(z_{\lambda}, c)$와 $w\epsilon^{*}(z_{\lambda}, c)$)에서 $\epsilon^{*}(z_{\lambda}, c)$를 묶어냅니다.
+
+$$
+\tilde{\epsilon}^{*}(z_{\lambda}, c) = (1+w)\epsilon^{*}(z_{\lambda}, c) - w\epsilon^{*}(z_{\lambda})
+$$
+
+* **결론적으로 유도된 수식은 다음과 같습니다**
+
+$$
+\tilde{\epsilon}^{*}(z_{\lambda}, c) = (1+w)\epsilon^{*}(z_{\lambda}, c) - w\epsilon^{*}(z_{\lambda})
+$$
