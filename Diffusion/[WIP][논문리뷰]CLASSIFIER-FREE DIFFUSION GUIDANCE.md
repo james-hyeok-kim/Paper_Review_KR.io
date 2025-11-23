@@ -57,6 +57,7 @@ $$q(z_\lambda|x)=\mathcal{N}(\alpha_\lambda x,\sigma_\lambda^2 I)$$
 * $\sigma_\lambda^2 = 1 - \alpha_\lambda^2$: 잡음(Noise)의 비율
 * 이 둘의 제곱 합은 1 ($\alpha^2 + \sigma^2 = 1$)이 되도록 설계되어 있어, 노이즈가 추가되어도 전체 데이터의 분산(Variance)은 일정하게 유지됩니다 (Variance Preserving)
 * $\lambda$는 로그 신호 대 잡음비(log signal-to-noise ratio)로 해석됩니다. $\lambda$가 클수록 신호가 강하고(깨끗한 이미지), 작을수록 잡음이 강함
+
 $$
 \lambda = \log \left( \frac{\alpha^2_\lambda}{\sigma^2_\lambda} \right)
 $$
@@ -69,7 +70,8 @@ $$q(z_\lambda|z_{\lambda'})=\mathcal{N}\left(\frac{\alpha_\lambda}{\alpha_{\lamb
 * 새로운 분산 $\sigma_{\lambda|\lambda'}^2$은 두 시점 사이의 노이즈 차이를 나타냄
 
 
-#### 이상적인 역방향 전이 (정답을 알고 있을때)
+#### Backward Process
+##### 이상적인 역방향 전이 (정답을 알고 있을때)
 
 $$
 q(z_{\lambda_0} | z_\lambda, x) = \mathcal{N}(\tilde{\mu}_{\lambda_0|\lambda}(z_\lambda, x), \tilde{\sigma}^2_{\lambda_0|\lambda} I) \quad \text{where} 
