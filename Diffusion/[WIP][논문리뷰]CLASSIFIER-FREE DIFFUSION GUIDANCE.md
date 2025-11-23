@@ -263,13 +263,13 @@ $$
 * **점수 함수($\epsilon^{*}$)로 치환:** (위의 관계 $\nabla \log p(z) = -\frac{1}{\sigma}\epsilon^{*}(z)$ 를 적용)
 
 $$
-\nabla_{z_{\lambda}}\log p^{i}(c|z_{\lambda}) = \left( -\frac{1}{\sigma_{\lambda}}\epsilon^{*}(z_{\lambda}, c) \right) - \left( -\frac{1}{\sigma_{\lambda}}\epsilon^{*}(z_{\lambda}) \right)
+\nabla_{z_{\lambda}}\log p^{i}(c|z_{\lambda}) = \left( -\frac{1}{\sigma_{\lambda}}\epsilon_{\theta}(z_{\lambda}, c) \right) - \left( -\frac{1}{\sigma_{\lambda}}\epsilon_{\theta}(z_{\lambda}) \right)
 $$
 
 * **최종 정리**
 
 $$
-\nabla_{z_{\lambda}}\log p^{i}(c|z_{\lambda}) = -\frac{1}{\sigma_{\lambda}}[\epsilon^{*}(z_{\lambda}, c) - \epsilon^{*}(z_{\lambda})]
+\nabla_{z_{\lambda}}\log p^{i}(c|z_{\lambda}) = -\frac{1}{\sigma_{\lambda}}[\epsilon_{\theta}(z_{\lambda}, c) - \epsilon_{\theta}(z_{\lambda})]
 $$
 
 ---
@@ -277,13 +277,13 @@ $$
 * **Step 1: 암묵적 분류기 그래디언트 (B)를 가이던스 수식 (A)에 대입**
 
 $$
-\tilde{\epsilon}^{*}(z_{\lambda}, c) = \epsilon^{*}(z_{\lambda}, c) - w\sigma_{\lambda} \left[ \nabla_{z_{\lambda}}\log p^{i}(c|z_{\lambda}) \right]
+\tilde{\epsilon}_{\theta}(z_{\lambda}, c) = \epsilon_{\theta}(z_{\lambda}, c) + w \left[ \epsilon_{\theta}(z_{\lambda}, c) - \epsilon_{\theta}(z_{\lambda}) \right]
 $$
 
 * **B를 대괄호 안에 대입**
 
 $$
-\tilde{\epsilon}^{*}(z_{\lambda}, c) = \epsilon^{*}(z_{\lambda}, c) - w\sigma_{\lambda} \left[ -\frac{1}{\sigma_{\lambda}}(\epsilon^{*}(z_{\lambda}, c) - \epsilon^{*}(z_{\lambda})) \right]
+\tilde{\epsilon}_{\theta}(z_{\lambda}, c) = \epsilon_{\theta}(z_{\lambda}, c) - w\sigma_{\lambda} \left[ -\frac{1}{\sigma_{\lambda}}(\epsilon_{\theta}(z_{\lambda}, c) - \epsilon_{\theta}(z_{\lambda})) \right]
 $$
 
 ---
@@ -294,7 +294,7 @@ $$
     * 두 번째로, $-w$와 대괄호 안의 $-$ 부호가 곱해져 **$+$**가 됩니다.
 
 $$
-\tilde{\epsilon}^{*}(z_{\lambda}, c) = \epsilon^{*}(z_{\lambda}, c) + w \left[ \epsilon^{*}(z_{\lambda}, c) - \epsilon^{*}(z_{\lambda}) \right]
+\tilde{\epsilon}_{\theta}(z_{\lambda}, c) = \epsilon_{\theta}(z_{\lambda}, c) + w \left[ \epsilon_{\theta}(z_{\lambda}, c) - \epsilon_{\theta}(z_{\lambda}) \right]
 $$
 
 ---
@@ -303,71 +303,18 @@ $$
 
     * $w$를 대괄호 안에 분배합니다.
 
-$$\tilde{\epsilon}^{*}(z_{\lambda}, c) = \epsilon^{*}(z_{\lambda}, c) + w\epsilon^{*}(z_{\lambda}, c) - w\epsilon^{*}(z_{\lambda})$$
-
-    * 좌측 두 항 ($\epsilon^{*}(z_{\lambda}, c)$와 $w\epsilon^{*}(z_{\lambda}, c)$)에서 $\epsilon^{*}(z_{\lambda}, c)$를 묶어냅니다.
-
 $$
-\tilde{\epsilon}^{*}(z_{\lambda}, c) = (1+w)\epsilon^{*}(z_{\lambda}, c) - w\epsilon^{*}(z_{\lambda})
+\tilde{\epsilon}_{\theta}(z_{\lambda}, c) = \epsilon_{\theta}(z_{\lambda}, c) + w\epsilon_{\theta}(z_{\lambda}, c) - w\epsilon_{\theta}(z_{\lambda})
 $$
 
-* **결론적으로 유도된 수식은 다음과 같습니다**
+* 좌측 두 항 $\epsilon_{\theta}(z_{\lambda}, c)$와 $w\epsilon_{\theta}(z_{\lambda}, c)$에서 공통 인수인 $\epsilon_{\theta}(z_{\lambda}, c)$를 묶어냅니다.
 
 $$
-\tilde{\epsilon}^{*}(z_{\lambda}, c) = (1+w)\epsilon^{*}(z_{\lambda}, c) - w\epsilon^{*}(z_{\lambda})
-$$* **점수 함수($\epsilon^{*}$)로 치환:** (위의 관계 $\nabla \log p(z) = -\frac{1}{\sigma}\epsilon^{*}(z)$ 를 적용)
-
-$$
-\nabla_{z_{\lambda}}\log p^{i}(c|z_{\lambda}) = \left( -\frac{1}{\sigma_{\lambda}}\epsilon^{*}(z_{\lambda}, c) \right) - \left( -\frac{1}{\sigma_{\lambda}}\epsilon^{*}(z_{\lambda}) \right)
+\tilde{\epsilon}_{\theta}(z_{\lambda}, c) = (1+w)\epsilon_{\theta}(z_{\lambda}, c) - w\epsilon_{\theta}(z_{\lambda})
 $$
 
-* **최종 정리**
+* **점수 함수( $\epsilon^{*}$ )로 치환:** (위의 관계 $\nabla \log p(z) = -\frac{1}{\sigma}\epsilon^{*}(z)$ 를 적용)
 
 $$
-\nabla_{z_{\lambda}}\log p^{i}(c|z_{\lambda}) = -\frac{1}{\sigma_{\lambda}}[\epsilon^{*}(z_{\lambda}, c) - \epsilon^{*}(z_{\lambda})]
-$$
-
----
-
-* **Step 1: 암묵적 분류기 그래디언트 (B)를 가이던스 수식 (A)에 대입**
-
-$$
-\tilde{\epsilon}^{*}(z_{\lambda}, c) = \epsilon^{*}(z_{\lambda}, c) - w\sigma_{\lambda} \left[ \nabla_{z_{\lambda}}\log p^{i}(c|z_{\lambda}) \right]
-$$
-
-* **B를 대괄호 안에 대입**
-
-$$
-\tilde{\epsilon}^{*}(z_{\lambda}, c) = \epsilon^{*}(z_{\lambda}, c) - w\sigma_{\lambda} \left[ -\frac{1}{\sigma_{\lambda}}(\epsilon^{*}(z_{\lambda}, c) - \epsilon^{*}(z_{\lambda})) \right]
-$$
-
----
-
-* **Step 2: $\sigma_{\lambda}$와 부호 정리**
-
-    * 첫 번째로, $\sigma_{\lambda}$와 $\frac{1}{\sigma_{\lambda}}$는 서로 **상쇄**되어 사라집니다.
-    * 두 번째로, $-w$와 대괄호 안의 $-$ 부호가 곱해져 **$+$**가 됩니다.
-
-$$
-\tilde{\epsilon}^{*}(z_{\lambda}, c) = \epsilon^{*}(z_{\lambda}, c) + w \left[ \epsilon^{*}(z_{\lambda}, c) - \epsilon^{*}(z_{\lambda}) \right]
-$$
-
----
-
-* **Step 3: $w$를 분배하고 동류항 정리**
-
-    * $w$를 대괄호 안에 분배합니다.
-
-$$\tilde{\epsilon}^{*}(z_{\lambda}, c) = \epsilon^{*}(z_{\lambda}, c) + w\epsilon^{*}(z_{\lambda}, c) - w\epsilon^{*}(z_{\lambda})$$
-
-    * 좌측 두 항 ($\epsilon^{*}(z_{\lambda}, c)$와 $w\epsilon^{*}(z_{\lambda}, c)$)에서 $\epsilon^{*}(z_{\lambda}, c)$를 묶어냅니다.
-
-$$
-\tilde{\epsilon}^{*}(z_{\lambda}, c) = (1+w)\epsilon^{*}(z_{\lambda}, c) - w\epsilon^{*}(z_{\lambda})
-$$
-
-* **결론적으로 유도된 수식은 다음과 같습니다**
-
-$$
-\tilde{\epsilon}^{*}(z_{\lambda}, c) = (1+w)\epsilon^{*}(z_{\lambda}, c) - w\epsilon^{*}(z_{\lambda})
+\nabla_{z_{\lambda}}\log p^{i}(c|z_{\lambda}) = -\frac{1}{\sigma_{\lambda}} \left[ \epsilon_{\theta}(z_{\lambda}, c) - \epsilon_{\theta}(z_{\lambda}) \right]
 $$
