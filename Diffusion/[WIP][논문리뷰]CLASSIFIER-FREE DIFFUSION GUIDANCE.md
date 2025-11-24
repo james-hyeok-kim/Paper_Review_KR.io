@@ -89,7 +89,7 @@ $$
 * 원본 데이터 $x$를 알고있다면, 이즈가 더 많은 상태($z_\lambda$)에서 노이즈가 덜한 상태($z_{\lambda'}$)로 가는 확률 분포를 정확히 계산 가능
 * 의미: 이것은 모델이 학습해야 할 '정답지(Ground Truth)' 역할을 하는 사후 확률(Posterior) 분포
 
-#### 실제 모델의 역방향 전이 (정답을 모를 때)
+##### 실제 모델의 역방향 전이 (정답을 모를 때)
 
 $$
 p_\theta(\mathbf{z}_{\lambda_0} | \mathbf{z}_\lambda) = \mathcal{N} \left( \tilde{\boldsymbol{\mu}}_{\lambda_0|\lambda}(\mathbf{z}_\lambda, \mathbf{x}_\theta(\mathbf{z}_\lambda)), \left( \tilde{\sigma}^2_{\lambda_0|\lambda} \right)^{1-v} \left( \sigma^2_{\lambda|\lambda_0} \right)^v \mathbf{I} \right) \quad (4)
