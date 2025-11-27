@@ -154,15 +154,19 @@ $$
 
 #### 스코어 매칭
 * 데이터가 있는 진짜 방향을 알려주는 나침반 학습법
+
 $$
 \epsilon_\theta(z_\lambda) \approx -\sigma_\lambda \nabla_{z_\lambda} \log p(z_\lambda)
 $$
 
 * 모델 예측 노이즈와 $\epsilon_\theta$와 실제 노이즈 $\epsilon$의 차이를 줄이는 것이 스코어 매칭
-* 학습된 모델 $\epsilon_\theta(z_\lambda)$는 데이터 분포의 로그 밀도 기울기(gradient of log-density), 즉 스코어(Score)를 추정하는 것과 같다
-* $\epsilon_\theta(z_\lambda) \approx -\sigma_\lambda \nabla_{z_\lambda} \log p(z_\lambda)$즉, 모델은 "데이터가 밀집해 있는 방향(더 그럴듯한 이미지 쪽)"을 가리키는 나침반 역할
-* 이를 따라가는 과정은 랑주뱅 역학(Langevin diffusion)과 유사
 * 조건부 모델링: 클래스 조건(예: '강아지' 사진 생성)을 줄 때는, 모델 입력에 클래스 정보 $c$만 추가하면 됩니다 ( $\epsilon_\theta(z_\lambda, c)$ ).
+* 이를 따라가는 과정은 랑주뱅 역학(Langevin diffusion)과 유사
+  * 나침반(방향) + 발걸음 + 비틀거림(노이즈)
+* 수학적으로 랑주뱅 역학은 다음 두 항의 합으로 정의됩니다
+ 
+$$x_{new} = x_{old} + \underbrace{\epsilon \nabla \log p(x)}_{\text{기울기 방향 이동}} + \underbrace{\sqrt{2\epsilon} z}_{\text{무작위 노이즈 주입}}$$
+
 
 
 ---
