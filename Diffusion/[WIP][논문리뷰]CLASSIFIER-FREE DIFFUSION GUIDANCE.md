@@ -116,7 +116,7 @@ $$
 ##### 실제 모델의 역방향 전이 (정답을 모를 때)
 
 $$
-p_\theta(\mathbf{z}_{\lambda_0} | \mathbf{z}_\lambda) = \mathcal{N} \left( \tilde{\boldsymbol{\mu}}_{\lambda_0|\lambda}(\mathbf{z}_\lambda, \mathbf{x}_\theta(\mathbf{z}_\lambda)), \left( \tilde{\sigma}^2_{\lambda_0|\lambda} \right)^{1-v} \left( \sigma^2_{\lambda|\lambda_0} \right)^v \mathbf{I} \right) \quad (4)
+p_\theta(\mathbf{z}_{\lambda'} | \mathbf{z}_\lambda) = \mathcal{N} \left( \tilde{\boldsymbol{\mu}}_{\lambda'|\lambda}(\mathbf{z}_\lambda, \mathbf{x}_\theta(\mathbf{z}_\lambda)), \left( \tilde{\sigma}^2_{\lambda'|\lambda} \right)^{1-v} \left( \sigma^2_{\lambda|\lambda'} \right)^v  \right) \quad (4)
 $$
 
 * 원본 데이터 $x$를 모르고 노이즈($z_\lambda$)만 주어집니다. 따라서 모델은 $x$ 대신 **모델이 추정한 값 $x_\theta(z_\lambda)$**를 사용하여 위의 분포를 흉내
@@ -138,8 +138,11 @@ $$
 
 
 #### Noise Schedule
+* 언제 얼마나 노이즈를 섞을지(or 뺄지)를 결정하는 시간적 지표
 * 학습 및 샘플링 시 $\lambda$(로그 신호 대 잡음비)를 어떻게 선택
+  * 완전한 노이즈에서 어떤 속도로 노이즈를 걷어낼지 결정
 * $u$를 0과 1 사이에서 균등하게 뽑은 뒤, $\lambda = -2 \log \tan(au + b)$ 공식을 통해 변환하여 사용
+  * 왜 저 복잡한 탄젠트($\tan$) 공식을 쓰는가? 학습에 **가장 중요한 구간(Signal과 Noise가 적절히 섞인 구간)** 을 더 집중적으로 학습하기 위해서입니다.
 
 $$
 \lambda = -2 \log \tan(a u + b)
