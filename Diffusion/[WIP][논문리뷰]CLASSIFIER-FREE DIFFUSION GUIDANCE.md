@@ -242,6 +242,7 @@ $$-\sigma_\lambda \nabla_{z_\lambda} \left[ \log p(z_\lambda|c) + w \log p_\thet
 #### 3.2 Classifier-Free Guidance
 
 * $\epsilon_\theta(\mathbf{z}_\lambda, c)$ 를 수정하여 Classifier 없이 Classifier Guidance와 같은 효과를 얻고자 함
+* 3.1 Classifier 에서 $\nabla_{z_{\lambda}}\log~p_{\theta}(c|z_{\lambda})$ 을 대체하고 싶음
 
 ##### Algorithm 1
 
@@ -266,114 +267,47 @@ $$\tilde{\epsilon}_{\theta}(z_{\lambda},c)=(1+w)\epsilon_{\theta}(z_{\lambda},c)
 ##### 의의
 * $\nabla_{z_{\lambda}}\log~p_{\theta}(c|z_{\lambda})$ 별도의 Classifier 없음으로 $\tilde{\epsilon}_{\theta}$ 으로 가는 것이 Gradient-based Adversarial Attack이라고 볼수 없다
 
-##### 암묵적 분류기(Implicit Classifier)로부터의 영감
-* 이상적인 경우: 정확한 점수( $\epsilon^{*}$ )의 사용
-* 만약 우리가 학습된 모델의 추정치 $\epsilon_{\theta}$ 대신, 확률 분포 $p(z_{\lambda}|c)$ 와 $p(z_{\lambda})$ 의 정확한 점수( $\epsilon^{*}$ )를 알고 있다고 가정하면 다음과 같은 관계가 성립
-* 암묵적 분류기의 정의: 베이즈 정리(Bayes' rule)를 사용하여 암묵적 분류기 $p^{i}(c|z_{\lambda})$를 정의
-
-$$p^{i}(c|z_{\lambda}) \propto \frac{p(z_{\lambda}|c)}{p(z_{\lambda})}$$
-
-* 암묵적 분류기의 그래디언트: 이 암묵적 분류기의 로그 우도 그래디언트는 정확한 점수를 사용하여 다음과 같이 표현됩니다
-
-$$
-\nabla_{\mathbf{z}_{\lambda}}\log p(c|\mathbf{z}_{\lambda}) \approx -\frac{1}{\sigma_{\lambda}}[\epsilon_{\theta}(\mathbf{z}_{\lambda}, c) - \epsilon_{\theta}(\mathbf{z}_{\lambda})]
-$$
-
-* 이상적인 분류기 가이던스 $\tilde{\epsilon}_{\theta}$
-  * 이 그래디언트를 분류기 가이던스 수식에 대입하면, 이상적인 가이던스 점수 $\tilde{\epsilon}_{\theta}$ 는 CFG 수식과 정확히 동일한 형태를 갖습니다.
-
-$$
-\tilde{\epsilon}_{\theta}(\mathbf{z}_{\lambda}, c) = (1+w)\epsilon_{\theta}(\mathbf{z}_{\lambda}, c) - w\epsilon_{\theta}(\mathbf{z}_{\lambda})
-$$
-
-* 암묵적 분류기
-
-$$
-p^{i}(c|z) \propto p(z|c)/p(z)
-$$
-
-* 이상적인 분류기 가이던스
-
-$$
-\nabla_{z_{\lambda}}\log p^{i}(c|z_{\lambda}) = -\frac{1}{\sigma_{\lambda}}[\epsilon_{\ast}(z_{\lambda}, c) - \epsilon_{\ast}(z_{\lambda})]
-$$
-
-* 확산 모델은 기본적으로 점수 함수(Score Function)를 학습
-* 점수 함수는 확률 분포의 로그 우도 그래디언트와 관련됩니다.
-
-$$
-\nabla_{z}\log p(z) = -\frac{1}{\sigma_{\lambda}}\epsilon^{*}(z)
-$$
-
-암묵적 분류기 $p^{i}(c|z) \propto p(z|c)/p(z)$에 로그를 취하고 그래디언트를 적용
-
-* 로그 취하기
-
-$$
-\log p^{i}(c|z_{\lambda}) = \log p(z_{\lambda}|c) - \log p(z_{\lambda}) + \text{상수}
-$$
-
-* 그래디언트 취하기: (상수 항의 그래디언트는 0입니다.
-
-$$
-\nabla_{z_{\lambda}}\log p^{i}(c|z_{\lambda}) = \nabla_{z_{\lambda}}\log p(z_{\lambda}|c) - \nabla_{z_{\lambda}}\log p(z_{\lambda})
-$$
-
-* **점수 함수($\epsilon^{*}$)로 치환:** (위의 관계 $\nabla \log p(z) = -\frac{1}{\sigma}\epsilon^{*}(z)$ 를 적용)
-
-$$
-\nabla_{z_{\lambda}}\log p^{i}(c|z_{\lambda}) = \left( -\frac{1}{\sigma_{\lambda}}\epsilon_{\theta}(z_{\lambda}, c) \right) - \left( -\frac{1}{\sigma_{\lambda}}\epsilon_{\theta}(z_{\lambda}) \right)
-$$
-
-* **최종 정리**
-
-$$
-\nabla_{z_{\lambda}}\log p^{i}(c|z_{\lambda}) = -\frac{1}{\sigma_{\lambda}}[\epsilon_{\theta}(z_{\lambda}, c) - \epsilon_{\theta}(z_{\lambda})]
-$$
-
 ---
 
-* **Step 1: 암묵적 분류기 그래디언트 (B)를 가이던스 수식 (A)에 대입**
+### 기존 Classifer Guidance에서 Classifier-Free Guidance 유도하기
+
+#### 기존 Claissfier Guidance
 
 $$
-\tilde{\epsilon}_{\theta}(z_{\lambda}, c) = \epsilon_{\theta}(z_{\lambda}, c) + w \left[ \epsilon_{\theta}(z_{\lambda}, c) - \epsilon_{\theta}(z_{\lambda}) \right]
+\hat{\epsilon}_\theta(\mathbf{z}_\lambda, c) = \epsilon_\theta(\mathbf{z}_\lambda, c) - w \sigma_\lambda \nabla_{\mathbf{z}_\lambda} \log p_\theta(c|\mathbf{z}_\lambda) \approx -\sigma_\lambda \nabla_{\mathbf{z}_\lambda} [\log p(\mathbf{z}_\lambda|c) + w \log p_\theta(c|\mathbf{z}_\lambda)]
 $$
 
-* **B를 대괄호 안에 대입**
+$$\epsilon_\theta(z_\lambda, c) \approx -\sigma_\lambda \nabla_{z_\lambda} \log p(z_\lambda|c)$$
 
-$$
-\tilde{\epsilon}_{\theta}(z_{\lambda}, c) = \epsilon_{\theta}(z_{\lambda}, c) - w\sigma_{\lambda} \left[ -\frac{1}{\sigma_{\lambda}}(\epsilon_{\theta}(z_{\lambda}, c) - \epsilon_{\theta}(z_{\lambda})) \right]
-$$
+
+$$\text{Modified Score} = \nabla_{z} \log p(z|c) + w \cdot \underbrace{\nabla_{z} \log p(c|z)}_{\text{분류기 그라디언트}}$$
+
+* 베이지 룰 적용
+
+$$p(c|z) = \frac{p(z|c) \cdot p(c)}{p(z)}$$
+
+* log + 미분
+
+$$\nabla_{z} \log p(c|z) = \nabla_{z} \log p(z|c) - \nabla_{z} \log p(z) + \underbrace{\nabla_{z} \log p(c)}_{=0}$$
+
+$$\begin{aligned}
+\text{Modified Score} &= \nabla_{z} \log p(z|c) + w \cdot (\nabla_{z} \log p(z|c) - \nabla_{z} \log p(z)) \\
+&= (1 + w) \nabla_{z} \log p(z|c) - w \nabla_{z} \log p(z)
+\end{aligned}$$
+
+* Diffusion 모델은 보통 점수($\nabla \log p$) 대신 **노이즈($\epsilon$)**를 예측하도록 학습합니다.
+* 점수와 노이즈 예측값 사이에는 비례 관계가 성립합니다 ($\epsilon \propto -\text{Score}$)
+
+$$\tilde{\epsilon}_\theta(z, c) = (1+w)\epsilon_\theta(z, c) - w\epsilon_\theta(z)$$
+
 
 ---
+### Gradient-based Adversarial Attack
 
-* **Step 2: $\sigma_{\lambda}$와 부호 정리**
+* 기울기 기반 공격 (Attack)
+  * 목표: 모델이 오답을 내도록 오차(Loss)를 키우거나, 특정 오답(Target) 확률을 높이는 것
+  * 방법: 모델의 파라미터( $w$ )는 고정하고, 입력 이미지( $x$ )를 수정합니다.
 
-    * 첫 번째로, $\sigma_{\lambda}$와 $\frac{1}{\sigma_{\lambda}}$는 서로 **상쇄**되어 사라집니다.
-    * 두 번째로, $-w$와 대괄호 안의 $-$ 부호가 곱해져 **$+$**가 됩니다.
+* "진짜로 강아지 같은 고품질 이미지를 만드는 것인지" 아니면 "단지 분류기가 강아지라고 착각하게끔 픽셀을 조작하는 것인지(Adversarial Attack)" 의문
 
-$$
-\tilde{\epsilon}_{\theta}(z_{\lambda}, c) = \epsilon_{\theta}(z_{\lambda}, c) + w \left[ \epsilon_{\theta}(z_{\lambda}, c) - \epsilon_{\theta}(z_{\lambda}) \right]
-$$
-
----
-
-* **Step 3: $w$를 분배하고 동류항 정리**
-
-    * $w$를 대괄호 안에 분배합니다.
-
-$$
-\tilde{\epsilon}_{\theta}(z_{\lambda}, c) = \epsilon_{\theta}(z_{\lambda}, c) + w\epsilon_{\theta}(z_{\lambda}, c) - w\epsilon_{\theta}(z_{\lambda})
-$$
-
-* 좌측 두 항 $\epsilon_{\theta}(z_{\lambda}, c)$와 $w\epsilon_{\theta}(z_{\lambda}, c)$에서 공통 인수인 $\epsilon_{\theta}(z_{\lambda}, c)$를 묶어냅니다.
-
-$$
-\tilde{\epsilon}_{\theta}(z_{\lambda}, c) = (1+w)\epsilon_{\theta}(z_{\lambda}, c) - w\epsilon_{\theta}(z_{\lambda})
-$$
-
-* **점수 함수( $\epsilon^{*}$ )로 치환:** (위의 관계 $\nabla \log p(z) = -\frac{1}{\sigma}\epsilon^{*}(z)$ 를 적용)
-
-$$
-\nabla_{z_{\lambda}}\log p^{i}(c|z_{\lambda}) = -\frac{1}{\sigma_{\lambda}} \left[ \epsilon_{\theta}(z_{\lambda}, c) - \epsilon_{\theta}(z_{\lambda}) \right]
-$$
+* 생성된 이미지의 점수(FID, Inception Score)가 높은 이유는 이미지가 진짜 좋아서가 아니라, 평가용 분류기(Inception Network)를 속였기 때문
