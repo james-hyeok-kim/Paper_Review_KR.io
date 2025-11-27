@@ -69,6 +69,30 @@ $$q(z_\lambda|z_{\lambda'})=\mathcal{N}\left(\frac{\alpha_\lambda}{\alpha_{\lamb
 * 전 단계($z_{\lambda'}$)의 상태를 알면, 다음 단계($z_\lambda$)의 분포를 계산할 수 있음을 보여줌
 * 새로운 분산 $\sigma_{\lambda|\lambda'}^2$은 두 시점 사이의 노이즈 차이를 나타냄
 
+* $\lambda$ 식 유도
+$$\lambda = \log(\text{SNR}) = \log\left(\frac{\text{신호 분산}}{\text{노이즈 분산}}\right) = \log\left(\frac{\alpha_\lambda^2}{\sigma_\lambda^2}\right)$$
+
+1. $\lambda$의 정의에서 로그를 지수로 변환
+
+$$e^\lambda = \frac{\alpha_\lambda^2}{\sigma_\lambda^2}$$
+
+2. Variance Preserving (VP) 조건($\sigma_\lambda^2 = 1 - \alpha_\lambda^2$)을 대입
+
+$$e^\lambda = \frac{\alpha_\lambda^2}{1 - \alpha_\lambda^2}$$
+
+3. $\alpha_\lambda^2$에 대해 식을 정리
+
+$$e^\lambda (1 - \alpha_\lambda^2) = \alpha_\lambda^2$$
+
+$$e^\lambda - e^\lambda \alpha_\lambda^2 = \alpha_\lambda^2$$
+
+$$e^\lambda = \alpha_\lambda^2 (1 + e^\lambda)$$
+
+$$\alpha_\lambda^2 = \frac{e^\lambda}{1 + e^\lambda}$$
+
+4. 분모와 분자를 $e^\lambda$로 나누면 논문의 최종 식
+
+$$\alpha_\lambda^2 = \frac{1}{e^{-\lambda} + 1}$$
 
 #### Backward Process
 ##### 이상적인 역방향 전이 (정답을 알고 있을때)
@@ -86,7 +110,7 @@ $$
  \quad \tilde{\sigma}^2_{\lambda'|\lambda} = (1 - e^{\lambda-\lambda'}) \sigma^2_{\lambda'} \quad(3)
 $$
 
-* 원본 데이터 $x$를 알고있다면, 이즈가 더 많은 상태($z_\lambda$)에서 노이즈가 덜한 상태($z_{\lambda'}$)로 가는 확률 분포를 정확히 계산 가능
+* 원본 데이터 $x$를 알고있다면, 노이즈가 더 많은 상태($z_\lambda$)에서 노이즈가 덜한 상태($z_{\lambda'}$)로 가는 확률 분포를 정확히 계산 가능
 * 의미: 이것은 모델이 학습해야 할 '정답지(Ground Truth)' 역할을 하는 사후 확률(Posterior) 분포
 
 ##### 실제 모델의 역방향 전이 (정답을 모를 때)
