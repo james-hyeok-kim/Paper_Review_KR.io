@@ -187,7 +187,23 @@ $$\epsilon_\theta(z_\lambda, c) \approx -\sigma_\lambda \nabla_{z_\lambda} \log 
 
 모델이 예측한 값($\epsilon$)은 "데이터 분포의 기울기($\nabla \log p$)에 $-\sigma_\lambda$를 곱한 것"과 같다
 
-원래 식 (좌변):$$\epsilon_\theta(z_\lambda, c) - w\sigma_\lambda \nabla_{z_\lambda} \log p_\theta(c|z_\lambda)$$단계 1: $\epsilon_\theta$ 자리에 정의 대입$$\underbrace{-\sigma_\lambda \nabla_{z_\lambda} \log p(z_\lambda|c)}_{\epsilon_\theta \text{의 정의}} - w\sigma_\lambda \nabla_{z_\lambda} \log p_\theta(c|z_\lambda)$$단계 2: 공통 인수 $-\sigma_\lambda$로 묶기두 항 모두 $-\sigma_\lambda$를 가지고 있으므로 밖으로 묶어냅니다. (주의: 두 번째 항은 마이너스가 밖으로 나갔으므로 안에는 플러스가 남습니다.)$$-\sigma_\lambda \left[ \nabla_{z_\lambda} \log p(z_\lambda|c) + w \nabla_{z_\lambda} \log p_\theta(c|z_\lambda) \right]$$단계 3: 미분 연산자($\nabla$) 묶기 (Linearity)기울기(gradient, $\nabla$)는 덧셈에 대해 분배 법칙이 성립합니다 ($\nabla A + \nabla B = \nabla(A+B)$). 또한 상수($w$)는 미분 기호 안으로 들어갈 수 있습니다 ($w \nabla B = \nabla (wB)$).따라서 두 로그 확률을 하나의 미분 기호 안으로 합칠 수 있습니다.$$-\sigma_\lambda \nabla_{z_\lambda} \left[ \log p(z_\lambda|c) + w \log p_\theta(c|z_\lambda) \right]$$이것이 질문하신 식의 우변입니다.
+원래 식 (좌변)
+
+$$\epsilon_\theta(z_\lambda, c) - w\sigma_\lambda \nabla_{z_\lambda} \log p_\theta(c|z_\lambda)$$
+
+단계 1: $\epsilon_\theta$ 자리에 정의 대입
+
+$$\underbrace{-\sigma_\lambda \nabla_{z_\lambda} \log p(z_\lambda|c)}_{\epsilon_\theta \text{의 정의}} - w\sigma_\lambda \nabla_{z_\lambda} \log p_\theta(c|z_\lambda)$$
+
+단계 2: 공통 인수 $-\sigma_\lambda$로 묶기두 항 모두 $-\sigma_\lambda$를 가지고 있으므로 밖으로 묶어냅니다. (주의: 두 번째 항은 마이너스가 밖으로 나갔으므로 안에는 플러스가 남습니다.)
+
+$$-\sigma_\lambda \left[ \nabla_{z_\lambda} \log p(z_\lambda|c) + w \nabla_{z_\lambda} \log p_\theta(c|z_\lambda) \right]$$
+
+단계 3: 미분 연산자( $\nabla$ ) 묶기 (Linearity)기울기(gradient, $\nabla$ )는 덧셈에 대해 분배 법칙이 성립합니다 ( $\nabla A + \nabla B = \nabla(A+B)$ ). 또한 상수( $w$ )는 미분 기호 안으로 들어갈 수 있습니다 ( $w \nabla B = \nabla (wB)$ ).따라서 두 로그 확률을 하나의 미분 기호 안으로 합칠 수 있습니다.
+
+$$-\sigma_\lambda \nabla_{z_\lambda} \left[ \log p(z_\lambda|c) + w \log p_\theta(c|z_\lambda) \right]$$
+
+이것이 질문하신 식의 우변입니다.
 
 * $\epsilon_{\theta}(z_{\lambda},c)$: 확산 모델이 예측한 조건부 스코어 (즉, 데이터가 있어야 할 방향)입니다
 * $\nabla_{z_{\lambda}}\log~p_{\theta}(c|z_{\lambda})$: 보조 분류기가 예측한 클래스 $c$에 대한 로그 우도의 그래디언트입니다. 이 항은 모델이 "분류기가 선호하는 방향"으로 움직이도록 만듭니다
