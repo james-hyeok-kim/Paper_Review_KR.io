@@ -198,7 +198,9 @@ $$
 
 * 샘플링 시 $\tilde{\epsilon}$ 사용하면 위에서 언급된 방식의 샘플을 생성하는 것과 동일합니다.
 
+<p align='center'>
 <img width="813" height="293" alt="image" src="https://github.com/user-attachments/assets/a356691e-eff5-46ed-960e-b3826073fc31" />
+</p>
 
 * 가이던스 강도($w$)를 높일수록 데이터 분포가 넓게 퍼져 있는 형태에서 특정 지점으로 좁게 모이는(집중되는) 현상. 이는 다양성이 줄어들고 품질(확실성)이 높아짐을 시각적으로 보여줍
 
@@ -246,7 +248,9 @@ $$-\sigma_\lambda \nabla_{z_\lambda} \left[ \log p(z_\lambda|c) + w \log p_\thet
 
 ##### Algorithm 1
 
+<p align='center'>
 <img width="808" height="257" alt="image" src="https://github.com/user-attachments/assets/f1f4c17c-d656-4cf7-99a9-1eedd5bef339" />
+</p>
 
 * 별도의 분류기를 훈련하는 대신 단일 모델 사용, 조건부 확산 모델( $\epsilon_{\theta}(z_{\lambda},c)$ )과 비조건부 확산 모델( $\epsilon_{\theta}(z_{\lambda})$ )을 단일 네트워크로 통합
 * 비조건부 훈련: 훈련 중 일정 확률 $p_{uncond}$ 로 조건 정보 $c$ (클래스 라벨)를 널 토큰(null token, $\emptyset$ )으로 설정하여 제거
