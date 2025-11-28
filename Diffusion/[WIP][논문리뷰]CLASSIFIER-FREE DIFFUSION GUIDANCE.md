@@ -246,18 +246,6 @@ $$-\sigma_\lambda \nabla_{z_\lambda} \left[ \log p(z_\lambda|c) + w \log p_\thet
 * $\epsilon_\theta(\mathbf{z}_\lambda, c)$ 를 수정하여 Classifier 없이 Classifier Guidance와 같은 효과를 얻고자 함
 * 3.1 Classifier 에서 $\nabla_{z_{\lambda}}\log~p_{\theta}(c|z_{\lambda})$ 을 대체하고 싶음
 
-##### Algorithm 1
-
-<p align='center'>
-<img width="808" height="257" alt="image" src="https://github.com/user-attachments/assets/f1f4c17c-d656-4cf7-99a9-1eedd5bef339" />
-</p>
-
-* 별도의 분류기를 훈련하는 대신 단일 모델 사용, 조건부 확산 모델( $\epsilon_{\theta}(z_{\lambda},c)$ )과 비조건부 확산 모델( $\epsilon_{\theta}(z_{\lambda})$ )을 단일 네트워크로 통합
-* 비조건부 훈련: 훈련 중 일정 확률 $p_{uncond}$ 로 조건 정보 $c$ (클래스 라벨)를 널 토큰(null token, $\emptyset$ )으로 설정하여 제거
-  * $c=\emptyset$ 일 때 모델은 비조건부 점수 추정치( $\epsilon_{\theta}(z_{\lambda})$ )를 학습
-  * 장점: 이 방식은 훈련 파이프라인을 복잡하게 만들지 않고, 총 모델 파라미터 수를 늘리지 않아 매우 간단합니다
-
-$$\epsilon_\theta(\mathbf{z}_{\lambda}) = \epsilon_\theta(\mathbf{z}_{\lambda}, c=\emptyset)$$
 
 ##### Sampling, 점수 결합
 
@@ -270,6 +258,87 @@ $$\tilde{\epsilon}_{\theta}(z_{\lambda},c)=(1+w)\epsilon_{\theta}(z_{\lambda},c)
 
 ##### 의의
 * $\nabla_{z_{\lambda}}\log~p_{\theta}(c|z_{\lambda})$ 별도의 Classifier 없음으로 $\tilde{\epsilon}_{\theta}$ 으로 가는 것이 Gradient-based Adversarial Attack이라고 볼수 없다
+
+---
+##### Algorithm 1
+
+<p align='center'>
+<img width="808" height="257" alt="image" src="https://github.com/user-attachments/assets/f1f4c17c-d656-4cf7-99a9-1eedd5bef339" />
+</p>
+
+* 별도의 분류기를 훈련하는 대신 단일 모델 사용, 조건부 확산 모델( $\epsilon_{\theta}(z_{\lambda},c)$ )과 비조건부 확산 모델( $\epsilon_{\theta}(z_{\lambda})$ )을 단일 네트워크로 통합
+
+0. 입력 (Input) $p_{uncond}$ : '비조건부 학습 확률'입니다. (예: 0.1).
+
+2. 데이터 샘플링 (Repeat Loop)
+* $(x, c) \sim p(x, c)$
+* 데이터셋에서 이미지( $x$ )와 그에 해당하는 레이블( $c$, 예: "강아지")을 꺼냅니다
+
+3. 조건 드롭아웃 (Condition Dropout) - 가장 중요한 부분 $c \leftarrow \emptyset$ with probability $p_{uncond}$
+
+* 주사위를 던져서 $p_{uncond}$ 확률에 당첨되면, 레이블 $c$ 를 버리고 빈 값(Null token, $\emptyset$ )으로 바꿔치기합니다
+* 경우 A (90%): 모델에게 "이건 강아지야"라고 알려주고 학습시킵니다. $\rightarrow$ 조건부 모델($\epsilon(z, c)$) 학습
+* 경우 B (10%): 모델에게 "이게 뭔지 안 알려줄 거야(Null)"라고 하고 학습시킵니다. $\rightarrow$ 비조건부 모델($\epsilon(z)$)학습
+
+* 이 과정을 통해 모델은 텍스트가 있을 때 그리는 법과, 텍스트가 없을 때(Null) 그리는 법을 동시에 배웁니다
+
+노이즈 추가 및 손실 계산 (Diffusion Process)
+
+4. $\lambda \sim p(\lambda)$
+
+5. $\epsilon \sim \mathcal{N}(0, I)$
+
+* $노이즈 강도( $\lambda$ )와 실제 노이즈( $\epsilon$ )를 무작위로 뽑습니다
+
+6. $z_\lambda = \alpha_\lambda x + \sigma_\lambda \epsilon$
+
+* 이미지 $x$에 노이즈를 섞어 $z_\lambda$를 만듭니다
+
+7. Gradient Step on $\nabla_{\theta}||\epsilon_{\theta}(z_{\lambda},c)-\epsilon||^{2}$
+
+* 모델에게 $z_\lambda$ 와 조건 $c$ (혹은 $\emptyset$ )를 주고 "어떤 노이즈가 섞였게?"라고 물어봅니다
+* 모델이 예측한 노이즈와 실제 노이즈($\epsilon$)의 차이(오차)를 줄이도록 학습합니다.
+ 
+##### Algorithm 2
+<p align='center'>
+<img width="909" height="375" alt="image" src="https://github.com/user-attachments/assets/9577ea5f-4002-4b3f-802e-0be69e4dbe99" />
+</p>
+
+* 이 알고리즘의 가장 중요한 특징은 매 스텝마다 모델을 두 번 실행해야 한다는 점
+  * 기존 방식(Classifier Guidance): 생성 모델 1번 + 분류기 모델 1번 실행
+  * 이 방식(Classifier-Free Guidance): 조건부 생성($\epsilon(z, c)$) 1번 + 비조건부 생성($\epsilon(z)$) 1번 실행.
+
+1. 1단계: 노이즈 생성 (Initialization) $z_1 \sim \mathcal{N}(0, I)$ 완전한 무작위 노이즈 이미지 $z_1$을 하나 만듭니다.
+
+2. 2단계: 반복적인 노이즈 제거 (Loop)총 $T$ 번의 단계(Timesteps)를 거치며 조금씩 이미지를 선명하게 만듭니다. 각 단계( $t$ )마다 다음 과정을 수행합니다.
+
+3. 가이던스 적용 (Core Step)앞서 배운 수식(Eq. 6)을 여기서 적용합니다.
+
+$$\tilde{\epsilon}_t = (1+w)\epsilon_\theta(z_t, c) - w\epsilon_\theta(z_t)$$
+
+이 계산을 통해 "일반적인 이미지 방향보다는, 고양이 특징이 더 강하게 나타나는 방향"의 수정된 노이즈 $\tilde{\epsilon}_t$ 를 구합니다.
+
+두 가지 노이즈 예측 (Two Forward Passes)현재 상태의 이미지($z_t$)를 모델에 두 번 넣습니다
+
+  3-1. 조건부 예측: $\epsilon_\theta(z_t, c)$ $\rightarrow$ "고양이를 그리려면 어떤 노이즈를 빼야 하니?"
+  
+  3-2. 비조건부 예측: $\epsilon_\theta(z_t)$ $\rightarrow$ "그냥 일반적인 이미지를 그리려면 어떤 노이즈를 빼야 하니?"
+  
+(참고: 논문에서는 비조건부 모델을 따로 만들지 않고, 조건 $c$ 를 비우는 방식으로 하나의 모델을 공유합니다.)
+
+ 
+4. 이미지 업데이트 (Sampling Step)계산된 $\tilde{\epsilon}_t$를 사용하여 이미지를 업데이트합니다.
+
+$$\tilde{x}_t = (z_t - \sigma_{\lambda_t}\tilde{\epsilon}_t) / \alpha_{\lambda_t}$$
+
+현재 이미지( $z_t$ )에서 수정된 노이즈( $\tilde{\epsilon}_t$ )를 빼서, 더 깨끗한 이미지( $z_{t+1}$ )로 나아갑니다
+
+5. 정규분포(Gaussian Distribution)에서 값을 하나 뽑는다
+
+$$z_{t+1} \sim \mathcal{N}(\underbrace{\tilde{\mu}_{\lambda_{t+1}|\lambda_t}(z_t, \tilde{x}_t)}_{\text{평균}}, \underbrace{(\tilde{\sigma}^2_{\lambda_{t+1}|\lambda_t})^{1-v}(\sigma^2_{\lambda_t|\lambda_{t+1}})^v}_{\text{분산}})$$
+
+* 조건문의 의미 (if t < T else ...): 샘플링(랜덤 추출)
+
 
 ---
 
