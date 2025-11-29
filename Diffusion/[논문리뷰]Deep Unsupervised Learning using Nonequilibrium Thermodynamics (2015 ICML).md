@@ -201,6 +201,19 @@ Gaussian인 경우엔 closed-form으로 처리 가능
 
 ---
 
+### 의의
+1. 생성의 관점을 바꾸다: "구축(Construction)"에서 "복원(Restoration)"으로
+2. 물리학(열역학)과 딥러닝의 결합
+3. GAN과 VAE의 한계를 극복할 이론적 토대 마련
+
+   3-1. GAN: 학습이 불안정, 수렴이 어렵다
+   
+   3-2. VAE: 학습 안정적, 이미지 흐릿(Blurry)
+   
+5. 수학적 다루기 쉬움 (Tractability)
+
+---
+
 ### Posterior란? (사후확률)
 
 #### 정의 
