@@ -109,6 +109,7 @@ $$p(x^{(0:T)})=p(x^{(T)}) \displaystyle\prod_{t=1}^{T} p(x^{(t−1)} ∣x ^{(t)}
 
 모델 데이터의 분포는 적분식(6)이므로 tractable 하지 않아, 순방향 경로에 대한 sampling을 평균화 하여 효율적으로 사용
 
+
 직접 $p(x^{(0)})$ 를 계산하기는 어렵지만, forward/reverse 경로의 확률비를 계산해 근사합니다:
 
 $$p(x^{(0)})=\int dx^{(1...T)}q\left(x^{(1...T)}|x^{(0)}\right) \cdot p(x^{(T)}) \prod_{t=1}^{T}\frac{p(x^{(t-1)}|x^t)}{q(x^{(t)}|x^{(t-1)})} \\ (9) $$
@@ -119,7 +120,7 @@ $$p(x^{(0)})=E_{q(x^{(1:T)}∣x^{(0)})}\left[\frac{p(x^{(0:T)})}{q(x^{(1:T)}|x^{
 
 #### 개념정리 Log-Likelihood란?
 Likelihood
-* 어떤 데이터 $x$가 관측되었을때, 모델이 그 데이터를 낼 확률
+* 어떤 데이터 $x$가 관측되었을때, 모델이 그 데이터를 낼 확률 (가장 그럴듯한 것)
 * $p_{\theta}(x)$:파라미터 $\theta$를 가진 모델이 $x$를 생성할 확률
 * 여러 데이터가 있을 경우 전체 likelihood는 곱
 
@@ -132,12 +133,12 @@ Likelihood
 
 ### 2.4 Training (Log-likelihood Bound Maximization)
 로그 가능도(Log likelihood): 
+
 $$L=\int dx^{(0)}q\left(x^{(0)}\right) \log p \left( x^{(0)} \right) \\ (10)$$
+
 $$𝐿=𝐸_{𝑞(𝑥^{(0)})}[\log ⁡𝑝(𝑥^{(0)})]$$
 
 여기에 (9)번식 대입하여 Jensen's inequality로 lower bound 𝐾를 도입:
-
-$$ = \int dx^{(0)}q\left(x^{(0)}\right) \log p(x^{(0)}) \\ (10)$$
 
 $$𝐿≥𝐾=−\displaystyle\sum_{𝑡=2}^{𝑇} \int dx^{(0)}dx^{(t)}q(x^{(0)},x^{(t)}) \cdot [𝐷_{𝐾𝐿}(𝑞(𝑥^{(𝑡−1)}∣𝑥^{(𝑡)},𝑥^{(0)}) \parallel 𝑝(𝑥^{(𝑡−1)}∣𝑥^{(𝑡)}))] + H_q(X^{(T)}|X^{(0)}) - H_q(X^{(1)}|X^{(0)}) - H_p(X^{(T)}) \\ (14)$$
 
@@ -145,6 +146,28 @@ $$𝐿≥𝐾=−\displaystyle\sum_{𝑡=2}^{𝑇} \int dx^{(0)}dx^{(t)}q(x^{(0)
 $$𝐿≥𝐾=−\displaystyle\sum_{𝑡=2}^{𝑇}𝐸_{𝑞(𝑥^{(0)},𝑥^{(𝑡)})}[𝐷_{𝐾𝐿}(𝑞(𝑥^{(𝑡−1)}∣𝑥^{(𝑡)},𝑥^{(0)})∥𝑝(𝑥^{(𝑡−1)}∣𝑥^{(𝑡)}))]+entropy terms$$
 
 즉, reverse transition과 posterior 간의 KL divergence를 최소화하는 것이 학습의 핵심입니다.
+
+#### 유도
+
+* 우리가 구하고 싶은 것 Log-likelihood (L)
+
+$$L = \int dx^{(0)} q(x^{(0)}) \log p(x^{(0)})$$
+
+* 위에서 구한 (9)
+
+$$p(x^{(0)}) = \int dx^{(1 \dots T)} q(x^{(1 \dots T)}|x^{(0)}) \cdot \left( \frac{p(x^{(0 \dots T)})}{q(x^{(1 \dots T)}|x^{(0)})} \right)$$
+
+$$L = \int dx^{(0)} q(x^{(0)}) \color{red}{\log} \left[ \color{blue}{\int dx^{(1 \dots T)} q(x^{(1 \dots T)}|x^{(0)})} \frac{p(x^{(0 \dots T)})}{q(x^{(1 \dots T)}|x^{(0)})} \right]$$
+
+* 젠센 부등식: $\log(\text{평균}) \ge \text{평균}(\log)$
+* 수식으로 표현하면: $\log \left( \int p(x) f(x) dx \right) \ge \int p(x) \log f(x) dx$
+
+$$L \ge \int dx^{(0)} q(x^{(0)}) \left[ \int dx^{(1 \dots T)} q(x^{(1 \dots T)}|x^{(0)}) \color{red}{\log} \left( \frac{p(x^{(0 \dots T)})}{q(x^{(1 \dots T)}|x^{(0)})} \right) \right]$$
+
+$$K = \int dx^{(0 \dots T)} q(x^{(0 \dots T)}) \log \left[ p(x^{(T)}) \prod_{t=1}^{T} \frac{p(x^{(t-1)}|x^{(t)})}{q(x^{(t)}|x^{(t-1)})} \right]$$
+
+---
+
 
 * $D_{KL}$ (Kullback-Leibler Divergence)
 * $D_{KL}(P∣∣Q)=∑_x P(x) \log \frac{P(x)}{Q(x)}$
