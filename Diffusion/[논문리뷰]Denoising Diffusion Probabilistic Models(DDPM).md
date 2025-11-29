@@ -204,6 +204,19 @@ Loss를 통해 P를 어떻게 구하는지는 알았는데, q는 어떻게 구�
 
 ---
 
+### 의의
+1. Image $\rightarrow$ Noise
+* 2015년 논문 (기존): 노이즈 낀 이미지( $x_t$ )를 보고, "원래 이미지( $x_{t-1}$의 평균 $\mu$ )" 가 무엇일지 예측
+* DDPM (혁신): 노이즈 낀 이미지( $x_t$ )를 보고, "여기 섞여 있는 '노이즈( $\epsilon$ )'가 무엇인가?" 를 예측하도록 바꿨습니다.
+
+2. 수식의 단순화
+* Diffusion 모델의 학습 목표 함수(Loss Function)는 원래 ELBO(Evidence Lower Bound) 라는 매우 복잡한 수식
+* "정답 노이즈와 예측 노이즈 간의 차이(MSE)" 라는 아주 단순한 식으로 귀결
+
+$$L_{simple}(\theta) = \mathbb{E}_{t, x_0, \epsilon} [ \| \epsilon - \epsilon_\theta(\sqrt{\bar{\alpha}_t} x_0 + \sqrt{1-\bar{\alpha}_t}\epsilon, t) \|^2 ]$$
+
+---
+
 ### $p$가 닮아야할 확률분포 $q$에 대해서 이해하기
 
 $$q(x_{t-1}|x_t,x_0) = \mathcal{N}(x_{t-1}; \tilde{\mu}_t(x_t,x_0), \tilde{\beta}_tI) \\ (6)$$
