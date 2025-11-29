@@ -125,7 +125,7 @@ $$L=E_q​[ −logp_θ​(x_0)\]≤E_{q}​[−log\frac{p_θ(x_{0:T})​}{q(x_{1
 1. 로그-우도(Log-Likelihood)
 
 ```math
-\log \; p_θ(x_0)=\log\int{p_θ}(x_{0:T}))dx_{1:T}
+\log \; p_θ(x_0)=\log\int{p_θ}(x_{0:T})dx_{1:T}
 ```
 ​
 여기서 $p_\theta(x_{0:T})$는 모든 시점의 데이터를 포함하는 결합 확률 분포입니다.
