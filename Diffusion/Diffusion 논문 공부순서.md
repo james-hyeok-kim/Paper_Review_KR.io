@@ -46,5 +46,9 @@ DDPM의 성공 이후, 생성 속도를 높이고 샘플링 방식을 개선하�
 
 이 리스트를 순서대로 따라가시면 확산 모델의 역사와 핵심 아이디어를 체계적으로 이해하는 데 큰 도움이 될 것입니다.
 
+📜 Scalable Diffusion Models with Transformers (DiT) (ICCV 2023)
+저자: Peebles & Xie
 
-📜Tackiling the Generative Learning Trilemma with Denoising Diffusion GANs  (2022) ???
+핵심: Diffusion 모델의 백본(Backbone)이었던 UNet을 제거하고, Vision Transformer (ViT) 구조를 전면 도입했습니다.
+
+의의: 데이터와 모델 크기를 키울수록 성능이 예측 가능하게 좋아지는 Scaling Law가 Diffusion에서도 적용됨을 보였습니다. (Sora의 기반 기술로 추정됨)
