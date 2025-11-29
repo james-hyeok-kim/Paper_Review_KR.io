@@ -8,7 +8,7 @@ title: "[논문리뷰]Denoising Diffusion Probabilistic Models(DDPM)"
 
 논문 : [PDF](https://arxiv.org/pdf/2006.11239)
 
-일자 : 16 Dec 2020
+일자 : 16 Dec 2020 (NeurIPS)
 
 
 ---
