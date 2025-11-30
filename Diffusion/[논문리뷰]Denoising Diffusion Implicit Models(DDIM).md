@@ -338,6 +338,24 @@ We consider two types of selection procedure for τ given the desired dim($τ$) 
 <img width="1103" height="387" alt="image" src="https://github.com/user-attachments/assets/d26245a4-fc48-4ea5-8407-b63c3bf30d5e" />
 
 
+---
+### DDIM 의의
+
+1. 속도 혁명: 1,000 Step $\rightarrow$ 50 Step
+
+* DDPM의 가장 큰 문제는 샘플링 속도였습니다. 노이즈를 1,000번에 걸쳐 아주 조금씩 걷어내야만 했죠(Markov Chain)
+* DDPM: $x_{1000} \to x_{999} \to x_{998} \to \dots \to x_0$ (모든 정거장을 다 거쳐야 함)
+* DDIM: $x_{1000} \to x_{900} \to x_{800} \to \dots \to x_0$ (급행열차처럼 건너뛰기 가능)
+
+2. 무작위성 제거: 결정론적(Deterministic) 샘플링
+
+* DDIM은 이 랜덤 노이즈 항의 계수($\sigma_t$)를 0으로 만들어 버립니다
+
+$$x_{t-1} = \underbrace{\sqrt{\bar{\alpha}_{t-1}} \left( \frac{x_t - \sqrt{1-\bar{\alpha}_t}\epsilon_\theta}{\sqrt{\bar{\alpha}_t}} \right)}_{\text{예측된 } x_0 \text{ 방향}} + \underbrace{\sqrt{1-\bar{\alpha}_{t-1}} \epsilon_\theta}_{\text{노이즈 방향}} + \underbrace{0 \times \sigma_t z}_{\text{랜덤 제거!}}$$
+
+
+---
+
 ## Diffusion Models as Score Based Models vs Stochastical Differential Equation(SDE)
 
 ### Score Based Model
