@@ -155,6 +155,35 @@ $$x_{i-1} = \frac{1}{\sqrt{1-\beta_i}}(x_i - \beta_i s_{\theta^{*}}(x_i, i)) + \
 
 * $\sqrt{\beta_i}z_i$: 생성 과정의 무작위성을 위해 약간의 노이즈를 다시 추가하는 항입니다. 이 과정은 생성된 샘플의 다양성을 보장합니다.
 
+
+#### (3) 유도
+
+* 합계 ( $\sum$ ): 모든 노이즈 단계 $i=1$부터 $N$까지
+* 가중치: $(1-\alpha_i)$
+* 손실 함수: $\mathbb{E} [ \| \text{내 모델 예측} - \text{정답 스코어} \|^2 ]$
+
+$$\theta^{*} = \arg\min \sum_{i=1}^{N} \underbrace{(1-\alpha_i)}_{\text{가중치}} \mathbb{E} \left[ \| s_\theta(\tilde{x}, i) - \underbrace{\nabla_{\tilde{x}} \log p_{\alpha_i}(\tilde{x}|x)}_{\text{정답 스코어}} \|_2^2 \right]$$
+
+ **DDPM의 원래 손실 함수($L_{simple}$, 노이즈 $\epsilon$ 예측)**와 수학적으로 동치입니다.
+ 
+ 단지 DDPM은 "노이즈 $\epsilon$을 맞춰라"라고 표현했고, 이 식은 "스코어 $\nabla \log p$를 맞춰라"라고 표현했을 뿐
+
+* 정답 스코어 계산 (Target Score)
+
+가우시안 분포 식을 로그를 취하고 $\tilde{x}$에 대해 미분하면 다음과 같습니다.
+
+$$\nabla_{\tilde{x}} \log p_{\alpha_i}(\tilde{x}|x_0) = \nabla_{\tilde{x}} \left( -\frac{\| \tilde{x} - \sqrt{\alpha_i}x_0 \|^2}{2(1-\alpha_i)} + C \right)$$
+
+$$= -\frac{\tilde{x} - \sqrt{\alpha_i}x_0}{1-\alpha_i}$$
+
+DDPM의 재매개변수화(Reparameterization trick) 
+
+$\tilde{x} = \sqrt{\alpha_i}x_0 + \sqrt{1-\alpha_i}\epsilon$ ( 여기서 $\epsilon \sim \mathcal{N}(0, I)$ )를 대입하면, 이 식은 더 직관적으로 바뀝니다.
+
+$$\text{Target Score} = -\frac{\sqrt{1-\alpha_i}\epsilon}{1-\alpha_i} = -\frac{\epsilon}{\sqrt{1-\alpha_i}}$$
+
+즉, **"정답 스코어는 추가된 노이즈 $\epsilon$의 반대 방향(역수)과 비례한다"**는 것을 알 수 있습니다.
+
 ---
 
 ### 3.3 ESTIMATING SCORES FOR THE SDE
