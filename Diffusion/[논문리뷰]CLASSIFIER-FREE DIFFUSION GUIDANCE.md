@@ -342,45 +342,42 @@ $$z_{t+1} \sim \mathcal{N}(\underbrace{\tilde{\mu}_{\lambda_{t+1}|\lambda_t}(z_t
 
 ---
 
-### 기존 Classifer Guidance에서 Classifier-Free Guidance 유도하기
+### 4. Experiment
 
-#### 기존 Claissfier Guidance
-
-$$
-\hat{\epsilon}_\theta(\mathbf{z}_\lambda, c) = \epsilon_\theta(\mathbf{z}_\lambda, c) - w \sigma_\lambda \nabla_{\mathbf{z}_\lambda} \log p_\theta(c|\mathbf{z}_\lambda) \approx -\sigma_\lambda \nabla_{\mathbf{z}_\lambda} [\log p(\mathbf{z}_\lambda|c) + w \log p_\theta(c|\mathbf{z}_\lambda)]
-$$
-
-$$\epsilon_\theta(z_\lambda, c) \approx -\sigma_\lambda \nabla_{z_\lambda} \log p(z_\lambda|c)$$
+<p align = 'center'>
+<img width="697" height="492" alt="image" src="https://github.com/user-attachments/assets/f406c594-9480-4ff6-b956-5cae20c8b37f" />
+</p>
 
 
-$$\text{Modified Score} = \nabla_{z} \log p(z|c) + w \cdot \underbrace{\nabla_{z} \log p(c|z)}_{\text{분류기 그라디언트}}$$
+1. 가이던스 강도 ($w$)에 따른 변화
+  1-1. 낮은 $w$ ($0.1 \sim 0.3$): 최고의 FID 점수를 기록하여 가장 자연스러운 이미지를 생성
+  1-2. 높은 $w$ ($4.0$ 이상): 최고의 IS 점수
+* 가이던스 강도가 높아질수록 샘플의 다양성은 줄어들지만, 개별 샘플의 선명도가 높아지고 색상이 진해지는(saturated) 경향
 
-* 베이지 룰 적용
+2. 비조건부 학습 확률 ($p_{uncond}$)의 영향
+  2-1. 결과: $p_{uncond} = 0.1$ 또는 $0.2$일 때가 $0.5$일 때보다 전반적으로 더 좋은 성능
+  2-2. 아주 적은 부분만 비조건부 생성 능력에 할애해도 효과적인 가이던스가 가능하다는 것
 
-$$p(c|z) = \frac{p(z|c) \cdot p(c)}{p(z)}$$
+<p align = 'center'>
+<img width="808" height="563" alt="image" src="https://github.com/user-attachments/assets/d44ca235-6185-444c-9a81-d04f8959b2b3" />
+</p>
 
-* log + 미분
-
-$$\nabla_{z} \log p(c|z) = \nabla_{z} \log p(z|c) - \nabla_{z} \log p(z) + \underbrace{\nabla_{z} \log p(c)}_{=0}$$
-
-$$\begin{aligned}
-\text{Modified Score} &= \nabla_{z} \log p(z|c) + w \cdot (\nabla_{z} \log p(z|c) - \nabla_{z} \log p(z)) \\
-&= (1 + w) \nabla_{z} \log p(z|c) - w \nabla_{z} \log p(z)
-\end{aligned}$$
-
-* Diffusion 모델은 보통 점수($\nabla \log p$) 대신 **노이즈($\epsilon$)**를 예측하도록 학습합니다.
-* 점수와 노이즈 예측값 사이에는 비례 관계가 성립합니다 ($\epsilon \propto -\text{Score}$)
-
-$$\tilde{\epsilon}_\theta(z, c) = (1+w)\epsilon_\theta(z, c) - w\epsilon_\theta(z)$$
-
+* vs. Classifier Guidance (ADM): $w=0.3$일 때, $128 \times 128$ ImageNet에서 분류기를 사용하는 ADM 모델보다 더 좋은(낮은) FID 점수를 기록
+* vs. BigGAN-deep: $w=4.0$일 때, BigGAN-deep의 최고 성능 설정보다 더 나은 FID 및 IS 점수를 동시에 달성
 
 ---
-### Gradient-based Adversarial Attack
+### 5. Discussion
 
-* 기울기 기반 공격 (Attack)
-  * 목표: 모델이 오답을 내도록 오차(Loss)를 키우거나, 특정 오답(Target) 확률을 높이는 것
-  * 방법: 모델의 파라미터( $w$ )는 고정하고, 입력 이미지( $x$ )를 수정합니다.
+1. 실용적 장점: 극도의 단순성 (Simplicity)
+* 학습이 쉽다
 
-* "진짜로 강아지 같은 고품질 이미지를 만드는 것인지" 아니면 "단지 분류기가 강아지라고 착각하게끔 픽셀을 조작하는 것인지(Adversarial Attack)" 의문
+2. 이론적 의의: 순수 생성 모델의 가능성
+* 비(非) 적대적 방식
 
-* 생성된 이미지의 점수(FID, Inception Score)가 높은 이유는 이미지가 진짜 좋아서가 아니라, 평가용 분류기(Inception Network)를 속였기 때문
+3. 한계점 및 고려사항
+* 샘플링 속도 (Sampling Speed)
+  * Classifier-Free Guidance는 매 스텝마다 조건부 및 비조건부 스코어를 계산하기 위해 **두 번의 포워드 패스(forward pass)**를 실행
+* 다양성 감소 (Decreased Diversity)
+  * 샘플의 품질(Fidelity)을 높이기 위해 다양성(Diversity)을 희생하는 방식
+
+---
