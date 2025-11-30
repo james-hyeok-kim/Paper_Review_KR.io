@@ -106,9 +106,14 @@ q_{\sigma}(x_{t-1}|x_t, f_{\theta}^{(t)}(x_t)) & \text{otherwise}
 
 ### DDIM 핵심 아이디어 Non Markovian Process
 
-#### 새로운 Forward 조건부 분포 $q$
-
 [Youtube](https://www.youtube.com/watch?v=n2P6EMbN0pc)
+
+* 목표: $x_t$에서 $x_{t-1}$로 가는 새로운 확률 분포 $q_\sigma(x_{t-1}|x_t, x_0)$를 정의하고 싶습니다
+* 제약 조건 (Consistency): 새롭게 정의한 방식으로 $x_{t-1}$을 만들어도, 결국 $x_{t-1}$ 자체의 분포 $q_\sigma(x_{t-1}|x_0)$는 기존 DDPM에서 정의한 것과 똑같아야 합니다.
+
+---
+
+#### 새로운 Forward 조건부 분포 $q$
 
 * $x_t =\sqrt{α_t}x_0 + \sqrt{1 − α_t}\epsilon, \\ where \\ \epsilon \sim \mathcal{N} (0, I) \\ (4)$
 
@@ -121,8 +126,21 @@ $$q_σ(x_{t−1}∣x_t,x_0)=\mathcal{N}(\sqrt{α_{t−1}}x_0 +  \sqrt{1−α_{t�
 
 * $\sigma_t$ : 확률을 조절하는 새로운 파라미터
 
+---
 
-##### (7) 유도과정
+#### (7) 유도과정
+
+##### 사용하려는 Tool, 가우시안 선형 변환 도구 (User's Tool)
+
+* 공식
+
+$$p(x) = \mathcal{N}(x|\mu, \Lambda^{-1})$$
+
+$$p(y|x) = \mathcal{N}(y|Ax+b, L^{-1})$$
+
+$$p(y) = \mathcal{N}(y|A\mu+b, L^{-1} + A\Lambda^{-1}A^T)$$
+
+---
 
 * $q_\sigma(x_t|x_0) = \mathcal{N}(\sqrt{α_t}x_0,(1 − α_t)I)$
 * $q_\sigma(x_{t-1}|x_0) = \mathcal{N}(\sqrt{\alpha_{t-1}}x_0, (1-\alpha_{t-1}I)$
@@ -194,7 +212,10 @@ L^{-1} + A\Lambda^{-1}A^T &= \sigma_t^2I + \sqrt{1-\alpha_{t-1}-\sigma^2_t} \cdo
 \end{align}
 ```
 
-* 최종식 유도
+---
+
+#### 최종식 유도
+
 ```math
 \begin{align}
 q_\sigma(x_t|x_0) &= \mathcal{N}(\sqrt{\alpha_t}x0, (1-\alpha_t)I) \\\\
@@ -217,6 +238,8 @@ q_\sigma(x_{t-1}|x_0) &= \mathcal{N}(x_{t-1};\mu_q = \frac{\sqrt{1-\alpha_{t-1}-
 * Trained DDPM을 DDIM non-markovian에서 사용 가능 (retrain x )
 
 $q_\sigma(x_t|x_{t-1},x_0) \neq q_\sigma(x_t|x_{t-1})$
+
+---
 
 #### Sampling
 
