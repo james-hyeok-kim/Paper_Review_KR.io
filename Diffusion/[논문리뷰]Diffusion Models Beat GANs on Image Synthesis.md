@@ -18,6 +18,8 @@
 * Classifier Guidance + upsampling
   * 256x256 : FID 3.94
   * 512x512 : FID 3.85
+
+---
  
 ### Introduction
 
@@ -41,12 +43,23 @@
 #### Backward (Denoising)
 * 노이즈 제거, 이미지 생성
 #### Training
-* 손실함수 MSE
-* $\left\| \epsilon_\theta(x_t, t) - \epsilon \right\|^2$
+* 손실 함수: MSE, $||\epsilon - \epsilon_{\theta}(x_{t},t)||^2$ 를 최소화
+
 #### Sampling
-* Backward process에서 진행
-* $x_t$ 에서 노이즈 $\epsilon_\theta$를 예측하며 $x_{t-1}, \mu_\theta$ 를 계산
+* 평균 $\mu_{\theta}$
+* 노이즈 $\epsilon_{\theta}$
+* 분산 $\Sigma_{\theta}$
+
 #### Main Improvement
+
+* 아키텍처 개선
+    * Layer 수 보다, Channel를 늘리는 것이 성능에 효과적
+    * 어텐션 헤드의 수를 늘리거나 헤드 당 채널 수를 줄이는 것이 FID를 개선
+    * 적응형 그룹 정규화 (AdaGN)
+* 분류기 가이던스 (Classifier Guidance)
+    * 분류기(Classifier) $p_{\phi}(y|x_t)$를 사용
+    * 분류기의 그라디언트 $\nabla_{x} \log p_{\phi}(y|x_t)$를 사용
+
 * Learned Variance
   * DDPM에서는 분산이 상수로 고정했지만 이 논문은 분산을 학습 하도록 했음
   * 50단계 미만의 샘플링은 DDIM 방식을 채택
@@ -58,12 +71,24 @@ $$\Sigma_\theta(x_t, t) = \exp(v \log \beta_t + (1 - v) \log \tilde{\beta}_t)$$
 
 $$L_{\text{simple}} + \lambda L_{\text{vlb}}$$
 
-* DDPM은 $L_{simple}$만 사용하여 노이즈$(\epsilon_\theta)$를 훈련
+* DDPM은 $L_{simple}$만 사용하여 노이즈 $(\epsilon_\theta)$ 를 훈련
   * 단순 평균제곱오차(MSE)
 * 현재 논문에서는 $L_{vlb}$를 추가
   * VLB : Variational Lower Bound
   * $\mu, \Sigma$ 둘다 고려한 수식
   * $\lambda$ 는 가중치 (0.0001)
+
+<p align ='center'>
+<img width="1285" height="435" alt="image" src="https://github.com/user-attachments/assets/93a23319-7e68-4e6f-97a6-5e104d46d6cd" />
+</p>
+
+<p align ='center'>
+<img width="1315" height="716" alt="image" src="https://github.com/user-attachments/assets/b01cbf09-7430-4895-857f-d1e152f8aa6a" />
+</p>
+
+<p align ='center'>
+<img width="1295" height="285" alt="image" src="https://github.com/user-attachments/assets/e5bf837e-49d8-4c02-8384-98be62696549" />
+</p>
 
 
 #### 성능 평가 지표
@@ -71,6 +96,7 @@ $$L_{\text{simple}} + \lambda L_{\text{vlb}}$$
 * IS(Inception Score) : 특정 클래스 분류 되는지 품질과 다양성 측정
 * Precision and Recall : 품질과 다양성 분리하여 측정
 
+---
 
 ### Architecture Improvements
 * UNet 아키텍처 개선 부분
@@ -132,63 +158,102 @@ $$AdaGN(h, y) = y_s \cdot GroupNorm(h) + y_b$$
     * $s$ 값을 높이면 ($s \uparrow$): 모델이 분류기의 판단에 더 집중하여 품질(Precision)과 IS가 크게 향상
     * $s$ 값을 낮추면 ($s \downarrow$): 다양성(Recall)이 향상됩니다
 
-### Conditional Reverse Noising Process
+### Conditional Reverse Noising Process (2~10)
 
 <p align="center">
 <img width="787" height="230" alt="image" src="https://github.com/user-attachments/assets/e8cdcd9c-5b47-4bdb-ad2e-ce7cb9d212ba" />
 </p>
 
-$$p_{\theta,\phi}(x_t | x_{t+1}, y) \propto \underbrace{p_{\theta}(x_t | x_{t+1})}_{\text{A. 확산 모델}} \cdot \underbrace{p_{\phi}(y | x_t)}_{\text{B. 분류기}}$$
 
-* 이 두 확률을 곱한 새로운 분포 $p_{\theta,\phi}$에서 직접 샘플링하는 것은 계산이 매우 어렵
+#### 조건부 확률 정의
+$$p_{\theta,\phi}(x_{t}|x_{t+1},y) = Z p_{\theta}(x_{t}|x_{t+1})p_{\phi}(y|x_{t}) \quad \quad (2)$$
 
-#### 근사
+* 비조건부 전이 확률 $p_{\theta}$
+* 분류기 확률 $p_{\phi}$
 
-* 확산 모델( $p_{\theta}$ )은 원래 가우시안 분포 $\mathcal{N}(\mu, \Sigma)$ (평균 $\mu$, 분산 $\Sigma$ )
-* 분류기( $p_{\phi}$ )의 $\log p_{\phi}(y|x_t)$를 1차 함수(직선)로 근사 (테일러 전개)
-  * $\log p_{\phi}(y|x_t) \approx \text{상수} + (x_t - \mu) \cdot \mathbf{g}$
-  * $\mathbf{g}$가 바로 분류기의 그래디언트 $\nabla_{x_t} \log p_{\phi}(y|x_t)$
+#### 비조건부 모델의 가우시안 정의
 
-* 기존 분포: $\mathcal{N}(\mu, \Sigma)$
-* 안내된 분포 (근사): $\mathcal{N}(\mathbf{\mu + \Sigma g}, \Sigma)$
+$$p_{\theta}(x_{t}|x_{t+1}) = \mathcal{N}(\mu, \Sigma) \quad \quad (3)$$
 
-* Algorithm 1 에서 샘플링 시 평균에 $s\Sigma \nabla_{x_t} \log p_{\phi}(y|x_t)$ (즉, $s\Sigma \mathbf{g}$)를 더해주는 이유
+$$\log p_{\theta}(x_{t}|x_{t+1}) = -\frac{1}{2}(x_{t}-\mu)^{T}\Sigma^{-1}(x_{t}-\mu) + C \quad \quad (4)$$
+
+#### 분류기의 테일러 급수 근사
+
+* $x_t = \mu$ 근처에서 테일러 급수(Taylor expansion)를 사용해 선형 함수로 근사
+
+$$\log p_{\phi}(y|x_{t}) \approx \log p_{\phi}(y|x_{t})|_{x_{t}=\mu} + (x_{t}-\mu)\nabla_{x_{t}}\log p_{\phi}(y|x_{t})|_{x_{t}=\mu} \quad \quad (5)$$
+
+$$= (x_{t}-\mu)g + C_{1} \quad \quad (6)$$
+
+$g = \nabla_{x_{t}}\log p_{\phi}(y|x_{t})|{x{t}=\mu}$
+
+#### 가우시안 분포 재구성 (Completing the Square)
+
+(2)의 Log Likelihood
+
+$$\log(p_{\theta}(x_{t}|x_{t+1})p_{\phi}(y|x_{t})) = \log p_{\theta}(x_{t}|x_{t+1}) + \log p_{\phi}(y|x_{t})$$
+
+$$\log p_{\phi}(y|x_{t}) \approx (x_{t}-\mu)g + C_{1} \quad \quad (6)$$
 
 $$
 \begin{aligned}
-\log p_\phi(y|x_t) &\approx \log p_\phi(y|x_t)|_{x_t=\mu} + (x_t - \mu) \nabla_{x_t} \log p_\phi(y|x_t)|_{x_t=\mu} \quad &(5) \\
-&= (x_t - \mu)g + C_1 \quad &(6)
+\log(p_\theta(x_t|x_{t+1})p_\phi(y|x_t)) &\approx -\frac{1}{2}(x_t - \mu)^T \Sigma^{-1} (x_t - \mu) + (x_t - \mu)^T g + C_2 \quad \quad (7) \\
+&= -\frac{1}{2}(x_t - \mu - \Sigma g)^T \Sigma^{-1} (x_t - \mu - \Sigma g) + \frac{1}{2}g^T \Sigma g + C_2  \quad \quad (8) \\
+&= -\frac{1}{2}(x_t - \mu - \Sigma g)^T \Sigma^{-1} (x_t - \mu - \Sigma g) + C_3  \quad \quad (9) \\
+&= \log p(z) + C_4, \quad z \sim \mathcal{N}(\mu + \Sigma g, \Sigma)  \quad \quad (10) 
 \end{aligned}
 $$
 
-*  $\log p_\phi(y|x_t)$를 평균 $\mu$ 에서 테일러 급수를 사용한 1차 항 근사 (식 5~6)
+##### (7)
+1. 가우시안 분포(정규분포)의 원래 공식
 
-$g = \nabla_{x_t} \log p_\phi(y|x_t)|_{x_t=\mu}$, and $C_1$ is a constant
+$$p(x) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left( -\frac{(x - \mu)^2}{2\sigma^2} \right)$$
+
+2. Log
+
+$$\log p(x) = \log\left( \frac{1}{\sqrt{2\pi\sigma^2}} \right) + \log\left( \exp\left( -\frac{(x - \mu)^2}{2\sigma^2} \right) \right)$$
+
+$$\log p(x) = \underbrace{\log(\text{상수})}_{C} - \frac{1}{2\sigma^2}(x - \mu)^2$$
+
+$$\log p(x) = -\frac{1}{2\sigma^2}(x - \mu)^2 + C$$
+
+* 스칼라(숫자)일 때: $\frac{1}{\sigma^2}(x - \mu)^2$
+* 벡터일 때: $(x - \mu)^T \Sigma^{-1} (x - \mu)$
+
+$$\log p_{\theta}(x_{t}|x_{t+1}) = -\frac{1}{2}(x_{t}-\mu)^{T}\Sigma^{-1}(x_{t}-\mu) + C \quad \quad(7)$$
+
+#### (8)
+
+$$\text{식} = \underbrace{-\frac{1}{2}(x_t - \mu)^T \Sigma^{-1} (x_t - \mu)}_{\text{확산 모델 (2차 함수)}} + \underbrace{(x_t - \mu)^T g}_{\text{분류기 (1차 함수)}} + C$$
+
+* $z = x_t - \mu$
+
+$$\text{식} = -\frac{1}{2} z^T \Sigma^{-1} z + z^T g + C$$
+
+* target
 
 $$
-\begin{aligned}
-\log(p_\theta(x_t|x_{t+1})p_\phi(y|x_t)) &\approx -\frac{1}{2}(x_t - \mu)^T \Sigma^{-1} (x_t - \mu) + (x_t - \mu)g + C_2 \quad &(7) \\
-&= -\frac{1}{2}(x_t - \mu - \Sigma g)^T \Sigma^{-1} (x_t - \mu - \Sigma g) + \frac{1}{2}g^T \Sigma g + C_2 \quad &(8) \\
-&= -\frac{1}{2}(x_t - \mu - \Sigma g)^T \Sigma^{-1} (x_t - \mu - \Sigma g) + C_3 \quad &(9) \\
-&= \log p(z) + C_4, \quad z \sim \mathcal{N}(\mu + \Sigma g, \Sigma) \quad &(10)
-\end{aligned}
+-\frac{1}{2}(z - A)^T \Sigma^{-1} (z - A)
 $$
 
-* 식 7
-  * 좌변, Diffusion의 역과정(Reverse process) 확률 $p_\theta$와 분류기 확률 $p_\phi$를 곱한 것의 로그
-  * 우변 첫째항, Diffusion 모델의 역과정 $p_\theta(x_t|x_{t+1})$은 정규분포 $\mathcal{N}(\mu, \Sigma)$를 따릅니다. 정규분포의 로그 취하면 2차 형식(Quadratic form)인 $-\frac{1}{2}(x-\mu)^T\Sigma^{-1}(x-\mu)$
-  * 우변의 두 번째 항 ($(x_t - \mu)g$): 식 (6)에서 구한 분류기의 근사값
+$$
+= -\frac{1}{2} \left( z^T \Sigma^{-1} z - z^T \Sigma^{-1} A - A^T \Sigma^{-1} z + A^T \Sigma^{-1} A \right)
+$$
 
-* 식 8~9 완전 제곱식 만들기
-  * $-\frac{1}{2}(x-\mu)^T\Sigma^{-1}(x-\mu) + (x-\mu)g$ 형태를 정리하면, 평균이 이동된 새로운 2차 형식 $-\frac{1}{2}(x - (\mu + \Sigma g))^T \Sigma^{-1} (x - (\mu + \Sigma g))$ 꼴로 바꿀 수
-  * 남는 찌꺼기 항들($\frac{1}{2}g^T \Sigma g$ 등)은 $x_t$와 무관하므로 상수로 처리되어 $C_3$로 흡수
+$z^T \Sigma^{-1} A = A^T \Sigma^{-1} z$
 
-* 식 10
-  * 이는 평균이 $\mu + \Sigma g$이고 공분산이 $\Sigma$인 정규분포의 로그 확률 밀도 함수(log-pdf)와 모양이 같음
-  * 분류기 정보( $y$ )를 반영하여 샘플링할 분포는 원래의 평균 $\mu$에서 $\Sigma g$만큼 이동한 정규분포
+$$= -\frac{1}{2} z^T \Sigma^{-1} z + z^T \Sigma^{-1} A - \frac{1}{2} A^T \Sigma^{-1} A$$
 
-* Key Takeaway
-  * $\mu' = \mu + \Sigma \cdot \nabla \log p(y|x_t)$
+* 가진 식: $-\frac{1}{2} z^T \Sigma^{-1} z + \mathbf{z^T g}$
+
+* 전개 식: $-\frac{1}{2} z^T \Sigma^{-1} z + \mathbf{z^T \Sigma^{-1} A} - \frac{1}{2} A^T \Sigma^{-1} A$
+
+$g = \Sigma^{-1} A$, $A = \Sigma g$
+
+불필요한 상수항( $-\frac{1}{2} A^T \Sigma^{-1} A$ ) : $-\frac{1}{2} (\Sigma g)^T \Sigma^{-1} (\Sigma g) = -\frac{1}{2} g^T \Sigma \Sigma^{-1} \Sigma g = \mathbf{-\frac{1}{2} g^T \Sigma g}$
+
+$$\text{결과} = \underbrace{-\frac{1}{2}(z - \Sigma g)^T \Sigma^{-1} (z - \Sigma g)}_{\text{완전 제곱식 부분}} + \underbrace{\frac{1}{2} g^T \Sigma g}_{\text{상수 보정 부분}} + C_2$$
+
 
 ### Conditional Sampling for DDIM
 
@@ -196,44 +261,46 @@ $$
 <img width="787" height="237" alt="image" src="https://github.com/user-attachments/assets/0d205809-49b1-41d8-b9fe-350a2fc517df" />
 </p>
 
-* DDPM 방식에서 DDIM 샘플링 과정 적용 관련 내용
-  * 위에 조건부 샘플링, Stochastic한 샘플링에서만 유효
-  * DDIM 같은 Deterministic한 샘플링 에는 적용 불가
+$$\nabla_{x_{t}}\log p_{\theta}(x_{t}) = -\frac{1}{\sqrt{1-\overline{\alpha}_{t}}}\epsilon_{\theta}(x_{t}) \quad \quad (11)$$
 
-* DDPM과 DDIM의 공통적 관계
-* 모델이 예측한 노이즈 $\epsilon_\theta(x_t)$는 데이터 분포의 로그 기울기(Score)와 비례
+* 좌변 (LHS): Score Function (점수 함수)
+   * 어느 방향으로 이동해야 진짜 데이터($x_0$)처럼 보일 확률($p_{\theta}$)이 높아지는가?
+* 우변 (RHS): Scaled Negative Noise (스케일된 음의 노이즈)
+   * 노이즈를 걷어내는 방향
+* Score(데이터로 가는 방향) $\approx$ -Noise(노이즈의 반대 방향)
 
-$$\nabla_{x_t} \log p(x_t) \propto - \frac{\epsilon_\theta(x_t)}{\sqrt{1-\bar{\alpha}_t}}$$
+#### 우리가 원하는 것은 조건부 분포 $p(x_t)p(y|x_t)$에서 샘플링
+$$\nabla_{x_{t}}\log(p_{\theta}(x_{t})p_{\phi}(y|x_{t})) = \nabla_{x_{t}}\log p_{\theta}(x_{t}) + \nabla_{x_{t}}\log p_{\phi}(y|x_{t}) \quad \quad (12)$$
 
-$$\nabla_{x_t} \log p(x_t|y) = \underbrace{\nabla_{x_t} \log p(x_t)}_{\text{Unconditional Score}} + \underbrace{\nabla_{x_t} \log p(y|x_t)}_{\text{Classifier Gradient}}$$
+* 원래 이미지의 Score + 분류기의 Score
 
-* 이를 이용해 조건부 노이즈 예측값 정의
+* (12)에 (11) 반영하면 (13)
+
+$$= -\frac{1}{\sqrt{1-\overline{\alpha}_{t}}}\epsilon_{\theta}(x_{t}) + \nabla_{x_{t}}\log p_{\phi}(y|x_{t}) \quad \quad (13)$$
 
 
+* 전체 Score(식 13)를 하나의 새로운 노이즈 예측값 $\hat{\epsilon}(x_t)$
 
-$$
-\begin{aligned}
-\nabla_{x_t} \log(p_\theta(x_t)p_\phi(y|x_t)) &= \nabla_{x_t} \log p_\theta(x_t) + \nabla_{x_t} \log p_\phi(y|x_t) \quad &(12) \\
-&= -\frac{1}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_\theta(x_t) + \nabla_{x_t} \log p_\phi(y|x_t) \quad &(13) \\
-\hat{\epsilon}(x_t) &= \epsilon_\theta(x_t) - \sqrt{1 - \bar{\alpha}_t} \nabla_{x_t} \log p_\phi(y|x_t) \quad (14)
-\end{aligned}
-$$
+$$-\frac{1}{\sqrt{1-\overline{\alpha}_{t}}} \hat{\epsilon}(x_t) = \text{Total Score}$$
+
+$$\hat{\epsilon}(x_{t}) := \epsilon_{\theta}(x_{t}) - \sqrt{1-\overline{\alpha}_{t}}\nabla_{x_{t}}\log p_{\phi}(y|x_{t}) \quad \quad (14)$$
 
 
 ### Scaling Classifier Gradients
 
-$$\hat{\epsilon}(x_t) := \epsilon_\theta(x_t) - \sqrt{1-\bar{\alpha}_t} \cdot s \cdot \nabla_{x_t} \log p_\phi(y|x_t)$$
+* 그라디언트에 1보다 큰 상수를 곱해주는 단순한 조작으로 클래스 이미지 생성에 도움
+* 이론적으로 정확한 값인 스케일 $1.0$, 생성된 이미지는 해당 클래스처럼 보이지 않았음
+* 1 보다 큰 상수 $s$ (예: 10.0), 클래스 확률이 거의 100%로 올라갔음
 
-* 단순히 $s=1$을 사용하면 생성된 이미지가 클래스 조건($y$)을 따르기는 하지만, 여전히 모호하거나 해당 클래스의 가장 전형적인 특징을 보여주지 못하는 경우가 많음
+$$s \cdot \nabla_x \log p(y|x) = \nabla_x \log (p(y|x)^s)$$
 
-* 강아지일 수도 있는 이미지를 누가봐도 확실한 강아지 이미지를 생성하려고 노력
+<p align = 'center'>
+<img width="1070" height="302" alt="image" src="https://github.com/user-attachments/assets/5b1ad5ad-b493-474c-8486-3c7de182bf77" />
+</p>
+
 
 * $s \approx 1$ 분류기 개입이 적고, 다양성 높고, 이미지 특징이 약하거나 흐릿
 * $s > 1$ 분류기 강하게 개입, 품질/충실도 높음, 다양성 감소
-
-<p align="center">
-<img width="667" height="205" alt="image" src="https://github.com/user-attachments/assets/c9afcf09-e104-4f7d-b2f2-b31dafbc4d1b" />
-</p>
 
 * Metrics (지표)
   * FID ($\downarrow$): 낮을수록 좋음 (이미지 품질 + 다양성 종합 점수)
@@ -241,8 +308,9 @@ $$\hat{\epsilon}(x_t) := \epsilon_\theta(x_t) - \sqrt{1-\bar{\alpha}_t} \cdot s 
   * Precision ($\uparrow$): 높을수록 좋음 (이미지 품질/충실도)
   * Recall ($\uparrow$): 높을수록 좋음 (이미지 다양성)
 
+---
 
-### Result
+## Result
 
 <p align="center">
 <img width="598" height="502" alt="image" src="https://github.com/user-attachments/assets/3ca1d688-65a6-4aaa-9b37-bfc705c02160" />
@@ -280,3 +348,15 @@ $$\hat{\epsilon}(x_t) := \epsilon_\theta(x_t) - \sqrt{1-\bar{\alpha}_t} \cdot s 
 #### 정성적 평가 (Qualitative Results)
 * GAN: 종종 기괴한 텍스처나 무너진 구조(Artifacts)가 나타나는 경향이 있습니다.
 * Diffusion (ADM-G): 전체적인 구조(Global Structure)가 매우 안정적이며, 털 질감이나 그림자 같은 세부 묘사가 훨씬 자연스럽습니다. 특히 Guidance를 강하게 줄수록(Scale이 높을수록) 물체가 더 명확해지는 현상을 시각적으로 확인
+
+---
+
+## Limitations and Future work
+
+1. 샘플링 속도의 한계 (Sampling Speed)
+   1-1. GAN에 비해 샘플링 시간이 훨씬 오래
+2. 레이블 데이터 의존성 (Labeled Datasets)
+   2-1. 분류기 가이던스(Classifier Guidance)' 기법은 레이블(정답지)이 있는 데이터셋에만 적용
+3. CLIP 모델의 노이즈 버전을 사용하여 텍스트 캡션으로 이미지 생성을 가이드하는(Text-to-Image) 방식에도 적용
+
+---
