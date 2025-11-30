@@ -62,7 +62,7 @@ $$PE_{(pos, 2i+1)} = \cos(pos / 10000^{2i/d})$$
 * 연구진은 $p=2, 4, 8$을 설계 변수로 설정했습니다
 
 <p align = 'center'>
-<img width="672" height="662" alt="image" src="https://github.com/user-attachments/assets/2c35c1e1-014a-4031-b429-1243e58f0ecb" />
+<img width="300" height="300" alt="image" src="https://github.com/user-attachments/assets/2c35c1e1-014a-4031-b429-1243e58f0ecb" />
 </p>
 
 #### DiT block design
@@ -126,8 +126,132 @@ $$y = x^{(1)} + \alpha_2 \cdot h_{mlp}$$
 <img width="300" height="250" alt="image" src="https://github.com/user-attachments/assets/591109e7-b024-46dd-8068-a0f99208c712" />
 </p>
 
+#### Model size
+
+* 표준 비전 트랜스포머(ViT)의 구성을 그대로 따르는 방식을 택함
+
+* 레이어 수 ( $N$ ): 트랜스포머 블록을 얼마나 깊게 쌓을 것인가
+* 히든 사이즈 ( $d$ ): 각 토큰이 가지는 벡터의 차원 크기
+* 어텐션 헤드 수: 멀티 헤드 어텐션에서 몇 개의 헤드를 사용할 것인가
+
+| 모델 (Model) | 레이어 수 (N) | 히든 사이즈 (d) | 헤드 수 (Heads) | 연산량 (Gflops) |
+| :--- | :--- | :--- | :--- | :--- |
+| DiT-S (Small) | 12 | 384 | 6 | 1.4 |
+| DiT-B (Base) | 12 | 768 | 12 | 5.6 |
+| DiT-L (Large) | 24 | 1024 | 16 | 19.7 |
+| DiT-XL (XLarge) | 28 | 1152 | 16 | 29.1 |
+
+#### Transformer decoder
+
+* DiT 블록을 통과한 토큰들은 여전히 1차원 시퀀스 형태
+* 이를 확산 모델의 학습 목표인 노이즈 예측(noise prediction)과 공분산 예측(diagonal covariance prediction)을 위해 원래 입력되었던 공간적 형태(spatial input)와 동일한 모양으로 복원
+
+$$Layer Norm $\rightarrow$ Linear Layer $\rightarrow$ Reshape$$
+
+* 표준 선형 디코더(standard linear decoder)를 사용
+
+1. 마지막 토큰 시퀀스에 레이어 정규화(Layer Norm)를 적용
+2. 각 토큰을 선형 레이어(Linear Layer)에 통과시켜 차원을 확장 (FC)
+    * 각 토큰은 $p \times p \times 2C$ 크기의 텐서로 변환
+    * $p$: 패치 크기 (Patch size)
+    * $C$: 입력 잠재 표현(Latent)의 채널 수
+    * $2C$인 이유: 모델이 노이즈와 공분산($\Sigma$) 두 가지를 동시에 예측하기 때문에 채널 수가 2배
+3. 재배열 (Rearrangement / Unpatchify)
+    * 디코딩된 토큰들을 원래 이미지의 공간적 위치에 맞춰 재배열
+    * 예: $32 \times 32 \times 4$
+
+---
+
+### 4. Experimental Setup
+
+#### Training
+1. ImageNet 데이터셋을 사용하여 클래스 조건부(class-conditional) 모델을 학습
+2. 해상도: $256 \times 256$ 및 $512 \times 512$ 두 가지 해상도에서 실험
+3. 최적화 도구: AdamW 옵티마이저를 사용했
+4. 학습률 (Learning Rate): $1 \times 10^{-4}$의 고정된 학습률을 사용
+    * 특이점: 일반적인 비전 트랜스포머(ViT) 학습과 달리, 학습률 웜업(warmup)이나 복잡한 정규화 기법 없이도 매우 안정적으로 학습
+5. 데이터 증강: 수평 뒤집기(horizontal flips)만 유일하게 사용
+6. EMA: 생성 모델링의 관례에 따라 가중치에 대한 지수 이동 평균(Exponential Moving Average, 0.9999 decay)을 유지하여 최종 평가에 사용
+
+#### Diffusion
+* 이 모델은 잠재 확산 모델(LDM)이므로, 이미지를 압축하는 과정이 포함
+
+1. VAE: Stable Diffusion에서 사용된 **사전 학습된 VAE(Variational Autoencoder)**를 그대로 가져와 사용
+2. 압축률: 인코더는 이미지를 $1/8$ 크기로 다운샘플링합니다
+    * 예: $256 \times 256 \times 3 \rightarrow 32 \times 32 \times 4$
+3. 확산 파라미터: 기존 연구인 ADM(Guided Diffusion)과의 공정한 비교를 위해, $t_{max}=1000$ 선형 스케줄 등 ADM의 하이퍼파라미터를 그대로 유지
+
+#### Evaluation Metrics
+
+1. 기준: FID-50K를 사용하며, 250단계의 DDPM 샘플링을 거친 이미지를 평가합니다
+2. 정확성: FID는 구현 방식에 따라 값이 달라질 수 있으므로, 정확한 비교를 위해 ADM의 TensorFlow 평가 스위트를 사용하여 측정
+3. 보조 지표: Inception Score, sFID, Precision/Recall 등도 함께
+
+#### Compute
+* 프레임워크: JAX
+* 하드웨어: TPU-v3 Pods를 사용하여 학습
 
 
+---
 
+### 5. Experiments
+
+#### DiT Block Design
+* adaLN-Zero가 가장 뛰어난 성능
+
+#### Scaling model size and patch size
+당연한 얘기
+
+* 확장 법칙 (Scaling Laws):모델 크기 증가: 모델을 더 깊고 넓게(Depth/Width 증가) 만들수록 성능이 좋아짐
+* 패치 크기 감소: 패치를 작게 만들면 토큰 수( $T$ )가 늘어나 연산량이 증가하며, 성능이 좋아짐
+* Gflops의 중요성: 파라미터 수가 비슷하더라도 Gflops(연산량)가 더 높은 모델(예: 패치 사이즈를 줄인 경우)이 성능이 더 좋아짐
+* Gflops와 FID 사이에는 강력한 음의 상관관계
+
+<p align = 'center'>
+<img width="800" height="400" alt="image" src="https://github.com/user-attachments/assets/5ce132a1-044b-469c-9039-65b3c9a0b382" />
+</p>
+
+* 패치 크기를 8에서 2로 줄인다는 것은, 이미지를 더 잘게 쪼개서 토큰의 개수( $T$ )를 늘린다는 뜻 (연산량 증가)
+* 모델 크기가 고정되어 있더라도 패치 크기를 줄여서 토큰 수를 늘리면 성능이 대폭 향상
+
+#### DiT Gflops are critical to improving performance & Larger DiT models are more compute-efficient
+* 결과: 큰 모델이 더 효율적입니다.
+
+<p align = 'center'>
+<img width="300" height="300" alt="image" src="https://github.com/user-attachments/assets/1568b59b-48a7-440d-a28e-64e0f1530930" />
+</p>
+
+
+#### SOTA
+
+<p align = 'center'>
+<img width="300" height="500" alt="image" src="https://github.com/user-attachments/assets/ce90f8ae-ab52-4492-a122-615642816d71" />
+</p>
+
+1. Table 2: ImageNet 256x256 해상도 성능 비교
+
+    * DiT-XL/2의 성과 - 최고 기록 달성: cfg=1.50 (분류기 없는 가이던스 스케일 1.5)을 사용했을 때, FID 2.27을 기록
+    * 확산 모델 중 가장 성능이 좋았던 LDM-4-G의 3.60을 크게 앞서는 수치이며, 당시 최강의 GAN이었던 StyleGAN-XL(2.30)보다도 낮은(좋은) 수치
+
+2. Table 3: ImageNet 512x512 해상도 성능 비교
+
+    * DiT-XL/2의 성과 - cfg=1.50에서 FID 3.04를 기록
+    * 픽셀 기반 확산 모델의 최고봉이었던 ADM-G, ADM-U의 3.85보다 훨씬 좋은 성능
+    * ADM이 1983 Gflops 이상의 연산량을 사용하는 데 비해, DiT-XL/2는 524.6 Gflops만으로 더 좋은 성능
+
+
+---
+### 의의
+
+#### 1. 확산 모델의 아키텍처 패러다임 전환 (U-Net $\rightarrow$ Transformer)기존의 한계 탈피
+
+#### 2. 확산 모델의 확장 법칙(Scaling Laws) 발견
+
+#### 3. SOTA
+
+#### 4. 아키텍처 통합 및 미래 연구 가속화
+
+* 확산 모델이 트랜스포머 아키텍처를 채택함으로써, 자연어 처리나 다른 비전 분야에서 개발된 최신 학습 기법, 최적화 기술, 하드웨어 가속 등의 이점
+* 단순함: 복잡한 다운샘플링/업샘플링 구조 없이 표준적인 블록 반복 구조를 사용함
 
 ---
