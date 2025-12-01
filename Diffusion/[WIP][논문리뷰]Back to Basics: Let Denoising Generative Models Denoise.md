@@ -86,7 +86,7 @@
 * Loss Space : 정답과의 차이를 $x, \epsilon, v$ 중 어떤 공간에서 계산할 것인가?
 
 <p align = 'center'>
-<img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/17db4679-b7d2-46cf-94bd-a70ae682cae8" />
+<img width="500" height="500" alt="image" src="https://github.com/user-attachments/assets/17db4679-b7d2-46cf-94bd-a70ae682cae8" />
 </p>
 
 * 실험 설정
@@ -156,7 +156,7 @@ $$
 #### What to Predict by the Network?
 
 <p align = 'center'>
-<img width="400" height="350" alt="image" src="https://github.com/user-attachments/assets/3f122669-9974-4fa6-b57f-cb8ec48fc8c2" />
+<img width="500" height="450" alt="image" src="https://github.com/user-attachments/assets/3f122669-9974-4fa6-b57f-cb8ec48fc8c2" />
 </p>
 
 * ImageNet 256x256 해상도에서 패치 크기를 16으로 설정(패치 차원 = 768)하고 실험을 진행했
@@ -171,7 +171,7 @@ $$
 
 #### Counter-intuitive Findings
 <p align = 'center'>
-<img width="500" height="450" alt="image" src="https://github.com/user-attachments/assets/6bd0050b-a623-4fca-a94f-6a74a260e819" />
+<img width="600" height="550" alt="image" src="https://github.com/user-attachments/assets/6bd0050b-a623-4fca-a94f-6a74a260e819" />
 </p>
 
 * 통념을 깨는 두 가지 중요한 발견
@@ -185,13 +185,13 @@ $$
 
 #### Algorithm
 <p align = 'center'>
-<img width="300" height="300" alt="image" src="https://github.com/user-attachments/assets/0b1db9a8-7c76-48aa-9349-74f5ad2895c1" />
+<img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/0b1db9a8-7c76-48aa-9349-74f5ad2895c1" />
 </p>
 
 
 #### “Just Advanced” Transformers
 <p align = 'center'>
-<img width="300" height="150" alt="image" src="https://github.com/user-attachments/assets/fc35eb2e-6ea7-4065-aced-e3c254c8b7a9" />
+<img width="400" height="200" alt="image" src="https://github.com/user-attachments/assets/fc35eb2e-6ea7-4065-aced-e3c254c8b7a9" />
 </p>
 
 * 최신 기술 적용 (Just Advanced): 언어 모델(LLM) 등에서 검증된 최신 기법들(SwiGLU, RMSNorm, ROPE 등)을 적용하고, In-context conditioning(클래스 토큰을 여러 개 붙이는 방식)을 도입하여 성능을 극대화
@@ -215,11 +215,11 @@ $$
 #### Reference results from previous works
 
 <p align = 'center'>
-<img width="300" height="500" alt="image" src="https://github.com/user-attachments/assets/991cb119-92aa-47be-942e-714f0bfb9463" />
+<img width="400" height="600" alt="image" src="https://github.com/user-attachments/assets/991cb119-92aa-47be-942e-714f0bfb9463" />
 </p>
 
 <p align = 'center'>
-<img width="300" height="300" alt="image" src="https://github.com/user-attachments/assets/3d3e246f-8fee-4045-9a58-4f58d3835911" />
+<img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/3d3e246f-8fee-4045-9a58-4f58d3835911" />
 </p>
 
 * 비교 대상
@@ -273,7 +273,7 @@ $$
     * 중간 투입 (Late Start Block): 이 토큰들을 맨 처음 입력단(Input)부터 넣지 않고, 트랜스포머의 중간 블록부터 끼워 넣습니다.
 
 <p align = 'center'>
-<img width="300" height="400" alt="image" src="https://github.com/user-attachments/assets/158292c1-3d92-4620-8ce2-3868d40cbe0f" />
+<img width="450" height="500" alt="image" src="https://github.com/user-attachments/assets/158292c1-3d92-4620-8ce2-3868d40cbe0f" />
 </p>
 
 * 예를 들어 JiT-H 모델의 경우 32개의 블록 중 10번째 블록부터 이 토큰들을 추가합니다
