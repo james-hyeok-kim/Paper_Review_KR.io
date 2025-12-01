@@ -6,7 +6,7 @@
 논문 : [PDF](https://arxiv.org/pdf/2511.13720)
 
 <p align = 'center'>
-<img width="681" height="639" alt="image" src="https://github.com/user-attachments/assets/38b2f741-47a4-4368-8c04-55b23e3883d6" />
+<img width="500" height="500" alt="image" src="https://github.com/user-attachments/assets/38b2f741-47a4-4368-8c04-55b23e3883d6" />
 </p>
 
 ---
@@ -79,14 +79,14 @@
 * $v$: 속도 (Velocity, 데이터와 노이즈가 섞인 변화율)
 
 <p align = 'center'>
-<img width="1368" height="303" alt="image" src="https://github.com/user-attachments/assets/a6cdd957-690a-46c5-beb3-72aa007a7821" />
+<img width="800" height="200" alt="image" src="https://github.com/user-attachments/assets/a6cdd957-690a-46c5-beb3-72aa007a7821" />
 </p>
 
 * Prediction Space : 신경망이 $x, \epsilon, v$ 중 무엇을 직접 출력할 것인가?
 * Loss Space : 정답과의 차이를 $x, \epsilon, v$ 중 어떤 공간에서 계산할 것인가?
 
 <p align = 'center'>
-<img width="690" height="778" alt="image" src="https://github.com/user-attachments/assets/17db4679-b7d2-46cf-94bd-a70ae682cae8" />
+<img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/17db4679-b7d2-46cf-94bd-a70ae682cae8" />
 </p>
 
 * 실험 설정
@@ -156,7 +156,7 @@ $$
 #### What to Predict by the Network?
 
 <p align = 'center'>
-<img width="662" height="535" alt="image" src="https://github.com/user-attachments/assets/3f122669-9974-4fa6-b57f-cb8ec48fc8c2" />
+<img width="400" height="350" alt="image" src="https://github.com/user-attachments/assets/3f122669-9974-4fa6-b57f-cb8ec48fc8c2" />
 </p>
 
 * ImageNet 256x256 해상도에서 패치 크기를 16으로 설정(패치 차원 = 768)하고 실험을 진행했
@@ -171,7 +171,7 @@ $$
 
 #### Counter-intuitive Findings
 <p align = 'center'>
-<img width="683" height="546" alt="image" src="https://github.com/user-attachments/assets/6bd0050b-a623-4fca-a94f-6a74a260e819" />
+<img width="500" height="450" alt="image" src="https://github.com/user-attachments/assets/6bd0050b-a623-4fca-a94f-6a74a260e819" />
 </p>
 
 * 통념을 깨는 두 가지 중요한 발견
@@ -185,13 +185,13 @@ $$
 
 #### Algorithm
 <p align = 'center'>
-<img width="674" height="672" alt="image" src="https://github.com/user-attachments/assets/0b1db9a8-7c76-48aa-9349-74f5ad2895c1" />
+<img width="300" height="300" alt="image" src="https://github.com/user-attachments/assets/0b1db9a8-7c76-48aa-9349-74f5ad2895c1" />
 </p>
 
 
 #### “Just Advanced” Transformers
 <p align = 'center'>
-<img width="673" height="268" alt="image" src="https://github.com/user-attachments/assets/fc35eb2e-6ea7-4065-aced-e3c254c8b7a9" />
+<img width="300" height="150" alt="image" src="https://github.com/user-attachments/assets/fc35eb2e-6ea7-4065-aced-e3c254c8b7a9" />
 </p>
 
 * 최신 기술 적용 (Just Advanced): 언어 모델(LLM) 등에서 검증된 최신 기법들(SwiGLU, RMSNorm, ROPE 등)을 적용하고, In-context conditioning(클래스 토큰을 여러 개 붙이는 방식)을 도입하여 성능을 극대화
@@ -200,11 +200,44 @@ $$
 
 ## 5. Comparisons
 
+#### High-resolution generation on pixels
+* 실험: 저자들은 ImageNet 512x512 및 1024x1024 해상도에서 실험을 진행했습니다
+    * 패치 크기 전략: 해상도가 커질 때 시퀀스 길이를 늘리는 대신, 패치 크기를 키우는 전략을 썼습니다
+    * 1024 해상도에서는 패치 크기가 $64 \times 64$가 되며, 패치 하나의 차원이 무려 12,288차원이 됩니다
+* 결과: 기존 모델이라면 히든 사이즈(Hidden units)가 입력 차원보다 작아 정보 손실로 실패했겠지만, $x$-prediction을 사용하는 JiT는 이 고차원 입력을 무리 없이 처리하며 성공적으로 이미지를 생성
+
+#### Scalability
+* 모델 크기: Base(B), Large(L), Huge(H), Giga(G) 사이즈로 모델을 키워가며 실험했습니다.
+* 성능 향상: 모델 사이즈가 커질수록 FID(이미지 품질 지표, 낮을수록 좋음)가 꾸준히 개선되었습니다. 특히 JiT-G 모델은 512 해상도에서 1.78이라는 매우 낮은 FID를 달성했습니다.
+* 특이점: 모델이 커질수록 256 해상도와 512 해상도 간의 성능 격차가 줄어들었습니다. 이는 큰 모델일수록 고해상도 생성이라는 어려운 작업을 더 잘 학습한다는 것을 의미합니다.
+
+
+#### Reference results from previous works
+
+<p align = 'center'>
+<img width="300" height="500" alt="image" src="https://github.com/user-attachments/assets/991cb119-92aa-47be-942e-714f0bfb9463" />
+</p>
+
+<p align = 'center'>
+<img width="300" height="300" alt="image" src="https://github.com/user-attachments/assets/3d3e246f-8fee-4045-9a58-4f58d3835911" />
+</p>
+
+* 비교 대상
+    * Latent Diffusion (예: DiT, SiT): 이미지를 압축하는 VAE(토크나이저)를 사용하고, 추가적인 학습 데이터나 손실 함수를 사용하는 모델들 .
+    * Pixel Diffusion (예: SiD, PixelFlow): 픽셀 공간에서 작동하지만 복잡한 구조를 가진 모델들
+* JiT의 성과
+    * 토크나이저(VAE), 사전 훈련(Pre-training), 지각 손실(Perceptual loss, VGG 사용), 적대적 손실(Adversarial loss) 등 외부의 도움을 전혀 받지 않고도(Self-contained) 경쟁력 있는 결과를 냈습니다.
+    * ImageNet 512x512에서 FID 1.78을 기록하며, VAE를 쓰는 모델들이나 복잡한 픽셀 모델들과 대등한 성능을 보였습니다.
 
 
 ---
 
 ## 6. Discussion and Conclusion
+
+* 미래 전망: 과학 분야로의 확장 가능성
+    * 토크나이저의 부재: 단백질 구조, 분자 배열, 기상 데이터(Weather)와 같은 과학 데이터들은 이미지와 달리 효과적인 토크나이저(VAE 등)를 설계하기가 매우 어렵습니다.
+    * 새로운 패러다임: 이 논문이 제안한 방식(JiT)은 복잡한 토크나이저 없이 '원시 데이터(Raw Data)'에 직접 트랜스포머를 적용할 수 있음을 증명했습니다.
+    * 비전: 저자들은 이 범용적인 "Diffusion + Transformer" 패러다임이 고차원 자연 데이터를 다루는 다양한 과학 분야의 기초 모델(Foundation)이 되기를 기대합니다.
 
 ---
 
