@@ -139,12 +139,68 @@ $$
 
 ## 4. “Just Image Transformers” for Diffusion
 
+<p align = 'center'>
+<img width="684" height="582" alt="image" src="https://github.com/user-attachments/assets/519aa81b-eefc-491b-a32e-2465c8f58230" />
+</p>
 
 
+#### Just Image Transformers
+
+* 구조: 기본적인 Vision Transformer (ViT) 구조를 그대로 따릅니다
+    * 이미지를 $p \times p$ 크기의 패치로 자릅니다
+        * (예: $16 \times 16$ 픽셀)
+    * 이 패치들을 1차원 벡터로 펼쳐서(Linear Embedding) 트랜스포머에 넣습니다
+    * 트랜스포머 블록을 통과한 후, 다시 선형 층(Linear Predictor)을 통해 깨끗한 이미지 패치($x$)를 예측합니다
+* 특징: 토크나이저(VAE), 사전 훈련, 추가적인 손실 함수 등이 전혀 없는 자립형(Self-contained) 모델입니다
+
+#### What to Predict by the Network?
+
+<p align = 'center'>
+<img width="662" height="535" alt="image" src="https://github.com/user-attachments/assets/3f122669-9974-4fa6-b57f-cb8ec48fc8c2" />
+</p>
+
+* ImageNet 256x256 해상도에서 패치 크기를 16으로 설정(패치 차원 = 768)하고 실험을 진행했
+* 결과 ( $x$ vs $\epsilon$ vs $v$ )
+    * $x$-prediction (데이터 예측): 매우 잘 작동
+        * 손실 함수를 어떤 기준(Loss Space)으로 설정하든 상관없이 안정적
+     * $\epsilon$ / $v$-prediction (노이즈/속도 예측): 처참하게 실패(Catastrophic failure)
+         * 네트워크가 고차원 패치 속에 섞인 노이즈 정보를 감당하지 못하기 때문
+* 비교 (저차원일 때)
+    * 해상도를 낮추어 패치 차원이 작을 때($4 \times 4$ 패치, 48차원)는 $\epsilon$이나 $v$를 예측해도 잘 작동
+    * 즉, 기존 연구들이 노이즈 예측의 문제를 몰랐던 건, 주로 저차원 잠재 공간(Latent Space)이나 작은 이미지에서만 실험했기 때문
+
+#### Counter-intuitive Findings
+<p align = 'center'>
+<img width="683" height="546" alt="image" src="https://github.com/user-attachments/assets/6bd0050b-a623-4fca-a94f-6a74a260e819" />
+</p>
+
+* 통념을 깨는 두 가지 중요한 발견
+* 네트워크 너비(Hidden Size)를 키울 필요가 없다
+    * 일반적으로 입력 데이터의 차원이 크면 네트워크도 커야 한다고 생각
+    * 하지만 $x$-prediction을 사용하면, 패치 차원(예: 3072, 12288)이 네트워크의 히든 사이즈(예: 768)보다 훨씬 커도 문제없이 작동
+    * 신경망이 노이즈를 다 외우는 게 아니라, 저차원 매니폴드 구조만 학습하면 되기 때문
+ * 병목(Bottleneck)이 오히려 도움이 된다
+     * 입력 패치를 트랜스포머에 넣을 때 차원을 줄이는 병목 층(Bottleneck Linear Layer)을 사용했더니 성능이 더 좋아졌다
+     * 병목 구조가 노이즈를 걸러내고 유용한 정보만 통과시키는 역할을 하여 매니폴드 학습을 돕기 때문
+
+#### Algorithm
+<p align = 'center'>
+<img width="674" height="672" alt="image" src="https://github.com/user-attachments/assets/0b1db9a8-7c76-48aa-9349-74f5ad2895c1" />
+</p>
+
+
+#### “Just Advanced” Transformers
+<p align = 'center'>
+<img width="673" height="268" alt="image" src="https://github.com/user-attachments/assets/fc35eb2e-6ea7-4065-aced-e3c254c8b7a9" />
+</p>
+
+* 최신 기술 적용 (Just Advanced): 언어 모델(LLM) 등에서 검증된 최신 기법들(SwiGLU, RMSNorm, ROPE 등)을 적용하고, In-context conditioning(클래스 토큰을 여러 개 붙이는 방식)을 도입하여 성능을 극대화
 
 ---
 
 ## 5. Comparisons
+
+
 
 ---
 
