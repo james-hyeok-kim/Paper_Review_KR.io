@@ -219,6 +219,38 @@ $$\mathcal{L}_{reg} = \mathbb{E}_{p_{data}(x), p(x_v|x)} [D_{KL}(q_{\phi}(z|x_v)
 * VMAE는 마스킹된 예측(Masked prediction)을 수행하므로 보이는 부분 $x_v$를 조건으로 하는 분포 $q(z|x_v)$를 규제하도록 식이 수정
 
 
+### 4.3. Perceptual Reconstruction (지각적 복원)
+
+#### 1. 픽셀 정확도 vs 지각적 품질
+
+* AE (AutoEncoder)의 한계: 픽셀 간의 차이(MSE)를 줄이는 데 집중
+    * 수치적으로 오차(MSE)는 매우 낮지만, 실제 눈으로 보면 미세한 디테일(질감 등)이 뭉개지는 현상
+
+* VAE (Variational AutoEncoder)의 한계: 확률 분포 규제가 강해 이미지가 전반적으로 흐릿(Blurry)해지며, 픽셀 정확도와 지각적 디테일 모두 떨어짐
+
+#### 2. 이중 손실 함수 설계
+
+1. 재구성 손실 ( $\mathcal{L}_R$, Reconstruction Loss)
+
+* 이 손실 함수는 픽셀 수준의 정확도
+* 하지만 VMAE는 마스킹(Masking) 기법을 사용하므로, 가려지지 않은 보이는 영역( $x_v$ )에 대해서만 이 손실을 계산
+
+$$\mathcal{L}_R = \mathbb{E}_{p_{data}(x), p(x_v|x), q_{\phi}(z|x_v)} [-\log p_{\theta}(x_v|z)]$$
+
+* 의미: 인코더가 압축한 정보( $z$ )를 디코더가 다시 풀었을 때, 원본의 보이는 부분( $x_v$ )과 얼마나 똑같은지 측정
+* 참고: 가려진 부분( $x_m$ )은 앞서 설명한 마스킹 손실( $\mathcal{L}_M$ )이 담당하므로 여기서는 계산하지 않는다.
+
+2. 지각적 손실 ( $\mathcal{L}_P$, Perceptual Loss )
+
+* 이 손실 함수는 사람 눈에 보이는 품질(Perceptual fidelity)
+* 픽셀 값을 직접 비교하는 대신, LPIPS (Learned Perceptual Image Patch Similarity)라는 지표를 사용
+
+$$\mathcal{L}_{P} = \mathbb{E}_{p_{data}(x), q_{\phi}(z|x_v), p_{\theta}(\hat{x}|z)} [\sum_{l}w_{l}||\psi_{l}(x)-\psi_{l}(\hat{x})||_{2}^{2}]$$
+
+* $\psi_l$: 사전 학습된 네트워크(VGG 등)의 $l$번째 레이어에서 추출한 특징 맵(Feature map)
+* 작동 원리: 원본 이미지 $x$와 복원된 이미지 $\hat{x}$를 VGG 네트워크에 통과시켜 추출된 '특징'들이 얼마나 유사한지를 비교
+* 효과: 픽셀 값이 조금 다르더라도, 이미지의 구조나 질감 같은 고차원적인 특징이 유사하도록 강제하여 결과물이 흐릿해지지 않고 선명하게 복원됩니다.
+
 
 ---
 
