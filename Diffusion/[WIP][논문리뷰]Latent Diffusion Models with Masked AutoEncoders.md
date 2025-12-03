@@ -221,6 +221,10 @@ $$\mathcal{L}_{reg} = \mathbb{E}_{p_{data}(x), p(x_v|x)} [D_{KL}(q_{\phi}(z|x_v)
 
 ### 4.3. Perceptual Reconstruction (지각적 복원)
 
+<p align = 'center'>
+<img width="539" height="345" alt="image" src="https://github.com/user-attachments/assets/e2fa85f3-79e1-421b-9d21-f02684ff22fa" />
+</p>
+
 #### 1. 픽셀 정확도 vs 지각적 품질
 
 * AE (AutoEncoder)의 한계: 픽셀 간의 차이(MSE)를 줄이는 데 집중
@@ -252,6 +256,133 @@ $$\mathcal{L}_{P} = \mathbb{E}_{p_{data}(x), q_{\phi}(z|x_v), p_{\theta}(\hat{x}
 * 효과: 픽셀 값이 조금 다르더라도, 이미지의 구조나 질감 같은 고차원적인 특징이 유사하도록 강제하여 결과물이 흐릿해지지 않고 선명하게 복원됩니다.
 
 
+### 4.4. Model Architecture and Training Objective
+
+#### Model Architecture
+
+* Vision Transformer (ViT) 기반
+* 대칭적 구조 (Symmetric Structure): 인코더와 디코더가 서로 대칭을 이루는 ViT 기반 구조
+    * 인코더: 입력 이미지를 작은 패치(Patch)로 쪼개서(Spatial downsampling) Transformer 레이어에 통과시킨 뒤, 미리 정해진 크기의 잠재 벡터로 압축
+    * 디코더: 인코더의 과정을 역순으로 수행하여 잠재 벡터를 다시 이미지로 복원
+
+#### Training Objective
+
+* 잠재 공간의 부드러움 확보
+    * KL 발산(KL divergence)을 사용하여 잠재 분포가 정규 분포를 따르도록 규제
+    * 중요한 디테일: 이때 분포의 분산(Variance)은 1이 되도록(Unit variance) 규제하지만, 평균(Mean)은 0으로 강제하지 않고 학습 가능하도록 둡니다.
+    * 이유: 평균까지 0으로 강제하면 정보가 너무 많이 사라지기 때문에, 계층적 압축에 필요한 '구별 가능한 특징(Discriminative features)'을 남겨두기 위함입니다.
+
+* 계층적 압축 및 복원
+    * 마스킹된 부분 예측(Masked-part prediction)을 통해 계층적 압축을 수행하고,
+    * 지각적 손실(Perceptual loss)을 통해 사람 눈에 자연스러운 복원을 수행합니다
+
+$$\mathcal{L}_{VMAE} = \mathcal{L}_R + \lambda_M \mathcal{L}_M + \lambda_P \mathcal{L}_P + \lambda_{reg} \mathcal{L}_{reg}$$
+
+* $\mathcal{L}_R$ (Reconstruction Loss): 보이는 부분($x_v$)에 대한 픽셀 복원 오차
+* $\mathcal{L}_M$ (Masking Loss): 가려진 부분($x_m$)에 대한 예측 오차
+* $\mathcal{L}_P$ (Perceptual Loss): 지각적 품질을 위한 LPIPS 손실
+* $\mathcal{L}_{reg}$ (Regularization Loss): 잠재 공간을 부드럽게 하는 KL 규제
+* $\lambda$ (Lambda): 각 손실 항의 중요도를 조절하는 하이퍼파라미터입니다
+
 ---
 
+## 5. Evaluation on Autoencoders
+
+<p align = 'center'>
+<img width="535" height="473" alt="image" src="https://github.com/user-attachments/assets/15a54e4a-110b-478d-b05b-d978831af88b" />
+</p>
+
+### 5.1. Results and Analysis
+
+#### 1. 잠재 공간의 부드러움 (Latent Space Smoothness)"
+
+* 확산 모델이 실수로 조금 틀린 값을 예측해도, 디코더가 찰떡같이 알아듣고 복원할 수 있는가?"
+* 실험 방법: 잠재 벡터에 인위적으로 노이즈(방해물)를 조금씩 섞어가며(Noise perturbation), 복원된 이미지의 품질(rFID)이 얼마나 나빠지는지 측정 (논문 Figure 6 참조)
+* 결과 분석
+    * 결정론적 모델 (AE, DAE): 노이즈가 없을 땐 잘하지만, 노이즈가 조금만 커져도 성능이 급격히 떨어짐
+    * 잠재 공간이 점(Point)으로만 이루어져 있어, 조금만 벗어나도 디코더가 해석을 못 하기 때문
+    * VAE: 노이즈에 가장 강합니다(그래프가 평평함). 하지만 기본 화질 자체가 안 좋습니다(rFID 점수가 높음)
+    * VMAE & SD-VAE: 화질도 좋고(낮은 rFID), 노이즈가 섞여도 성능이 잘 유지
+        * 특히 VMAE는 모든 구간에서 SD-VAE보다 더 좋은 성능을 보였습니다
+
+#### 2. 지각적 압축 (Perceptual Compression)
+
+<p align = 'center'>
+<img width="539" height="496" alt="image" src="https://github.com/user-attachments/assets/8f7ddbc0-dc42-42e7-ac74-796a1e845667" />
+</p>
+
+
+* "이미지를 얼마나 잘 압축하면서도, 중요한 의미(Semantics)를 잃어버리지 않았는가?"
+* 평가 지표
+    * 압축 강도 ( $\sigma^2$ ): 같은 종류의 데이터끼리 얼마나 똘똘 뭉쳐있는가?
+        * (작을수록 좋음 - 압축이 잘됨)
+    * 의미 분리도 ( $\rho$ ): 다른 종류의 데이터끼리 얼마나 확실히 구분되는가?
+        * (클수록 좋음 - 의미가 살아있음)
+* 결과 분석 (논문 Figure 7): DAE, VAE: 압축이 제대로 안 됩니다 ( $\sigma^2$가 큼)
+    * SD-VAE
+        * 압축은 엄청나게 잘합니다(가장 낮은 $\sigma^2$ ).
+        * 하지만 의미 분리도($\rho$)가 가장 낮습니다.
+        * 즉, 너무 과하게 압축해서 기린의 털 무늬와 배경을 구분 못 하고 뭉개버린다는 뜻
+     * VMAE
+         * 압축도 잘하면서 의미 분리도도 높습니다.
+             * 이는 계층적 압축(Hierarchical Compression) 덕분에 객체의 큰 틀과 세부 디테일을 모두 잘 정리해서 저장하고 있음을 보여줍니다
+
+#### 3. 복원 품질 (Reconstruction Quality)"
+
+<p align = 'center'>
+<img width="548" height="422" alt="image" src="https://github.com/user-attachments/assets/fbff52a4-ae24-4c3a-b4ff-6e7b7e5679df" />
+</p>
+
+
+* 압축을 풀었을 때 이미지가 원본과 얼마나 똑같고(Pixel), 얼마나 자연스러운가(Perceptual)?"
+* 실험 방법: ImageNet-1K 테스트셋을 이용해 다양한 지표로 측정 (논문 Table 1)
+* 결과 분석
+    * AE, DAE: 수치적인 정확도(MSE, PSNR)는 좋지만, 눈으로 볼 때의 품질(LPIPS, FID)은 떨어집니다
+    * VAE: 모든 지표에서 성능이 가장 나쁩니다. 이미지가 흐릿하게 나옵니다
+    * SD-VAE: 눈으로 볼 때의 품질(Perceptual)은 좋지만, 픽셀 정확도(Pixel-level)는 떨어집니다
+    * VMAE: 픽셀 정확도와 지각적 품질 모두 좋습니다. SD-VAE보다 더 선명하면서도 원본 수치에 더 가까운 복원 능력을 보여줍니다
+
+---
+
+## 6. Evaluation on Overall Image Generation
+
+<img width="537" height="319" alt="image" src="https://github.com/user-attachments/assets/fdfef4e5-b7c2-4656-823f-b4f67242f4a6" />
+
+
+* 저자들은 ImageNet-1K(클래스 조건부 생성)와 CelebA-HQ(비조건부 얼굴 생성) 두 가지 데이터셋을 사용하여 실험을 진행
+
+* AE & DAE (결정론적 모델):
+    * 잠재 공간이 부드럽지 않고 희소(Sparse)하기 때문에 생성 성능이 떨어집니다.
+    * 확산 모델이 예측한 값이 조금만 빗나가도 디코더가 제대로 복원하지 못하기 때문입니다.
+
+* VAE
+    * 잠재 공간은 가장 부드럽지만, 복원 품질이 너무 낮아 생성 점수(FID)가 가장 나쁩니다.
+    * 아무리 확산 모델이 잘 예측해도, 디코더가 흐릿하게 그리면 소용없음을 보여줍니다.
+
+* SD-VAE
+    * 3가지 조건의 균형을 잘 맞춰서 준수한 성능을 보입니다.
+
+* VMAE (LDMAE)
+    * 모든 지표에서 1등을 차지했습니다.
+    * 특히 픽셀 수준의 정확도와 지각적 품질을 모두 잡았기 때문에, 생성된 이미지의 완성도가 가장 높습니다.
+    * 결과: 다양한 인종, 나이, 액세서리를 가진 고해상도 얼굴 이미지(Figure 9)와 다양한 객체(Figure 1)를 성공적으로 생성했습니다.
+
+
+#### 흥미로운 발견 (CelebA-HQ vs ImageNet)
+
+* VAE는 배경이 복잡한 ImageNet에서는 점수가 매우 나쁘지만, 얼굴 중심의 CelebA-HQ에서는 다른 모델들과 격차가 줄어듭니다.
+* 이는 ImageNet의 복잡한 배경이 미세한 복원 오류에 더 민감하게 반응하기 때문으로 분석됩니다.
+
+
+### 절제 연구 (Ablation Study)
+* 저자들은 VMAE의 각 구성 요소(손실 함수)가 성능 향상에 기여하는 바를 확인하기 위해, 기능을 하나씩 추가해가며 실험 (ImageNet-1K 기준)
+* Baseline (MSE만 사용):픽셀 수치는 잘 맞추지만(높은 PSNR), 지각적 품질(rFID)과 생성 품질(gFID)은 나쁩니다.
+    * 잠재 공간이 부드럽지 않기 때문
+* + 마스킹 손실 ( $\mathcal{L}_M$ ):MAE처럼 학습시킵니다. 지각적 복원 품질이 좋아지면서 생성 품질(gFID)이 대폭 향상
+* + 잠재 공간 규제 ( $\mathcal{L}_{reg}$ ):잠재 공간을 부드럽게(Smooth) 만듭니다.
+    * 픽셀 정확도는 살짝 떨어지지만, 생성 품질(gFID)이 크게 좋아집니다
+    * 확산 모델이 학습하기 편해졌기 때문
+* + 지각적 손실 ( $\mathcal{L}_P$ ): 눈에 보이는 디테일(LPIPS, rFID)을 더욱 끌어올려 최고의 성능을 달성
+
+---
 
