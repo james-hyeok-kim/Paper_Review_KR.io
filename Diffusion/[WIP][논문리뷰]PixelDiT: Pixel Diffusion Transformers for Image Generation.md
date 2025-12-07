@@ -277,7 +277,7 @@ $$\mathcal{L}_{diff} = \mathbb{E}_{t,x,\epsilon} [ \parallel f_{\theta}(x_t, t, 
 ### 5. 어블레이션 연구 (Ablation Study)
 
 <p align = 'center'>
-<img width="300" height="200" alt="image" src="https://github.com/user-attachments/assets/dfe3d6ec-2729-4c42-84f6-16b276d114bc" />
+<img width="400" height="300" alt="image" src="https://github.com/user-attachments/assets/dfe3d6ec-2729-4c42-84f6-16b276d114bc" />
 </p>
 
 * 구성 요소별 기여도 (Table 4)
