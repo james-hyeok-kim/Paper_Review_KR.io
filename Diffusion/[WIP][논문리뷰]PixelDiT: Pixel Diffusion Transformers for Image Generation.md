@@ -123,6 +123,10 @@
 * 긴 범위의 어텐션(Attention)을 수행하여 이미지의 전반적인 레이아웃과 내용을 캡처
 * 생성된 시맨틱 토큰(Semantic Tokens)은 픽셀 레벨 경로에 컨텍스트 정보를 제공하는 역할
 
+* Figure 2의 가장 왼쪽 부분인 "Noised Image" 블록에서 화살표가 위아래 두 갈래로 나뉘는 지점
+* 16x16 Patchify라고 적힌 화살표가 Semantic Token 블록으로 들어갑니다. 이것이 일반적인 DiT에서 말하는 패치 임베딩
+* 1x1 Patchify라고 적힌 화살표가 Pixel Token 블록으로 들어갑니다. 이것은 픽셀 레벨 처리를 위한 별도의 임베딩
+
 #### 픽셀 토큰 압축 (Pixel Token Compaction)
 
 <p align = 'center'>
