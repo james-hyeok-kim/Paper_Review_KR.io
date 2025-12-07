@@ -160,7 +160,6 @@ $$c = \text{SiLU}(W_t t + W_y y + b) \quad \quad (2)$$
 
 * 벡터 $c$는 이후 모든 블록에서 AdaLN(Adaptive Layer Normalization)을 통해 이미지 생성 과정을 제어하는 데 사용
 * Figure 2의 Timestep and Class Embedding
-* 
 
 ##### DiT 블록 내부 연산 (AdaLN 메커니즘)
 
@@ -207,6 +206,15 @@ $$X \in \mathbb{R}^{B \times C \times H \times W} \xrightarrow{\text{reshape + l
 * 의미: 패치 단위로 뭉뚱그려 처리하는 것이 아니라, 모든 픽셀을 개별적으로 처리할 준비를 하는 단계입니다3.
 
 $$\Theta = \Phi(s_{cond}) \in \mathbb{R}^{(B \cdot L) \times p^2 \times 6D_{pix}} \quad \quad (7)$$
+
+
+1. 입력 (Global Conditioning Vector $c$)
+* 먼저 시간 단계(Timestep, $t$)와 클래스 레이블( $y$ )을 결합하여 글로벌 컨디셔닝 벡터 $c$를 만듭니다
+* 수식: $c = \text{SiLU}(W_t t + W_y y + b)$
+
+2. 생성 (MLP Projection)
+* 벡터 $c$를 MLP(Multi-Layer Perceptron)에 통과시킵니다.
+* 이 MLP의 출력 차원은 $6 \times D$ (여기서 $D$는 은닉 차원)입니다
 
 
 ### 3. 텍스트-이미지 생성을 위한 확장 (Text-to-Image Generation)
