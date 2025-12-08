@@ -143,34 +143,69 @@ B. 타임스텝 통합 (Timestep-aware Aggregation)
 (Here)
 
 ### 2. 동적 적응형 양자화기 (DAQ: Dynamically Adaptive Quantizer)
-이 모듈은 초기화 단계에서 Softmax 이후(Post-Softmax) 레이어의 활성화 값 분포가 타임스텝마다 달라지는 문제를 해결합니다.
 
 
-문제점:
+#### 문제점
 
-Softmax를 통과한 데이터는 타임스텝에 따라 분포 모양이 변합니다.
+* Softmax를 통과한 데이터는 타임스텝에 따라 분포 모양이 변합니다.
+* 어떤 때는 좁은 범위의 정규 분포를 띠지만, 어떤 때는 긴 꼬리를 가진 거듭제곱 법칙(Power-law) 분포를 띱니다.
+* 기존의 고정된 양자화기(Uniform 또는 Log2) 하나만으로는 이 두 가지 상황을 모두 커버할 수 없습니다.
+* t=T일때는 Unifrom / t=0 일때는 Log2 양자화가기가 더 적합
 
-어떤 때는 좁은 범위의 정규 분포를 띠지만, 어떤 때는 긴 꼬리를 가진 거듭제곱 법칙(Power-law) 분포를 띱니다.
+#### 작동 원리
 
-
-기존의 고정된 양자화기(Uniform 또는 Log2) 하나만으로는 이 두 가지 상황을 모두 커버할 수 없습니다.
-
-작동 원리:
-
-
-분포 감지 (MLE): 최대 우도 추정(Maximum Likelihood Estimation)을 사용하여 현재 타임스텝의 데이터가 '거듭제곱 법칙' 분포에 얼마나 가까운지 계산합니다.
-
-양자화기 자동 선택:
+* 분포 감지 (MLE): 최대 우도 추정(Maximum Likelihood Estimation)을 사용하여 현재 타임스텝의 데이터가 '거듭제곱 법칙' 분포에 얼마나 가까운지 계산합니다.
+* 거듭제곱 법칙 분포일 경우 (Ratio > 0): 작은 값과 큰 값을 동시에 잘 표현하는 Log2 양자화기를 사용합니다.
+* 그렇지 않을 경우 (Ratio ≤ 0): 일반적인 Uniform(균일) 양자화기를 사용합니다.
+* 효율성: 이 선택 과정은 오프라인으로 미리 계산할 수 있어 실제 추론 속도에는 거의 영향을 주지 않습니다.
 
 
-거듭제곱 법칙 분포일 경우 (Ratio > 0): 작은 값과 큰 값을 동시에 잘 표현하는 Log2 양자화기를 사용합니다.
+#### 수식
+
+##### $\mathcal{L}_{power}$
+
+$$P(x) = c x^{-\alpha} \quad (7)$$
+
+* 여기서 $\alpha$는 우리가 찾아야 할 지수 파라미터이고
+* $c$는 확률의 총합을 1로 만들기 위한 정규화 상수입니다. 보통 $c = (\alpha-1)x_{min}^{\alpha-1}$ 로 정의됩니다.
+
+* 데이터셋 $x = \{x_1, x_2, ..., x_n\}$이 있을 때, 로그 우도( $\mathcal{L}_{power}$ )는 모든 데이터의 확률에 로그를 취해 더한 값
+
+$$\mathcal{L}_{power} = \sum_{i=1}^{n} \ln P(x_i)$$
+
+* 위에 (7) 대입
+
+$$\mathcal{L}_{power} = \sum_{i=1}^{n} (\ln c - \alpha \ln x_i)$$
+
+$$\mathcal{L}_{power} = n \ln(\alpha - 1) - n \ln x_{min} - \alpha \sum_{i=1}^{n} \ln x_i$$
+
+* 이 수식의 값을 최대화하는 $\alpha$를 찾는 것이 MLE(최대 우도 추정) 과정입니다.
+
+##### $\mathcal{L}_{other}$
 
 
+* 논문에서는 비교 대상($L_{other}$)으로 지수(Exponential) 분포나 로그 정규(Log-normal) 분포를 언급
+* 지수 분포의 확률 밀도 함수 (PDF)
 
-그렇지 않을 경우 (Ratio ≤ 0): 일반적인 Uniform(균일) 양자화기를 사용합니다.
+$$P_{exp}(x) = \lambda e^{-\lambda x}$$
 
+(여기서 $\lambda$는 비율 파라미터입니다.)
 
-효율성: 이 선택 과정은 오프라인으로 미리 계산할 수 있어 실제 추론 속도에는 거의 영향을 주지 않습니다.
+마찬가지로 로그 우도($\mathcal{L}_{exp}$)를 구하면
+
+$$\mathcal{L}_{exp} = \sum_{i=1}^{n} \ln (\lambda e^{-\lambda x_i})$$
+$$\mathcal{L}_{exp} = \sum_{i=1}^{n} (\ln \lambda - \lambda x_i)$$
+$$\mathcal{L}_{exp} = n \ln \lambda - \lambda \sum_{i=1}^{n} x_i$$
+
+* MLE를 통해 이 값을 최대로 만드는 최적의 $\lambda$를 찾습니다.
+
+##### $R_g$
+
+$$R_g = \mathcal{L}_{power} - \mathcal{L}_{other}$$
+
+* 계산 결과 ($R_g > 0$): $\mathcal{L}_{power}$ 값이 더 크다는 뜻이므로, 데이터가 거듭제곱 법칙에 더 잘 맞습니다. $\rightarrow$ Log2 양자화기 선택계산
+* 결과 ($R_g \le 0$): $\mathcal{L}_{other}$ 값이 더 크거나 같다는 뜻이므로, 데이터가 일반 분포에 더 잘 맞습니다. $\rightarrow$ Uniform 양자화기 선택
+
 
 ### 3. 점진적 정렬 재구성 (PAR: Progressively Aligned Reconstruction)
 
