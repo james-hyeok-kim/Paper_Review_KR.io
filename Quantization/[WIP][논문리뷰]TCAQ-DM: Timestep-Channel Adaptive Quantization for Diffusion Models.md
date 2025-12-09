@@ -209,27 +209,82 @@ $$R_g = \mathcal{L}_{power} - \mathcal{L}_{other}$$
 
 ### 3. 점진적 정렬 재구성 (PAR: Progressively Aligned Reconstruction)
 
-이 전략은 재구성 단계에서 양자화 모델 튜닝 시 발생하는 데이터 불일치(Input Mismatch) 문제를 해결합니다.
 
-문제점:
+* 양자화 파라미터를 튜닝할 때 깨끗한 데이터(FP 모델 출력)를 쓰면, 실제 추론 시 노이즈가 섞인 데이터(양자화 모델 출력)가 들어왔을 때 성능이 떨어집니다.
 
-앞서 설명해 드린 대로, 양자화 파라미터를 튜닝할 때 깨끗한 데이터(FP 모델 출력)를 쓰면, 실제 추론 시 노이즈가 섞인 데이터(양자화 모델 출력)가 들어왔을 때 성능이 떨어집니다.
+#### 작동 원리
 
-작동 원리:
+1. 초기화 (Standard Initialization)먼저, 기존의 일반적인 방법(BRECQ 등)을 사용하여 모델을 1차적으로 양자화합니다
+* 이때는 아직 '깨끗한 데이터(FP 모델의 출력)'를 사용하여 기본적신 스케일( $s$ )과 제로 포인트( $z$ )를 잡습니다.
+* 결과: 기본 양자화 모델 ($M_{q_0}$) 생성
 
+2. 정렬된 보정 데이터셋 생성 (Sampling Aligned Set)이제 1단계에서 만든 양자화 모델( $M_{q_0}$ )을 사용하여 실제로 디퓨전 샘플링을 수행합니다.
+* 이 과정에서 생성되는 중간 결과물(Feature map)들을 수집합니다.
+* 핵심: 이 데이터들은 FP 모델이 만든 것이 아니라, 양자화 모델이 만들었기 때문에 양자화 오차(Quantization Noise)가 포함되어 있습니다.
+* 이것이 바로 실제 추론 환경과 '정렬(Aligned)'된 데이터입니다
 
-1단계 (기본 재구성): 먼저 일반적인 방식(BRECQ 등)으로 모델을 1차 튜닝합니다.
-
-2단계 (데이터 샘플링): 1차 튜닝된 양자화 모델을 사용하여 새로운 보정 데이터셋(Calibration Set)을 생성합니다. 이 데이터에는 양자화 오차가 포함되어 있습니다.
-
-3단계 (점진적 튜닝): 생성된 '오차가 포함된 데이터'를 입력으로 사용하여 다시 모델을 미세 조정(Reconstruction)합니다.
-
-
-반복: 이 과정을 몇 차례 반복하여, 모델이 실제 추론 시 겪게 될 데이터 분포에 점진적으로 적응하도록 만듭니다.
+3. 재구성 및 반복 (Re-optimization & Loop)
+* 2단계에서 수집한 '오차가 포함된 데이터셋'을 입력으로 사용하여, 모델의 가중치(Weight)를 다시 최적화(Reconstruction)합니다.
+* 목표: "입력에 이런 노이즈가 섞여 들어와도, 최대한 정답(FP 모델의 결과)에 가깝게 출력해라"라고 가중치를 미세 조정하는 것입니다.
 
 
 ---
+## 4. Experimental Results and Analysis
 
+#### 1. 실험 환경 (Experimental Settings)
+
+* 데이터셋: ImageNet (조건부 생성), CIFAR-10, LSUN-Bedrooms, LSUN-Churches (비조건부 생성).
+* 사용 모델: LDM-4 (Latent Diffusion Model), DDIM.
+* 평가 지표
+    * FID (Fréchet Inception Distance): 생성된 이미지와 실제 이미지 간의 거리. 낮을수록 좋습니다.
+    * IS (Inception Score): 이미지의 다양성과 품질. 높을수록 좋습니다.
+    * sFID (sliced FID): FID의 변형 지표.
+
+#### 2. 주요 비교 결과 (Comparison to SOTA)
+
+<p align = 'center'>
+<img width="300" height="400" alt="image" src="https://github.com/user-attachments/assets/3c2dad2a-277b-4a83-aae0-65515e99d168" />
+</p>
+
+
+* CIFAR-10 (Table 1)
+    * W8A8 / W6A6: 기존 SOTA 모델들보다 더 낮은 FID를 기록하며, 원본 모델(Full Precision)에 근접한 성능을 보입니다.
+    * W4A4 (핵심 성과): 다른 방법들(PTQ4DM, Q-Diffusion 등)은 FID가 200~300을 넘어가며 이미지가 붕괴(Collapsed)되지만, TCAQ-DM은 FID 6.38을 기록하며 유일하게 유의미한 이미지를 생성했습니다.
+
+<p align = 'center'>
+<img width="300" height="350" alt="image" src="https://github.com/user-attachments/assets/6716b189-9ade-4c35-afe1-0ab38cb6365d" />
+</p>
+
+
+* LSUN-Bedrooms (Table 2)
+    * W4A4 설정에서 타 모델 대비 압도적으로 낮은 FID(16.43)를 달성했습니다 (타 모델은 300 이상).
+
+<p align = 'center'>
+<img width="300" height="280" alt="image" src="https://github.com/user-attachments/assets/ccb98e6c-4483-4f4b-ae5b-e22b572a01e7" />
+</p>
+
+
+* ImageNet (Table 4) - 조건부 이미지 생성 (ImageNet)
+    * W8A8 및 W4A32 설정에서 기존 최고의 방법인 TFMQ-DM보다 FID를 각각 0.21, 1.32 더 낮추며 성능을 개선했습니다.
+    * 매우 어려운 W4A4 설정에서도 다른 모델들은 성능이 완전히 무너졌지만, TCAQ-DM은 비교적 안정적인 성능을 유지했습니다.
+
+#### 3. 애블레이션 연구 (Ablation Study)
+
+<p align = 'center'>
+<img width="300" height="500" alt="image" src="https://github.com/user-attachments/assets/68139479-dd5f-4145-9b67-c8fd3525d306" />
+</p>
+
+*  TCR (타임스텝-채널 재파라미터화)의 효과
+    *  활성화 값의 범위를 안정화시켜 양자화 오차를 줄입니다.
+    *  특히 W6A6 설정에서 FID를 26.60 → 4.59로 대폭 낮추고, W4A4와 같은 저비트 환경에서 성능 유지에 결정적인 역할을 했습니다.
+
+* DAQ (동적 적응형 양자화기)의 효과
+    * 분포에 따라 양자화기를 자동 선택하여 모든 비트 설정에서 성능을 향상시켰습니다.
+    * Table 6에 따르면, 고정된 Log2나 Uniform 양자화기보다 DAQ를 썼을 때 FID가 가장 안정적으로 낮게 유지됩니다.
+
+* PAR (점진적 정렬 재구성)의 효과
+    * 데이터 불일치 문제를 해결하여 추가적인 성능 향상을 이끌어냈습니다.
+    * 특히 W4A4 설정에서 FID를 9.09 → 6.38로 크게 낮추며, 극한의 양자화 환경에서 데이터 정렬(Alignment)이 얼마나 중요한지 증명했습니다.
 
 
 ---
