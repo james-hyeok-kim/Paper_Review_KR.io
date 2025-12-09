@@ -243,7 +243,7 @@ $$R_g = \mathcal{L}_{power} - \mathcal{L}_{other}$$
 #### 2. 주요 비교 결과 (Comparison to SOTA)
 
 <p align = 'center'>
-<img width="300" height="400" alt="image" src="https://github.com/user-attachments/assets/3c2dad2a-277b-4a83-aae0-65515e99d168" />
+<img width="400" height="450" alt="image" src="https://github.com/user-attachments/assets/3c2dad2a-277b-4a83-aae0-65515e99d168" />
 </p>
 
 
@@ -252,7 +252,7 @@ $$R_g = \mathcal{L}_{power} - \mathcal{L}_{other}$$
     * W4A4 (핵심 성과): 다른 방법들(PTQ4DM, Q-Diffusion 등)은 FID가 200~300을 넘어가며 이미지가 붕괴(Collapsed)되지만, TCAQ-DM은 FID 6.38을 기록하며 유일하게 유의미한 이미지를 생성했습니다.
 
 <p align = 'center'>
-<img width="300" height="350" alt="image" src="https://github.com/user-attachments/assets/6716b189-9ade-4c35-afe1-0ab38cb6365d" />
+<img width="400" height="450" alt="image" src="https://github.com/user-attachments/assets/6716b189-9ade-4c35-afe1-0ab38cb6365d" />
 </p>
 
 
@@ -260,7 +260,7 @@ $$R_g = \mathcal{L}_{power} - \mathcal{L}_{other}$$
     * W4A4 설정에서 타 모델 대비 압도적으로 낮은 FID(16.43)를 달성했습니다 (타 모델은 300 이상).
 
 <p align = 'center'>
-<img width="300" height="280" alt="image" src="https://github.com/user-attachments/assets/ccb98e6c-4483-4f4b-ae5b-e22b572a01e7" />
+<img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/ccb98e6c-4483-4f4b-ae5b-e22b572a01e7" />
 </p>
 
 
@@ -271,7 +271,7 @@ $$R_g = \mathcal{L}_{power} - \mathcal{L}_{other}$$
 #### 3. 애블레이션 연구 (Ablation Study)
 
 <p align = 'center'>
-<img width="300" height="500" alt="image" src="https://github.com/user-attachments/assets/68139479-dd5f-4145-9b67-c8fd3525d306" />
+<img width="400" height="600" alt="image" src="https://github.com/user-attachments/assets/68139479-dd5f-4145-9b67-c8fd3525d306" />
 </p>
 
 *  TCR (타임스텝-채널 재파라미터화)의 효과
