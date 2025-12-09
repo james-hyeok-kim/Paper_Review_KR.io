@@ -140,7 +140,6 @@ B. 타임스텝 통합 (Timestep-aware Aggregation)
     * 가중치( $W$ )는 하나뿐이라서 $s$를 하나로 정해야 합니다.
 * 해결: 저자들은 모든 타임스텝의 활성화 값을 조사한 뒤, 가중 평균(Weighted Average) 방식을 사용해 '모든 타임스텝을 아우르는 최적의 $s$ (논문에서는 $r$ 벡터)'를 계산해 냈습니다.
 
-(Here)
 
 ### 2. 동적 적응형 양자화기 (DAQ: Dynamically Adaptive Quantizer)
 
