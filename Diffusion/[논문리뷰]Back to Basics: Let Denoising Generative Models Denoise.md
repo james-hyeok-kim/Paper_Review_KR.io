@@ -254,6 +254,15 @@ $$
     * 그 다음 Diffusion 모델을 학습시킨다. (생성기)
 
 ---
+## 맹점
+
+Model Size가 그중에 가장 크다
+
+<p align = 'center'>
+<img width="400" height="600" alt="image" src="https://github.com/user-attachments/assets/4e37642a-c2ee-4e4d-b89b-e9f1cb2ba7a4" />
+</p>
+
+---
 
 ## Appendix
 
