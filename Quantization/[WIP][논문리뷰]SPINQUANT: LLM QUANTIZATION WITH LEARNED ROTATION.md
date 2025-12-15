@@ -1,10 +1,6 @@
 # SPINQUANT: LLM QUANTIZATION WITH LEARNED ROTATION
 
-저자 : Zechun Liu∗ Changsheng Zhao∗
-
-Igor Fedorov Bilge Soran Dhruv Choudhary
-
-Raghuraman Krishnamoorthi Vikas Chandra Yuandong Tian Tijmen Blankevoort
+저자 : Zechun Liu∗ / Changsheng Zhao∗ / Igor Fedorov / Bilge Soran / Dhruv Choudhary / Raghuraman Krishnamoorthi / Vikas Chandra / Yuandong Tian / Tijmen Blankevoort
 
 Meta
 
