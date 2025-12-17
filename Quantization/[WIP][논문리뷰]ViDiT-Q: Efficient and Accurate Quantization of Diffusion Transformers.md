@@ -183,12 +183,120 @@ $$x_{int}=Q(x;s,z,b)=clamp(\lfloor\frac{x}{s}\rfloor+z,0,2^{b}-1) \quad \quad (2
 
 ## 4 VIDIT-Q: QUANTIZATION SCHEME TAILORED FOR DITS
 
+<p align = 'center'>
+<img width="521" height="297" alt="image" src="https://github.com/user-attachments/assets/eca17c35-ec2e-4005-b04f-fe212f2273d9" />
+</p>
 
 ### 4.1 FINE-GRAINED GROUPING AND DYNAMIC QUANTIZATION
 
+#### 1. 세분화된 그룹화 (Fine-grained Grouping)
+
+* 하드웨어 친화적 접근: 그룹을 무작정 작게 나누면 하드웨어 효율이 떨어집니다.
+    * Transformer의 Linear layer 연산 특성상 합산summation이 일어나는 차원을 고려해야합니다.
+
+* 전략: "채널 단위(Channel-wise)" 및 "토큰 단위(Token-wise)" 그룹화 방식을 채택
+    * 활성화(Activation) 양자화 그룹의 크기를 채널 수 수준으로 압축하여 오차를 줄이면서도, 주요 추론 프레임워크에서 지원하는 방식이라 오버헤드가 거의 없습니다.
+
+#### 2. 동적 양자화 (Dynamic Quantization)
+
+* DiT 모델은 타임스텝(Timestep)과 Condition, (예: 텍스트 프롬프트 유무)에 따라 활성화 값의 분포가 크게 달라집니다.
+
+* 정적 양자화(Static Quantization)의 한계
+    * 모든 타임스텝과 조건에 대해 고정된(Static) 파라미터를 사용하면, 오차가 커집니다.
+    * 타임스텝별로 정적 파라미터를 미리 계산하는 방법도 있지만, 이는 반복적인 캘리브레이션이 필요하고 샘플링 스텝이 바뀌면 다시 해야 하는 등 유연성이 떨어집니다.
+
+* 해결책: 동적 양자화를 도입하여 추론 시점에 데이터의 최소값(min)과 최대값(max)을 실시간(Online)으로 계산하여 파라미터를 결정합니다.
+
+
+* 장점
+    * 변화하는 타임스텝과 조건에 즉각적으로 적응할 수 있어 알고리즘 성능의 상한선(Upper bound)을 제공합니다.
+    * 추가적인 연산 비용은 이전 연산(예: LayerNorm, GeLU 등)과 융합(Fusion)할 수 있어 실제 하드웨어 오버헤드는 무시할 수 있는 수준
+
 ### 4.2 STATIC-DYNAMIC CHANNEL BALANCING
 
+#### 1. 문제의 배경: 시간에 따른 채널 불균형
+
+* 채널 간의 값 차이(Imbalance)가 크면 여전히 양자화 오차가 발생합니다.
+* 특히 DiT 모델은 타임스텝이 변함에 따라 채널 불균형의 정도가 계속해서 바뀐다는 특징이 있습니다.
+
+#### 2. 기존 방법들의 한계
+
+* 스케일링 기반 방법 (Scaling-based, 예: SmoothQuant)
+    * 활성화(activation) 값을 나누고 가중치(weight)에 곱해 난이도를 조절하는 방식입니다.
+    * 한계: 특정 하이퍼파라미터( $\alpha$ )에 민감한데, 타임스텝마다 분포가 바뀌므로 하나의 고정된 $\alpha$로는 모든 시점을 최적화할 수 없습니다.
+
+* 회전 기반 방법 (Rotation-based, 예: QuaRot)
+    * 행렬 회전을 통해 데이터를 채널 간에 고르게 퍼뜨리는 방식입니다.
+    * 한계: 별도의 파라미터 튜닝이 필요 없고 변화에 적응적이지만, 회전 후에도 여전히 튀는 값(Outlier)들이 남아 있어 4비트와 같은 낮은 비트수에서는 오차를 유발합니다.
+  
+#### 3. 핵심 아이디어: 불균형의 원인 분해
+
+* 채널 불균형이 "특징 변조(Feature Modulation)" 과정에서 발생함을 발견하고 이를 두 가지 요소로 분해했습니다.
+* 정적(Static) 요소: 사전 학습된 "Scale Shift Table"에서 기인하는 초기 활성화 분포.
+* 동적(Dynamic) 요소: 타임스텝 임베딩(Time embedding)이 합쳐지면서 발생하는 변화.
+
+#### 4. 해결책: 정적-동적 결합 기법
+
+<p align = 'center'>
+<img width="537" height="300" alt="image" src="https://github.com/user-attachments/assets/35d416e5-e38e-4c76-88f2-ed83d62575c4" />
+</p>
+
+* 스케일링과 회전 방법의 장점을 결합한 "정적-동적(Static-Dynamic)" 밸런싱 기법을 제안
+
+1. 정적: 스케일링 기반 방법 적용
+
+    1-1. 초기 노이즈 제거 단계의 "정적"인 채널 불균형을 해결
+   
+    1-2. 이를 통해 극단적인 채널 불균형을 먼저 완화
+   
+2. 동적: 회전 기반 방법 적용
+
+    2-1. "동적"인 분포 변화를 해결하기 위해 회전 행렬을 적용합니다.
+
+    2-2. 이미 1단계에서 극단적인 불균형이 해소되었으므로, 회전만으로는 해결되지 않던 이상치(Outlier) 문제 없이 데이터를 고르게 분포시킬 수 있습니다.
+
+
 ### 4.3 METRIC DECOUPLED MIXED PRECISION DESIGN
+
+* 앞선 기술들로 양자화 오차를 줄였음에도 불구하고, 낮은 비트(W4)에서 여전히 발생하는 품질 저하를 해결하기 위한 고도화된 전략
+
+#### 1. 문제 발견: 레이어별 민감도의 다양성 (Layer Sensitivity)
+
+* 모든 레이어가 양자화에 동일하게 반응하지 않으며, 특정 레이어들이 "병목(bottleneck)" 현상을 일으켜 전체 품질을 떨어뜨린다는 것을 발견했습니다. 
+
+* 기존 방법의 한계: 기존에는 MSE(평균 제곱 오차)를 기준으로 민감한 레이어를 찾아 더 높은 비트를 할당했습니다.
+
+* 발견된 문제점: MSE는 콘텐츠의 변화에는 민감하지만, 시각적 품질(Visual Quality)이나 시간적 일관성(Temporal Consistency) 저하는 제대로 반영하지 못하는 경향이 있습니다5.
+
+
+#### 2. 핵심 아이디어: 레이어 타입과 품질 지표의 상관관계
+
+* 레이어의 종류에 따라 영향을 미치는 품질의 측면이 다르다는 것을 밝혀냈습니다.
+
+* Cross-Attention 레이어: 텍스트와 이미지를 연결하므로 "콘텐츠 변화(Content Change)" 및 텍스트 정합성에 큰 영향을 줍니다.
+
+* Spatial Attention & FFN 레이어: 이미지 자체의 구성을 담당하므로 "시각적 품질(Visual Quality)"에 주된 영향을 미칩니다.
+
+* Temporal Attention 레이어: 프레임 간의 관계를 다루므로 "시간적 일관성(Temporal Consistency)"에 결정적인 역할을 합니다.
+
+
+#### 3. 해결책: 메트릭 분리 혼합 정밀도 (Metric-Decoupled Mixed Precision)
+
+<p align = 'center'>
+<img width="629" height="283" alt="image" src="https://github.com/user-attachments/assets/87704cc4-2766-4a30-9257-0e14ab2fc7d6" />
+</p>
+
+* 양자화의 영향을 여러 측면으로 "분리(Decouple)"하여 관리하는 혼합 정밀도 할당 방식을 제안합니다.
+
+* 실행 과정 (Process)
+    * 타임스텝 분할: 민감도가 시간에 따라 다르므로, 노이즈 제거 과정을 4개의 구간으로 나눕니다.
+    * 그룹별 예산 할당: 목표 비트(예: 평균 4비트)가 주어지면, 레이어를 세 그룹(Cross-Attn, Spatial/FFN, Temporal-Attn)으로 나누고, FP16 모델과의 MSE 오차를 기준으로 각 그룹에 비트 예산을 할당합니다.
+    * 그룹별 맞춤형 민감도 분석: 각 그룹 내부에서는 해당 그룹이 주로 영향을 미치는 "특정 지표(Metric)"를 기준으로 민감도를 측정합니다.
+        * Cross-Attn 그룹 $\rightarrow$ ClipScore (텍스트 정합성)
+        * Spatial/FFN 그룹 $\rightarrow$ VQA (시각적 품질)
+        * Temporal-Attn 그룹 $\rightarrow$ FlowScore (시간적 일관성)
+    * 비트 할당: 각 그룹 내에서 가장 민감한 레이어부터 차례대로 높은 비트(예: 8비트)를 할당하여 예산을 맞춥니다.
+
 
 ---
 
