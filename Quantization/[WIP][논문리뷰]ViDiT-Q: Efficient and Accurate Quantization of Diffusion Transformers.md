@@ -304,13 +304,62 @@ $$x_{int}=Q(x;s,z,b)=clamp(\lfloor\frac{x}{s}\rfloor+z,0,2^{b}-1) \quad \quad (2
 
 ### 5.1 IMPLEMENTATION DETAILS AND EXPERIMENTAL SETTINGS
 
+* 대상 모델
+    * 비디오: OpenSORA (Transformer 기반 비디오 생성 모델).
+    * 이미지: PixArt-$\alpha$ (Transformer 기반 이미지 생성 모델).
+* 평가 지표
+    * VBench(비디오 품질 종합 벤치마크), FID(이미지 품질), ClipScore(텍스트 정합성), DOVER(심미적 품질) 등 다각적인 지표를 사용했습니다.
+* 하드웨어: Nvidia A100 GPU에서 CUDA 커널을 직접 구현하여 측정했습니다4.
+
 ### 5.2 MAIN RESULTS
 
+* 4비트(W4A8) 환경에서도 ViDiT-Q가 성능을 유지
+
+* 비디오 생성 (Text-to-Video)
+    * 기존 방법(Q-Diffusion, PTQ4DiT 등)은 W8A8(8비트)에서도 품질 저하가 발생하며, W4A8(4비트)에서는 아예 판독 불가능한 영상(노이즈나 빈 화면)을 생성했습니다.
+    * ViDiT-Q는 W4A8 설정에서도 FP16(원본)과 거의 차이가 없는 고품질 비디오를 생성했습니다. VBench 점수에서도 기존 방법들을 크게 앞섰습니다.
+
+* 이미지 생성 (Text-to-Image)
+    * 이미지 생성에서도 마찬가지로 기존 방법들은 W4A8에서 구조가 무너지는 현상을 보였으나, ViDiT-Q는 텍스트 정합성과 시각적 품질을 모두 유지했습니다. 
+
 ### 5.3 HARDWARE RESOURCE SAVINGS
+
+* 메모리 절감 (Memory Opt.)
+    * W8A8에서는 약 1.99배, W4A8(혼합 정밀도 적용)에서는 약 2.42배의 메모리를 절약했습니다.
+
+* 지연 시간 단축 (Latency Opt.)
+    * W8A8에서 약 1.71배, W4A8에서 약 1.38배의 속도 향상을 기록했습니다.
+
+* 특이점
+    * W4A8이 W8A8보다 속도 향상 폭이 작은 이유는, 품질 보존을 위해 일부 레이어를 고정밀도로 유지하는 혼합 정밀도(Mixed Precision)를 사용했기 때문입니다.
+
+#### 5.4 Ablation Studies
+
+<p align = 'center'>
+<img width="640" height="212" alt="image" src="https://github.com/user-attachments/assets/472ccc4d-f9a0-45fa-8002-ead5e1d18aea" />
+</p>
+
+* 동적 양자화(Dynamic Quantization) 적용 시: 판독 불가능하던 영상이 판독 가능한 수준으로는 올라오지만, 품질은 여전히 낮음.
+
+
+* 정적-동적 채널 밸런싱(Static-Dynamic Channel Balancing) 추가 시: 영상의 품질이 FP16 수준으로 크게 향상됨 (단순 스케일링이나 회전만 썼을 때보다 우수).
+
+
+* 메트릭 분리 혼합 정밀도(Metric-Decoupled Mixed Precision) 추가 시: 미세한 품질 저하까지 잡아내며 FP16과 거의 동등한 성능 달성.
+
 
 ---
 
 ## 6 CONCLUSION AND LIMITATIONS
+
+### 한계점 (Limitations)
+
+
+* 혼합 정밀도 설계의 정교함 부족: 현재의 혼합 정밀도(Mixed Precision) 설계는 효과적이지만, 아직 다듬어야 할 부분(polishing)이 남아 있다.
+
+* 활성화(Activation) 비트 수의 한계: 현재 방식은 가중치(Weight)는 4비트지만, 활성화 값(Activation)은 8비트인 W4A8 구조입니다.
+
+* 4비트 가중치의 연산 가속 잠재력을 100% 활용하기 위해서는 Activation 값의 비트 수 또한 더 낮춰야(lower activation bit-width) 한다고 지적했습니다. 현재 구조에서는 연산 시 8비트로 변환하거나 맞춰야 하는 오버헤드가 있기 때문입니다.
 
 ---
 
