@@ -36,7 +36,7 @@ Shiyao Li1, Zinan Lin3, Guohao Dai24, Shengen Yan2, Huazhong Yang1, Xuefei Ning1
 ### 4. 주요 기여 및 성과
 
 * 성능 유지: ViDiT-Q는 W8A8(8비트) 및 W4A8(4비트 가중치/8비트 활성화) 양자화에서 시각적 품질 저하가 거의 없는 결과를 달성
-* 효율성 증대: 효율적인 GPU 커널 구현을 통해 2~2.5배의 메모리 절약과 1.4~1.7배의 지연 시간(Latency) 단축
+* 효율성 증대: 효율적인 GPU 커널 구현을 통해 2-2.5배의 메모리 절약과 1.4-1.7배의 지연 시간(Latency) 단축
 
 ---
 
@@ -50,7 +50,7 @@ Shiyao Li1, Zinan Lin3, Guohao Dai24, Shengen Yan2, Huazhong Yang1, Xuefei Ning1
 #### 2. 이미지 생성 모델 (Image Generation)
 
 * DiT & UViT
-* PixArt-$\alpha$: 텍스트를 이미지로 변환(Text-to-Image)하는 작업에서 DiT 구조를 탐구한 모델
+* PixArt- $\alpha$ : 텍스트를 이미지로 변환(Text-to-Image)하는 작업에서 DiT 구조를 탐구한 모델
 
 #### 3. 비디오 생성 모델 (Video Generation)
 * 초기 모델: CNN 백본
