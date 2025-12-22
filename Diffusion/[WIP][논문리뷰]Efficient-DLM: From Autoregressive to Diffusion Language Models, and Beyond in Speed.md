@@ -12,7 +12,7 @@
 ## 1. Introduction
 
 <p align = 'center'>
-<img width="534" height="479" alt="image" src="https://github.com/user-attachments/assets/d8c0cf54-a257-40c1-a667-89504104a2a1" />
+<img width="400" height="350" alt="image" src="https://github.com/user-attachments/assets/d8c0cf54-a257-40c1-a667-89504104a2a1" />
 </p>
 
 ### 1. 배경 및 문제 제기
@@ -135,7 +135,7 @@ $$\mathcal{L}(\theta) = \mathbb{E}_{t \sim U[0, 1]} \mathbb{E}_{\tilde{x}_t^b \s
 * 학습(Training) 시의 블록 크기와 평가(Evaluation) 시의 블록 크기
 
 <p align = 'center'>
-<img width="789" height="417" alt="image" src="https://github.com/user-attachments/assets/00cd8876-f2ec-4cd9-8813-e23ffd03fca0" />
+<img width="500" height="300" alt="image" src="https://github.com/user-attachments/assets/00cd8876-f2ec-4cd9-8813-e23ffd03fca0" />
 </p>
 
 * 색상 및 숫자: 6가지 작업(수학, 코딩 등)에 대한 평균 정확도를 나타내며, 노란색에 가까울수록 성능이 높음을 의미합니다
@@ -175,11 +175,8 @@ $$w_{i}(t) = \exp[\beta(1-t)i] \quad (2)$$
 ### 3.3. 실험 결과 및 효과 (Table 2)
 
 <p align = 'center'>
-<img width="633" height="253" alt="image" src="https://github.com/user-attachments/assets/75e567f5-a909-437e-b7e0-4f5df939c818" />
-<img width="317" height="306" alt="image" src="https://github.com/user-attachments/assets/13048b4e-a527-4092-a585-dce4c49d038e" />
+<img width="1134" height="311" alt="image" src="https://github.com/user-attachments/assets/ba10acd7-9bba-46f4-8eed-04335b794ea4" />
 </p>
-
-
 
 
 * 정확도 향상: 단순히 무작위로 마스킹할 때보다 위치 기반 마스킹을 사용했을 때 평균 정확도가 향상되었습니다.
@@ -230,7 +227,7 @@ $$w_{i}(t) = \exp[\beta(1-t)i] \quad (2)$$
 ### 5.2. 성능 벤치마크 결과 (Table 3 & Figure 1)
 
 <p align = 'center'>
-<img width="970" height="672" alt="image" src="https://github.com/user-attachments/assets/13264171-9557-46ec-9051-0c926fad8adf" />
+<img width="600" height="450" alt="image" src="https://github.com/user-attachments/assets/13264171-9557-46ec-9051-0c926fad8adf" />
 </p>
 
 * SOTA dLM 대비 우위
@@ -254,9 +251,15 @@ $$w_{i}(t) = \exp[\beta(1-t)i] \quad (2)$$
 
 * 메모리 제한 상황에 최적: 배치 사이즈(Batch size)가 작은 메모리 제한 시나리오에서 dLM의 속도 이점이 가장 두드러지게 나타납니다.
 
-
-
 ---
+
+## 6. Related Work
+
+* Ablation Study
+
+<p align = 'center'>
+<img width="1155" height="275" alt="image" src="https://github.com/user-attachments/assets/8160be13-6489-49a6-911a-cf42110b9bcf" />
+</p>
 
 
 ---
