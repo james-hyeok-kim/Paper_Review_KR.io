@@ -1,4 +1,4 @@
-# Diffusion Model Quantization: A Review
+<img width="777" height="325" alt="image" src="https://github.com/user-attachments/assets/242c6136-f12e-4860-92d9-ea9a26ceaf8a" /># Diffusion Model Quantization: A Review
 
 저자 : Qian Zeng, Chenggong Hu, Mingli Song, Jie Song
 
@@ -28,6 +28,10 @@ Zhejiang University
 
 ### 4. 주요 양자화 기법 (Key Quantization Methods)
 
+<img width="830" height="707" alt="image" src="https://github.com/user-attachments/assets/cd7e7a59-e1cf-41eb-82ba-29d47cb12d45" />
+
+
+
 * 초기 및 기반 기술
     * 가우시안 분포 기반 타임스텝 샘플링(PTQ4DM) [40]
     * 분포 정렬 보정(Liu et al.) [50]
@@ -49,7 +53,22 @@ Zhejiang University
 
 ---
 
-##
+## 2. Background and Preliminary
+
+### 2.1 Diffusion Models
+
+
+<img width="777" height="325" alt="image" src="https://github.com/user-attachments/assets/1ac36d01-bd63-4c7b-8373-6526c8343f7d" />
+
+
+* (a) 시간 단계에 따른 양자화 노이즈 누적 (Error Accumulation)
+
+* (b) 시간 단계별 활성화 범위의 변화 (Activation Distribution Shift)
+* (c) 시간적 특징 불일치 현상 (Temporal Feature Mismatch)
+    * 양자화된 시간 임베딩( $\hat{emb}_t$ )이 원래의 시간 단계 $t$보다 다른 단계( $t+\delta_t$ )의 임베딩과 더 높은 유사성을 보이는 현상을 설명합니다.
+    * 그래프의 파란색 곡선에 나타난 변곡점들은 양자화로 인해 시간 정보가 혼동되어, 모델이 현재 단계를 부정확하게 인식하게 함으로써 샘플링 경로가 꼬이거나 역행하는 문제를 유발함을 시사합니다.
+ 
+
 
 ---
 
