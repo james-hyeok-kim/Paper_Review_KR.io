@@ -13,7 +13,7 @@
 ## 1. Introduction
 
 <p align = 'center'>
-<img width="1127" height="575" alt="image" src="https://github.com/user-attachments/assets/3e894174-98e2-4dd1-9a33-1f653477cd6a" />
+<img width="800" height="400" alt="image" src="https://github.com/user-attachments/assets/3e894174-98e2-4dd1-9a33-1f653477cd6a" />
 </p>
 
 ### 1. DiT 모델의 부상과 한계
@@ -58,8 +58,8 @@
 
 * 기존의 UNet 기반 양자화 방법론을 DiT에 적용했을 때 왜 성능이 급격히 떨어지는지, 그 근본적인 원인 두 가지를 분석
 
-<p algin = 'center'>
-<img width="564" height="502" alt="image" src="https://github.com/user-attachments/assets/c3b49b2d-c741-4057-bbce-0f67f8a9b7f5" />
+<p align = 'center'>
+<img width="500" height="500" alt="image" src="https://github.com/user-attachments/assets/c3b49b2d-c741-4057-bbce-0f67f8a9b7f5" />
 </p>
 
 ### 관찰 1: 입력 채널 전반에 걸친 가중치와 활성화 값의 심각한 분산
@@ -76,7 +76,116 @@
 
 ---
 
+## 4. Preliminary
+
+* Q-DiT의 기반이 되는 균등 양자화(Uniform Quantization)의 정의와 수식적 정의
+
+<p align = 'center'>
+<img width="500" height="300" alt="image" src="https://github.com/user-attachments/assets/c7688424-82f7-4f86-8167-4d1f21510071" />
+<img width="500" height="500" alt="image" src="https://github.com/user-attachments/assets/d637f24b-4ea7-4310-9c0c-83d8b624e61d" />
+</p>
+
+$$\hat{x} = Q(x; b) = s \cdot \left( \text{clip}\left( \left\lfloor \frac{x}{s} \right\rfloor + Z, 0, 2^b - 1 \right) - Z \right) \quad (1)$$
+
+
 ---
+
+## 5. Method: Q-DiT
+
+### 5.1. 자동 양자화 세밀도 할당 (Automatic Quantization Granularity Allocation)
+* 그룹 양자화(Group Quantization)를 도입
+    * 비단조성(Non-monotonicity) 발견: 일반적인 생각과 달리, 그룹 크기를 단순히 작게 한다고(세밀하게 나눈다고) 항상 성능이 좋아지지는 않는다는 사실을 발견했습니다.
+        * 예를 들어, 그룹 크기를 128에서 96으로 줄였을 때 오히려 FID가 11.8% 악화되기도 했습니다.
+    * FID/FVD를 최소화하는 레이어별 최적 그룹 크기 조합을 찾아냅니다.
+
+$$L(g) = \text{FID}(R, G_g) \quad (4)$$
+$$L(g) = \text{FVD}(R, G_g) \quad (5)$$
+
+* 연산량(BitOps) 제약 조건 내에서 FID/FVD를 최소화하는 레이어별 그룹 크기 구성 $g$를 찾는 것이 목표
+
+$$g^* = \arg \min L(g), \quad \text{s.t. } B(g) \le N_{bitops} \quad (6)$$
+
+### 5.2. 샘플별 동적 활성화 양자화 (Sample-wise Dynamic Activation Quantization)
+
+* 기존 방식의 한계: TDQ처럼 MLP로 파라미터를 예측하거나 모든 타임스텝의 파라미터를 미리 저장하는 방식은 메모리 오버헤드가 너무 큽니다(모델 크기의 약 39% 증가).
+* 실시간(On-the-fly) 계산: 추론 과정에서 현재 들어온 샘플 $i$와 타임스텝 $t$의 활성화 값( $x_{i,t}$ )에서 즉석으로 최솟값과 최댓값을 구해 양자화 파라미터를 계산
+* 연산자 융합(Operator Fusion): 이 계산 과정을 이전 연산 단계와 통합하여, 행렬 곱셈 연산량에 비해 무시할 수 있는 수준의 적은 비용으로 동적 양자화를 수행
+
+* 동적 스케일
+ 
+$$s_{i,t} = \frac{\max(x_{i,t}) - \min(x_{i,t})}{2^b - 1} \quad (7)$$
+
+* 동적 제로 포인트
+
+$$Z_{i,t} = \left\lfloor -\frac{\min(x_{i,t})}{s_{i,t}} \right\rfloor \quad (8)$$
+
+<p algin = 'center'>
+<img width="572" height="883" alt="image" src="https://github.com/user-attachments/assets/16f869bc-a874-4551-b038-77a9d1a31aad" />
+</p>
+
+#### 알고리즘 1: 자동 양자화 세밀도 할당 과정
+1. 임의의 그룹 크기 구성을 가진 인구(Population)를 초기화합니다
+2. 각 구성에 대해 실제 샘플과 생성된 샘플 사이의 FID(이미지) 또는 FVD(비디오)를 계산하여 점수를 매깁니다
+3. 성적이 좋은 상위 $K$개의 구성을 선택합니다
+4. 교차(Crossover) 및 변이(Mutation) 연산을 통해 비트 연산량 제약 조건을 만족하는 새로운 구성을 생성하고 이 과정을 반복합니다.
+5. 최종적으로 가장 성능이 좋은 최적의 그룹 크기( $g^{best}$ )를 모델에 적용합니다.
+
+---
+
+## 6. Experiments
+
+### 6.1. 실험 설정 (Experimental Setup)
+
+<p align = 'center'>
+<img width="802" height="659" alt="image" src="https://github.com/user-attachments/assets/ddc57728-5115-46af-bd77-fd0eb6a96485" />
+<img width="805" height="621" alt="image" src="https://github.com/user-attachments/assets/5a4dc818-e54c-4db2-bff9-22473dab2f40" />
+</p>
+
+* 이미지 생성: ImageNet $256\times256$ 및 $512\times512$ 해상도에서 DiT-XL/2 모델을 사용했습니다.
+    * DDIM 샘플러(50, 100단계)와 분류기 없는 가이드(Classifier-free guidance)를 적용하여 평가했습니다.
+* 비디오 생성: Open-Sora 프로젝트의 STDiT3 모델을 사용했으며, VBench 벤치마크의 16개 차원에서 성능을 측정했습니다.
+* 비교 대상: PTQ4DM, RepQ-ViT, TFMQ-DM, PTQ4DiT 등 최신 양자화 기법들과 비교했습니다.
+
+### 6.2. 주요 결과 (Main Results)
+
+<p align = 'center'>
+<img width="1135" height="363" alt="image" src="https://github.com/user-attachments/assets/0aa86c65-fa1d-4e82-b11c-8f71ec2bcf53" />
+</p>
+
+* 이미지 생성 (Table 2)
+    * W6A8 설정: Q-DiT는 FID 12.21, IS 117.75를 기록하며 전정밀도(FP) 모델에 근접한 손실 없는 압축(near-lossless compression)을 달성했습니다.
+    * W4A8 설정: 다른 베이스라인들이 심각한 성능 저하를 보인 것과 달리, Q-DiT는 FID 15.76을 유지하며 압도적인 성능을 보였습니다
+
+* 비디오 생성 (Table 3)
+    * W4A8 설정에서 16개 지표 중 15개에서 베이스라인(G4W+P4A)을 능가했으며, 원본 모델 대비 성능 저하를 최소화했습니다. 이는 비디오 품질과 일관성을 잘 유지함을 보여줍니다.
+
+### 6.3. 절제 연구 (Ablation Studies)
+
+<p align = 'center'>
+<img width="559" height="328" alt="image" src="https://github.com/user-attachments/assets/4d09a525-bb7e-489b-a2c7-ede65791a905" />
+</p>
+
+* Q-DiT의 각 구성 요소가 성능 향상에 기여하는 바를 분석했습니다 (Table 4)
+    * RTN baseline: W4A8에서 FID 225.50으로 매우 낮은 성능을 보였습니다.
+    * 그룹 양자화 (Group size 128): FID가 13.77로 대폭 개선되었습니다.
+    * 샘플별 동적 활성화 양자화: FID 6.64로 추가적인 성능 향상을 이끌어냈습니다.
+    * 자동 그룹 크기 할당: 최종적으로 FID 6.40을 달성하여 전정밀도 모델(5.31)에 매우 근접한 결과를 얻었습니다.
+
+---
+
+## 7. Conclusion
+
+### 2. 성과 및 의의
+
+* 탁월한 성능: 광범위한 실험을 통해 기존의 모든 베이스라인보다 뛰어난 성능을 입증했습니다.
+* 저비트 고효율: 특히 ImageNet 256x256 데이터셋에서 모델을 W4A8로 양자화했음에도 불구하고, FID 점수 상승(성능 저하)이 단 1.09에 불과할 정도로 원본의 품질을 잘 보존했습니다.
+
+
+### 3. 한계점 및 향후 연구 (Limitations and Future Work)
+
+* 계산 비용 문제: 최적의 레이어별 그룹 크기 구성을 찾기 위해 사용되는 진화 알고리즘(Evolutionary Algorithm)이 계산적으로 비싸고 시간이 많이 소요된다는 점을 한계로 꼽았습니다.
+* 최적화 계획: 향후 연구에서는 이 검색 과정을 더욱 효율적으로 최적화하여 전체적인 시스템 구축 비용을 낮출 계획입니다.
+
 
 ---
 
