@@ -81,8 +81,8 @@
 * Q-DiT의 기반이 되는 균등 양자화(Uniform Quantization)의 정의와 수식적 정의
 
 <p align = 'center'>
-<img width="500" height="300" alt="image" src="https://github.com/user-attachments/assets/c7688424-82f7-4f86-8167-4d1f21510071" />
-<img width="500" height="500" alt="image" src="https://github.com/user-attachments/assets/d637f24b-4ea7-4310-9c0c-83d8b624e61d" />
+<img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/c7688424-82f7-4f86-8167-4d1f21510071" />
+<img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/d637f24b-4ea7-4310-9c0c-83d8b624e61d" />
 </p>
 
 $$\hat{x} = Q(x; b) = s \cdot \left( \text{clip}\left( \left\lfloor \frac{x}{s} \right\rfloor + Z, 0, 2^b - 1 \right) - Z \right) \quad (1)$$
@@ -119,8 +119,8 @@ $$s_{i,t} = \frac{\max(x_{i,t}) - \min(x_{i,t})}{2^b - 1} \quad (7)$$
 
 $$Z_{i,t} = \left\lfloor -\frac{\min(x_{i,t})}{s_{i,t}} \right\rfloor \quad (8)$$
 
-<p algin = 'center'>
-<img width="572" height="883" alt="image" src="https://github.com/user-attachments/assets/16f869bc-a874-4551-b038-77a9d1a31aad" />
+<p align = 'center'>
+<img width="400" height="800" alt="image" src="https://github.com/user-attachments/assets/16f869bc-a874-4551-b038-77a9d1a31aad" />
 </p>
 
 #### 알고리즘 1: 자동 양자화 세밀도 할당 과정
@@ -137,8 +137,8 @@ $$Z_{i,t} = \left\lfloor -\frac{\min(x_{i,t})}{s_{i,t}} \right\rfloor \quad (8)$
 ### 6.1. 실험 설정 (Experimental Setup)
 
 <p align = 'center'>
-<img width="802" height="659" alt="image" src="https://github.com/user-attachments/assets/ddc57728-5115-46af-bd77-fd0eb6a96485" />
-<img width="805" height="621" alt="image" src="https://github.com/user-attachments/assets/5a4dc818-e54c-4db2-bff9-22473dab2f40" />
+<img width="500" height="350" alt="image" src="https://github.com/user-attachments/assets/ddc57728-5115-46af-bd77-fd0eb6a96485" />
+<img width="500" height="350" alt="image" src="https://github.com/user-attachments/assets/5a4dc818-e54c-4db2-bff9-22473dab2f40" />
 </p>
 
 * 이미지 생성: ImageNet $256\times256$ 및 $512\times512$ 해상도에서 DiT-XL/2 모델을 사용했습니다.
@@ -149,7 +149,7 @@ $$Z_{i,t} = \left\lfloor -\frac{\min(x_{i,t})}{s_{i,t}} \right\rfloor \quad (8)$
 ### 6.2. 주요 결과 (Main Results)
 
 <p align = 'center'>
-<img width="1135" height="363" alt="image" src="https://github.com/user-attachments/assets/0aa86c65-fa1d-4e82-b11c-8f71ec2bcf53" />
+<img width="800" height="300" alt="image" src="https://github.com/user-attachments/assets/0aa86c65-fa1d-4e82-b11c-8f71ec2bcf53" />
 </p>
 
 * 이미지 생성 (Table 2)
@@ -162,7 +162,7 @@ $$Z_{i,t} = \left\lfloor -\frac{\min(x_{i,t})}{s_{i,t}} \right\rfloor \quad (8)$
 ### 6.3. 절제 연구 (Ablation Studies)
 
 <p align = 'center'>
-<img width="559" height="328" alt="image" src="https://github.com/user-attachments/assets/4d09a525-bb7e-489b-a2c7-ede65791a905" />
+<img width="400" height="250" alt="image" src="https://github.com/user-attachments/assets/4d09a525-bb7e-489b-a2c7-ede65791a905" />
 </p>
 
 * Q-DiT의 각 구성 요소가 성능 향상에 기여하는 바를 분석했습니다 (Table 4)
