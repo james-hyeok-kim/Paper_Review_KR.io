@@ -173,6 +173,30 @@ $$R' = (I - \frac{\alpha}{2}Y)^{-1}(I + \frac{\alpha}{2}Y)R \quad (3)$$
 
 * 추론 속도: M1 Pro CPU에서 테스트한 결과, 4-bit 양자화 모델은 16-bit 모델보다 약 3배 빠릅니다.
 * 오버헤드: 성능을 위해 온라인 하다마드 회전($R_3, R_4$)을 추가한 SpinQuant$_{had}$를 사용하더라도, 지연 시간(Latency) 증가는 약 8%에 불과했습니다.
+---
+
+## 5. DISTRIBUTION VISUALIZATIONS BEFORE AND AFTER ROTATION
+
+|구분|회전 전 (Before)|회전 후 (After)|
+|:---:|:------|:------|
+|목표|데이터의 분산(정보량)을 최대로 설명하는 수학적 축 생성|사람이 이해하기 쉬운 해석 가능한 축으로 재조정|
+|변수의 위치|축과 축 사이(중간)에 흩어져 있음|특정 축(요인)에 가깝게 밀집됨|
+|해석 난이도|어려움 (이것도 저것도 아닌 상태)|쉬움 (명확한 특성 구분)|
+|대표 기법|초기 주성분/요인 추출|"Varimax (직각 회전), Promax (사각 회전)"|
+
+
+<p align = 'center'>
+<img width="500" height="800" alt="image" src="https://github.com/user-attachments/assets/64369e45-2e85-4981-97f4-0e238b43b6c7" />
+<img width="500" height="800" alt="image" src="https://github.com/user-attachments/assets/0cad8ded-db8b-4492-99ea-0f3d78794965" />
+</p>
+
+
+<p align = 'center'>
+<img width="500" height="800" alt="image" src="https://github.com/user-attachments/assets/c0e7cb29-f0d7-4f44-aeab-412d0fdc2f38" />
+<img width="500" height="800" alt="image" src="https://github.com/user-attachments/assets/d94621e8-a00a-4dcb-a371-4649e24eb443" />
+</p>
+
+
 
 ---
 
