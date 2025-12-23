@@ -68,7 +68,7 @@
 ### B. 확산 트랜스포머 (Diffusion Transformers, DiTs)
 
 <p align = 'center'>
-<img width="667" height="580" alt="image" src="https://github.com/user-attachments/assets/d353f12b-0a2c-4a4f-977c-586c9848d458" />
+<img width="400" height="350" alt="image" src="https://github.com/user-attachments/assets/d353f12b-0a2c-4a4f-977c-586c9848d458" />
 </p>
 
 
@@ -165,9 +165,9 @@ $$\Delta_{A}^{l,\mathcal{G}i}=arg~min~\Delta\mathbb{E}_{t\in\mathcal{G}_{i}}[\De
 
 
 ### 4. TQ-DiT 프레임워크 (Algorithm 1)
-
+<p align = 'center'>
 <img width="337" height="688" alt="image" src="https://github.com/user-attachments/assets/9e93d24b-ebb4-4f00-aaed-755d406906b4" />
-
+</p>
 
 * Phase 1: 데이터 생성
     * 타임스텝 그룹화 및 캘리브레이션 데이터셋 구축
@@ -176,5 +176,50 @@ $$\Delta_{A}^{l,\mathcal{G}i}=arg~min~\Delta\mathbb{E}_{t\in\mathcal{G}_{i}}[\De
 * Phase 3: 시간 인식 양자화
     * "HO, MRQ, TGQ를 적용하여 레이어별 최적의 양자화 파라미터 결정 "
 
+
+---
+## IV. EXPERIMENTS
+
+### A. Experimental Settings
+
+#### 1. 평가 지표 (Evaluation Metrics)
+* FID (Fréchet Inception Distance)
+    * 생성된 이미지와 실제 이미지의 특징 분포 간 유사성
+* SFID (Spatial FID)
+    * FID의 확장 버전으로, 생성된 이미지의 공간적 일관성(Spatial Coherence)을 평가
+* IS (Inception Score)
+    * 생성된 이미지의 품질과 다양성을 평가
+ 
+#### 2. 데이터셋 및 모델 설정
+* 데이터셋: ImageNet
+* 모델: DiT-XL-2 모델을 기반으로 $256\times256$ 해상도
+* 평가 규모: 총 10,000장의 이미지
+
+#### 3. 양자화 및 샘플링 설정
+* 확산 프로세스: DDPM을 구현하여 샘플링 타임스텝 $T=100$ 및 $T=250$에서 실험
+* 양자화 정밀도: 가중치(W)와 활성값(A) 모두 8비트(W8A8) 및 6비트(W6A6) 정밀도로 양자화
+* 최적화 반복: 최적화 반복 횟수 $R$은 3
+
+#### 4. 캘리브레이션(Calibration) 세부 사항
+
+* 그룹 구성: 타임스텝을 10개의 그룹
+* 샘플 수: 그룹당 32개, 총 320개의 캘리브레이션 샘플을 사용
+* 공정성: 비교 대상이 되는 모든 기본 방식(Baselines)에도 동일한 수의 캘리브레이션 샘플을 제공하여 공정성을 유지했습니다. 
+
+#### 5. 비교 대상 (Baselines)
+* TQ-DiT의 우수성을 입증하기 위해 다음 세 가지 기존 양자화 기법 및 원본 모델과 비교했습니다.
+* FP (Full-Precision): 양자화되지 않은 32비트 원본 모델입니다.
+* Q-Diffusion & PTQD : 원래 확산 모델에 적용되던 PTQ 기법들을 DiT에 맞게 구현하여 비교했습니다.
+* PTQ4DiT: DiT 양자화 분야에서 뛰어난 성과를 보여준 최신 기술(State-of-the-art)입니다.
+
+<p align = 'center'>
+<img width="411" height="300" alt="image" src="https://github.com/user-attachments/assets/f02c03c5-6954-4b7e-86e9-fe3f148a39f4" />
+<img width="413" height="295" alt="image" src="https://github.com/user-attachments/assets/8a072655-997e-4769-a050-90460e32f557" />
+<img width="423" height="369" alt="image" src="https://github.com/user-attachments/assets/4fa9fc59-e124-480f-bd12-3cb23c319ad9" />
+</p>
+
+* Table 1: 250 타임스텝 성능 비교
+* Table 2: 100 타임스텝 성능 비교
+* Table 3: 절제 연구 (Ablation Study)
 
 ---
