@@ -151,7 +151,77 @@ $$s_{\rho}(X^{(1:T)}) = \sum_{t=1}^{T} \eta_t \cdot s(X^{(t)}) \quad(10)$$
 
 
 ---
+## 5. Experiments
+
+### 5.1 Experimental Settings
+
+#### 1. 모델 및 데이터셋 (Models and Datasets)
+* 평가 데이터셋: 대규모 이미지 데이터셋인 ImageNet에서 평가를 진행했습니다.
+* 대상 모델: 사전 학습된 클래스 조건부(class-conditional) DiT-XL/2 모델을 사용했습니다.
+* 해상도: $256\times256$ 및 $512\times512$ 두 가지 이미지 해상도에서 실험을 수행했습니다.
+
+#### 2. 생성 및 샘플링 설정 (Generation and Sampling)
+* 솔버 및 단계: DDPM 솔버를 기본으로 사용하며, 표준 생성 과정은 250회의 샘플링 단계를 거칩니다.
+* 강건성 테스트: 방법론의 견고함을 평가하기 위해 샘플링 단계를 100회 및 50회로 줄인 추가 실험도 병행했습니다
+
+#### 3. 양자화 및 보정 상세 설정 (Quantization and Calibration)
+* 양자화 방식: 모든 방법론은 가중치에 대해 채널별(channel-wise) 양자화를, 활성화 값에 대해 텐서별(tensor-wise) 균등 양자화기를 사용했습니다.
+* 보정 데이터셋 구축
+    * $256\times256$ 해상도: 25개 타임스텝을 균등하게 선택했습니다.
+    * $512\times512$ 해상도: 10개 타임스텝을 선택했습니다.
+    * 각 선택된 타임스텝에서 32개의 샘플을 생성하여 보정에 활용했습니다.
+* 최적화: 양자화 파라미터 최적화는 기존 Q-Diffusion의 구현 방식을 따랐습니다.
+
+#### 4. 하드웨어 및 평가 지표 (Hardware and Metrics)
+* 인프라: 모든 실험은 PyTorch 기반으로 구축되었으며, NVIDIA RTX A6000 GPU에서 실행되었습니다.
+* 평가 지표
+    * FID (Fréchet Inception Distance)
+    * sFID (spatial FID)
+    * IS (Inception Score)
+    * Precision
+* 샘플 수: $256\times256$ 해상도는 10,000장, $512\times512$ 해상도는 5,000장의 이미지를 샘플링하여 지표를 계산했습니다18.
+
+
+### 5.2 Quantization Performance
+#### 1. Baselines
+* PTQ4DM, Q-Diffusion, PTQD: 확산 모델을 위해 설계된 기존의 주요 PTQ 방법들입니다.
+* $RepQ^{*}$: 비전 트랜스포머(ViT)용 SOTA 방법인 RepQ-ViT를 DiT의 특성에 맞춰 개선(타임스텝 동동역학 반영 등)한 버전입니다
+
+#### 2. 양자화 성능 분석
+
+<p align = 'center'>
+<img width="700" height="700" alt="image" src="https://github.com/user-attachments/assets/319d6355-d936-4696-b8c5-496556568506" />
+</p>
+
+* 8비트 양자화 (W8A8) 결과
+    * 성능 유지: PTQ4DiT는 8비트 정밀도에서 풀프레시전(FP) 모델의 생성 능력과 거의 대등한 성능을 보여주었습니다.
+    * 기준 모델 대비 우위: 대부분의 기준 모델들이 성능 저하를 겪는 것과 달리, 우리 방법은 높은 이미지 품질을 유지했습니다.
+    * ImageNet 256x256 (250 steps): PTQ4DiT의 FID는 4.63으로, FP 모델의 4.53에 근접한 수치를 기록했습니다.
+<p align = 'center'>
+<img width="518" height="467" alt="image" src="https://github.com/user-attachments/assets/f2babc0e-68c1-4403-a454-0bba16e32e0e" />
+</p>
+
+* 4비트 가중치 양자화 (W4A8) 결과
+    * 독보적인 회복력: 훨씬 더 까다로운 4비트 설정에서 타 방법들은 극심한 성능 저하를 보였으나, PTQ4DiT는 안정적인 결과를 냈습니다.
+    * 오차 폭 비교 (250 steps): PTQ4DM이 FID가 68.05나 급증한 반면, PTQ4DiT는 단 2.56 증가에 그쳤습니다.
+    * 고해상도($512\times512$) 성과: Q-Diffusion 대비 FID를 41.26, sFID를 9.83 낮추며 압도적인 성능 격차를 증명했습니다.
+
+<p align = 'center'>
+<img width="600" height="350" alt="image" src="https://github.com/user-attachments/assets/d2c6d954-e02f-400a-933f-b12eb49d29f7" />
+</p>
+
+#### 3. 효율성 및 강건성 (Efficiency & Robustness)
+
+* 샘플링 단계 축소: 샘플링 단계를 100회, 50회로 줄여도 PTQ4DiT는 여전히 높은 성능을 유지하며 자원이 제한된 환경에서의 견고함을 보여주었습니다. 
+* 비용 대비 효과: 아래 표에서 보듯, PTQ4DiT는 FP 모델과 비슷한 수준의 성능을 내면서도 계산 비용을 크게 절감했습니다.
+
+### 5.3 Ablation Study
+<p align = 'center'>
+<img width="550" height="150" alt="image" src="https://github.com/user-attachments/assets/81574025-0173-4998-8b06-0e6b5053ba89" />
+</p>
 
 
 
 ---
+
+
