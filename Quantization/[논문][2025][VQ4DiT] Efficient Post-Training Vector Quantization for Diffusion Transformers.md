@@ -37,7 +37,7 @@ dengjuncan@zju.edu.cn, list@zju.edu.cn, wangzeyu2020@zju.edu.cn, guhong@vivo.com
 * 성능: DiT 가중치를 2비트 수준으로 압축하면서도 수용 가능한 이미지 품질을 유지하며, 20분에서 5시간 내에 양자화가 가능합니다.
 
 <p align = 'center'>
-<img width="900" height="450" alt="image" src="https://github.com/user-attachments/assets/803f3fad-3740-44ef-811f-2f25888272f0" />
+<img width="700" height="350" alt="image" src="https://github.com/user-attachments/assets/803f3fad-3740-44ef-811f-2f25888272f0" />
 </p>
 
 
@@ -57,7 +57,7 @@ dengjuncan@zju.edu.cn, list@zju.edu.cn, wangzeyu2020@zju.edu.cn, guhong@vivo.com
 
 
 <p align = 'center'>
-<img width="1058" height="448" alt="image" src="https://github.com/user-attachments/assets/bab134a2-fce1-4ecc-9012-3c9153d00494" />
+<img width="800" height="350" alt="image" src="https://github.com/user-attachments/assets/bab134a2-fce1-4ecc-9012-3c9153d00494" />
 </p>
 
 
@@ -111,6 +111,99 @@ $$\mathcal{L}=\lambda_{d}\mathcal{L}_{d}+\lambda_{r}\mathcal{L}_{r} \quad(10)$$
 * 압도적인 압축 효율: 가중치를 2비트 수준으로 정밀하게 양자화하면서도 이미지 생성 품질을 안정적으로 유지합니다.
 * 빠른 실행 속도: 단일 NVIDIA A100 GPU에서 모델 설정에 따라 20분에서 5시간 내에 양자화를 완료할 수 있습니다.
 * 성능 비교: 기존의 GPTQ, Q-DiT, RepQ-ViT와 같은 강력한 베이스라인들이 2비트에서 성능이 완전히 무너지는(collapse) 것과 달리, VQ4DiT는 높은 정밀도를 유지합니다.
+
+---
+
+## 4. Experiments
+
+### Experimental Settings
+
+#### 1. 모델 및 양자화 설정 (Models and Quantization)
+* 대상 모델: 사전 학습된 DiT XL/2 모델을 부동 소수점 참조 모델로 선택했습니다.
+* 해상도: $256\times256$ 및 $512\times512$ 두 가지 버전의 이미지 생성 성능을 검증했습니다.
+* 보정 최적화: RMSprop 옵티마이저를 사용했습니다.
+* 학습률(Learning Rate): 후보 할당 비율($R$)에는 $5\times10^{-2}$, 그 외 파라미터에는 $1\times10^{-4}$의 고정 학습률을 적용했습니다.
+* 훈련 환경: 배치 크기 16, 반복 횟수 500회로 설정하여 단일 NVIDIA A100 GPU에서 실험을 진행했습니다.
+* 소요 시간: 양자화 설정에 따라 20분에서 5시간이 소요됩니다.
+* 양자화 범위: 계산 집약적인 DiT 블록만 양자화하고 나머지 부분은 제외했습니다.
+* 후보 세트 크기: 후보 할당 세트의 길이 $n$은 2로 설정했습니다.
+
+#### 2. 확산 모델 샘플링 설정
+
+* 스케줄러: DDPM 스케줄러를 사용했습니다.
+* 타임스텝: 샘플링 타임스텝은 50, 100, 250으로 설정했습니다.
+* 분류기 자유 가이드(CFG): CFG 값은 1.5로 고정했습니다.
+
+#### 3. 평가 지표 (Metrics)
+* FID (Fréchet Inception Distance): 이미지의 품질과 다양성 측정.
+* sFID (spatial FID): 공간적 특징을 반영한 FID.
+* IS (Inception Score): 생성된 이미지의 선명도와 다양성 측정.
+* Precision (정밀도): 생성 모델이 실제 데이터 분포를 얼마나 잘 따르는지 측정.
+* 평가 규모: 각 데이터셋(ImageNet 256/512)에 대해 10,000장의 이미지를 샘플링하여 평가했습니다.
+
+#### 4. 비교 베이스라인 (Baselines)
+* VQ4DiT의 우수성을 증명하기 위해 세 가지 강력한 사후 양자화 기법과 비교했습니다
+* RepQ-ViT: 비전 트랜스포머(ViT)를 위한 양자화 기법.
+* GPTQ: 거대 언어 모델(LLM)을 위해 설계된 기법.
+* Q-DiT: DiT 모델을 위해 개발된 최신 양자화 기법.
+* 참고: 구조적 유사성을 고려하여 타 모델용 기법(RepQ-ViT, GPTQ)을 DiT에 맞게 재구현하여 공정하게 비교했습니다.
+
+
+
+### Main Results
+
+<p align = 'center'>
+<img width="800" height="650" alt="image" src="https://github.com/user-attachments/assets/93696c84-4d55-418b-af09-1e32b2bcc0fb" />
+<img width="800" height="450" alt="image" src="https://github.com/user-attachments/assets/2782c16b-a242-478a-820d-88e7b88acdf9" />
+<img width="450" height="200" alt="image" src="https://github.com/user-attachments/assets/552a9fe5-fbe6-4c6d-9437-14656dc844f2" />
+</p>
+
+
+#### 1. ImageNet $256\times256$ 실험 결과
+* VQ4DiT는 3비트 및 2비트 양자화 모두에서 탁월한 성능을 유지합니다.
+* 3비트 양자화 (Near-Lossless)
+    * VQ4DiT는 3비트에서 FP 모델과 거의 차이가 없는 무손실에 가까운 압축을 달성했습니다.
+    * FID(이미지 품질 지표) 증가폭은 5.3 미만이었으며, IS(선명도 지표) 감소폭은 7.7 미만이었습니다.
+    * 반면, RepQ-ViT, GPTQ, Q-DiT와 같은 기존 방식들은 샘플링 타임스텝이 줄어들수록 성능이 급격히 저하되었습니다.
+* 2비트 양자화 (Superiority)
+    * 2비트 극저비트 환경에서 다른 세 가지 알고리즘(RepQ-ViT, GPTQ, Q-DiT)은 성능이 완전히 붕괴(Collapse)되었습니다.
+    * VQ4DiT는 이와 대조적으로 매우 높은 성능을 유지했으며, 3비트와 비교해도 정밀도(Precision) 감소가 0.012 수준에 불과했습니다.
+    * 예를 들어, 50 타임스텝 기준 VQ4DiT의 FID는 12.42인 반면, 다른 방법들은 모두 310 이상을 기록하며 이미지 생성에 실패했습니다.
+
+#### 2. ImageNet $512\times512$ 및 확장성
+* 고해상도 환경에서도 VQ4DiT의 우수성은 일관되게 나타났습니다.
+* 일관된 성능: $512\times512$ 해상도에서의 검증 결과는 $256\times256$ 결과와 동일한 양상을 보였으며, VQ4DiT가 지속적으로 가장 좋은 성능을 입증했습니다.
+* 엣지 배포 가능성: 이러한 결과는 VQ4DiT가 최소한의 메모리 사용량으로 고품질, 고해상도 이미지를 생성할 수 있음을 의미하며, 이는 엣지 디바이스 배포에 매우 중요합니다.
+
+#### 3. 정성적 평가 (이미지 품질)
+* 시각적 품질: VQ4DiT는 2비트라는 극도로 낮은 비트수에서도 시각적으로 우수한 품질의 이미지를 생성해냈습니다.
+* 베이스라인과 비교: GPTQ나 Q-DiT가 2비트에서 형체를 알아볼 수 없는 이미지를 생성하는 것과 달리, VQ4DiT는 FP 모델과 흡사한 디테일을 유지했습니다.
+
+### Ablation Study
+
+#### 1. 후보 할당 세트 길이($n$)의 영향
+* 할당 보정의 유효성: $n$이 1(전통적인 VQ 방식과 유사)에서 2로 증가할 때 성능이 대폭 향상되었으며, 이는 할당(Assignment)을 보정하는 것이 매우 효과적임을 입증
+* 최적의 설정: $n=3$일 때 가장 큰 성능 향상을 보였으며, FID는 47.97, sFID는 30.83 감소했습니다.
+* 수렴 한계: $n$이 4로 증가하면 오히려 성능이 저하되었는데, 이는 후보가 너무 많아지면 보정 과정의 수렴에 부정적인 영향을 주기 때문
+
+<p align = 'center'>
+<img width="513" height="340" alt="image" src="https://github.com/user-attachments/assets/b7affd59-d0ff-4209-91bb-252efc5b7865" />
+</p>
+
+#### 2. 그래디언트 일관성 (코사인 유사도 분석)
+* 그래디언트 유사도 증가: 할당을 보정한 후, 동일한 인덱스를 공유하는 서브 벡터들 사이의 그래디언트 코사인 유사도가 눈에 띄게 높아졌습니다.
+* 충돌 방지: 보정 전에는 동일한 인덱스에 할당되었더라도 서브 벡터들의 그래디언트 방향이 서로 달라(충돌) 코드워드 업데이트가 부정확해지는 문제가 있었습니다.
+* 효과: VQ4DiT의 할당 보정 메커니즘은 이러한 그래디언트 충돌 문제를 완화하여 코드북이 더 정확하게 학습되도록 돕습니다.
+
+<p align = 'center'>
+<img width="400" height="250" alt="image" src="https://github.com/user-attachments/assets/7530ee5d-19db-4bf0-b0c7-df3a79934686" />
+</p>
+
+#### 3. 최적 할당의 분포
+* 거리 기반 경향: 유클리드 거리가 가장 가까웠던 후보(Pos 1)가 최적 할당으로 선택될 확률이 가장 높았습니다.
+* 분포 사례: $n=2$일 때 첫 번째 후보가 선택될 확률은 55%, 두 번째 후보는 45%로 나타났습니다.
+* 결론: 비록 거리가 가장 가까운 후보가 선호되지만, 상당수(45% 이상)의 경우 거리 순위가 낮은 후보가 모델 전체 성능 관점에서 더 나은 '최적 할당'이 될 수 있음을 시사합니다
+
 
 
 ---
