@@ -230,6 +230,69 @@ $$
 * 시너지 효과: 이 기법은 앞서 설명한 Twin-Log Quantization (TLQ)과 결합하여 저비트 환경에서도 생성 품질을 보존하는 데 결정적인 역할을 합니다.
 
 
+### 4.3 Theoretical Analysis
+
+#### 1. Lemma 1: 회전 변환을 통한 이상치 억제
+
+* 이 보조정리는 활성화 벡터 $x$에 직교 회전 행렬 $R$을 적용했을 때 발생하는 변화를 설명합니다
+* .L2-노름 보존: 변환된 벡터 $x' = xR$은 원래 벡터와 동일한 $L_2$-노름($||x'||_2 = ||x||_2$)을 유지합니다. 즉, 데이터의 전체 에너지는 변하지 않습니다.
+* 이상치 억제: 만약 특정 채널에 매우 큰 값(Salient Outlier)이 존재할 경우, 회전 변환을 통해 이 값이 여러 채널로 분산됩니다4. 결과적으로 가장 큰 값인 $L_{\infty}$-노름은 차원 $C$의 제곱근인 $\sqrt{C}$만큼 억제되는 효과를 얻습니다.
+
+
+#### 2. Theorem 1: ARS 적용 전후의 오차 비교
+
+* 이 정리는 ARS를 적용했을 때 TLQ의 평균 제곱 오차(MSE)가 얼마나 감소하는지를 정량화합니다.
+* 오차 비율 공식: ARS 적용 후의 오차( $MSE_{after}$ )와 적용 전의 오차( $MSE_{before}$ )의 비율은 다음과 같이 근사화됩니다.
+$$\frac{MSE_{after}}{MSE_{before}} \approx \left(1 - \frac{\log_2 \sqrt{C}}{\log_2 \alpha}\right)^2$$
+
+* (여기서 $\alpha$는 이상치의 크기, $C$는 벡터의 차원입니다.)
+
+1. 로그 도메인 변환: TLQ는 입력을 로그 도메인으로 매핑하여 양자화합니다.
+2. 선형 도메인 오차 파급: 로그 도메인에서의 양자화 단계 크기( $\Delta_y$ )는 입력의 최대 절대값( $||X||_{\infty}$ )에 비례합니다.
+3. ARS의 효과: ARS를 통해 최대값이 $\alpha$에서 $\alpha/\sqrt{C}$로 줄어들면, 로그 도메인의 동적 범위(Dynamic Range)가 축소되어 더 정밀한 양자화가 가능해집니다.
+
+
+---
+
+## 5. Experiment
+
+### 5.1 Experimental Setting
+* 대상 모델: PixArt-$\Sigma$, PixArt-$\alpha$, FLUX.1-schnell, FLUX.1-dev와 비디오 생성 모델인 OpenSORA v1.2를 포함합니다.
+* 프롬프트 세트: 이미지 생성을 위해 COCO, MJHQ-30K, sDCI 데이터셋에서 각 1024개의 프롬프트를 사용했으며, 비디오 생성을 위해 OpenSORA 및 Vbench 세트를 활용했습니다.
+* 평가 지표
+    * 이미지: 품질 측정을 위한 FID, 인간 선호도를 반영하는 IR, 수치적 유사성을 위한 PSNR 및 SSIM을 사용합니다.
+    * 비디오: 미적 품질(Aesthetic Quality), 움직임의 부드러움(Motion Smooth), 일관성(Consistency) 등을 추가로 측정합니다.
+* 구현 상세: 훈련이 필요 없는(Training-free) PTQ 방식으로, 4~10개의 프롬프트만으로 캘리브레이션을 수행하여 추론 시 추가적인 오버헤드가 거의 없습니다.
+
+
+### 5.2 Main Results
+
+<p align = 'center'>
+<img width="673" height="465" alt="image" src="https://github.com/user-attachments/assets/4312213a-aa1a-4190-a1b7-97cecc1765a8" />
+</p>
+
+* PixArt 모델: 기존 최신 기법인 ViDiT-Q가 가중치 3비트( $W3$ ) 설정에서 성능이 급격히 저하되는 것과 달리, LRQ-DiT는 우수한 품질을 유지합니다.
+* FLUX 모델: $W3A4$ 설정에서도 생성된 이미지의 품질과 원본과의 유사성 모두에서 성능 향상을 입증했습니다.
+* OpenSORA 모델: 다양한 비트 설정( $W3A4$, $W3A6$, $W3A8$ 등)에서 타 기법(Smooth Quant, QuaRot 등)보다 강력한 견고성과 성능 우위를 보여줍니다.
+
+
+
+### 5.3 Ablation Study & 5.4 Visualization Comparison
+
+<p align = 'center'>
+<img width="677" height="186" alt="image" src="https://github.com/user-attachments/assets/67173962-ddab-4a6c-b246-96c3164a440a" />
+</p>
+
+* TLQ와 ARS의 시너지: 두 기법을 독립적으로 사용할 때보다 함께 적용했을 때 이미지 품질과 유사도에서 최적의 성능을 달성하여 상호 보완적 효과가 있음을 증명했습니다.
+
+* 시각적 품질: LRQ-DiT는 전경의 세부 묘사가 명확하고 캐릭터 인식이 용이하며, 비디오의 경우 흐름이 더 부드럽고 일관성이 뛰어납니다.
+
+### 5.5 SpeedUp and Latency
+
+* 하드웨어 효율성: INT8 행렬 곱셈을 위한 맞춤형 Triton 커널을 구현하여 NVIDIA RTX 4090 GPU에서 테스트했습니다.
+
+* 속도 향상: 다양한 행렬 크기에서 FP16 대비 2.15배에서 2.45배의 속도 향상을 달성했으며, 처리량(Throughput) 또한 약 65 TFLOPs에서 160 TFLOPs 이상으로 크게 개선되었습니다.
+
 ---
 
 ## Appendix
