@@ -82,7 +82,9 @@ University of Alberta
 
 ### 3.1 Uniform vs. Non-Uniform Quantization
 
-<img width="519" height="481" alt="image" src="https://github.com/user-attachments/assets/e694d5f4-fbfd-4efb-9ffa-2b5332c4d301" />
+<p align = 'center'>
+<img width="300" height="300" alt="image" src="https://github.com/user-attachments/assets/e694d5f4-fbfd-4efb-9ffa-2b5332c4d301" />
+</p>
 
 $$X^{(int)} = \text{clip}(\lfloor \frac{X}{s} \rfloor + z, I_{min}, I_{max}) \quad(1)$$
 
@@ -100,10 +102,13 @@ $$f = (-1)^{d_s} 2^{p-b} (1 + \frac{d_1}{2} + \frac{d_2}{2^2} + \dots + \frac{d_
 
 #### 3.1.1 Optimized FP Formats in DiT Blocks.
 
-<img width="377" height="525" alt="image" src="https://github.com/user-attachments/assets/4caf05b1-ffc5-4945-8591-e1b1a0ee2cc4" />
+<p align = 'center'>
+<img width="350" height="450" alt="image" src="https://github.com/user-attachments/assets/4caf05b1-ffc5-4945-8591-e1b1a0ee2cc4" />
+</p>
 
-
-<img width="572" height="449" alt="image" src="https://github.com/user-attachments/assets/df69fe1b-1659-4df1-827e-fd0a4b261fc7" />
+<p align = 'center'>
+<img width="350" height="300" alt="image" src="https://github.com/user-attachments/assets/df69fe1b-1659-4df1-827e-fd0a4b261fc7" />
+</p>
 
 ##### 1. 민감한 구간 보존을 위한 전략
 
@@ -113,8 +118,50 @@ $$f = (-1)^{d_s} 2^{p-b} (1 + \frac{d_1}{2} + \frac{d_2}{2^2} + \dots + \frac{d_
 
 ##### 2. DiT 모델별 혼합 형식(Mixed-format) 적용
 
+<div align="center">
+   
 |모델|첫 번째 선형 층 (FFN)|나머지 모든 가중치|
 |:---:|:---:|:---:|
 |PixArt-α|E3M0|E2M1| 
 |Hunyuan|E3M0|E2M1| 
 |PixArt-Σ|E3M0|E1M2|
+   
+</div>
+
+
+### 3.2 AdaRound for FP
+
+#### 1. AdaRound의 기본 개념
+* 최적의 반올림(Rounding): 일반적인 양자화는 가장 가까운 값으로 반올림(Rounding-to-nearest)을 수행하지만, 이것이 항상 최적은 아닙니다.
+* 손실 최소화: AdaRound는 가중치 변화( $\Delta w$ )가 전체 손실에 미치는 영향을 2차 테일러 확장(Second-order Taylor Expansion)으로 분석하여, 반올림 오차를 최소화하는 방향을 찾습니다.
+* 학습 가능한 변수: 가중치를 올림할지 내림할지를 결정하는 이진 게이트(Binary Gate) 역할을 하는 변수 $V$를 도입하여 최적화를 수행합니다.
+
+#### 2. FP 양자화에서의 기존 AdaRound의 한계
+
+* 일정한 스케일 가정: 기존 AdaRound는 모든 양자화 구간에서 스케일( $s$ )이 일정하다고 가정하는 정수(INT) 양자화에 맞춰 설계되었습니다.
+* FP의 다중 스케일 문제: 부동소수점(FP) 양자화는 지수(Exponent) 비트에 따라 $2^E$개의 서로 다른 스케일을 가집니다.
+* 불안정한 업데이트: 스케일이 달라지면 최적화 과정에서 기울기(Gradient)의 크기가 스케일에 의존하게 되어, 업데이트가 불균형하고 불안정해지는 문제가 발생합니다.
+
+#### 3. Scale-aware AdaRound (제안 방법)
+
+* 논문은 FP의 다중 스케일 특성을 고려한 Scale-aware AdaRound를 제안합니다. 핵심은 스케일에 따라 변하는 기울기를 정규화(Normalize)하는 것입니다.
+* 수식 수정: 기존의 정류된 시그모이드 함수(Rectified Sigmoid Function)를 스케일( $s$ )로 나누어 보정합니다.
+
+$$h^{\prime}(V^{\prime})=clip(\sigma(\frac{V^{\prime}}{s})(\zeta-\gamma)+\gamma,0,1) \quad (8)$$
+
+* 기울기 독립성: 이 수정을 통해 최적화 과정의 감산 항( $\nabla F(V'_n)$ )이 스케일 $s$값에 관계없이 일정해짐을 수학적으로 증명하였습니다.
+    * 발생하는 현상: 스케일 $s$가 크면 기울기도 커져서 가중치가 크게 변하고, $s$가 작으면 가중치가 거의 변하지 않습니다
+    * 부동소수점(FP)에서의 문제: FP 양자화는 구간마다 스케일($s$)이 모두 다릅니다 ( $2^E$개 ). 이로 인해 어떤 가중치는 너무 빨리 변하고 어떤 가중치는 너무 느리게 변하는 불균형한 학습(Imbalance)이 발생합니다.
+    * 논문에서 제안한 핵심은 가중치 결정 변수 $V'$을 정의할 때 스케일 $s$로 나누어 주는 것
+    * 변수 $V'$에 대해 미분을 수행하면, 함수 안에 있던 $\frac{V'}{s}$ 항 때문에 미분값 외부로 $\frac{1}{s}$이 튀어나오게 됩니다.
+
+$$\frac{\partial h'(V')}{\partial V'} = \frac{1}{s} \cdot (\text{시그모이드 미분 항})$$
+
+* 안정화된 최적화: 결과적으로 모든 스케일에서 가중치 재구성(Weight Reconstruction)이 안정적으로 이루어지며 양자화 성능이 향상됩니다.
+
+#### 4. 성능 및 효율성 결과
+
+* 수렴 속도 향상: Scale-aware AdaRound는 기존 INT 기반 AdaRound보다 8배 적은 반복 횟수(2.5k vs 20k steps)만으로도 최적의 성능에 도달할 수 있습니다.
+* 정확도 개선: 다중 스케일 환경을 정확히 반영함으로써 저비트(W4) 설정에서도 더 높은 CLIP 점수와 이미지 생성 품질을 보여줍니다.
+
+
