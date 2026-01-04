@@ -172,3 +172,99 @@ $$\frac{\partial h'(V')}{\partial V'} = \frac{1}{s} \cdot (\text{시그모이드
 * 정확도 개선: 다중 스케일 환경을 정확히 반영함으로써 저비트(W4) 설정에서도 더 높은 CLIP 점수와 이미지 생성 품질을 보여줍니다.
 
 
+#### 5. DiT 활성화 값 분석
+
+<p align = 'center'>
+<img width="700" height="300" alt="image" src="https://github.com/user-attachments/assets/f6954ee8-143f-44ac-9a1a-2971bf702655" />
+</p>
+
+* 특정 레이어에서 나오는 전체 데이터의 최댓값이나 평균적인 범위를 추적
+
+* Diffusion Transformer (DiT) 모델이 기존의 U-Net 기반 확산 모델과 어떤 데이터 분포 차이를 보이는지 통계적으로 설명합니다.
+
+* (a) DiT Input Value Box Plot: 타임스텝(Timestep)별 입력 값의 분포를 보여줍니다. U-Net 기반 모델은 타임스텝이 진행됨에 따라 입력 값의 범위가 줄어드는 경향이 있지만, DiT는 범위가 비교적 일정하게 유지됨을 보여줍니다.
+
+* (b) Output Scale (7th DiT Block): 특정 레이어(예: 7번째 DiT 블록)의 출력 스케일을 시계열로 나타냅니다. 시간이 지나도 스케일 변화가 거의 없이 일정(constant)하다는 것을 증명하며, 이는 특정 양자화 전략이 왜 효과적인지에 대한 근거가 됩니다.
+
+* (c) 7th DiT Block Output Box Plot: 실제 출력값들의 분포를 박스 플롯으로 나타내어, 데이터의 범위가 안정적임을 재확인시켜 줍니다.
+
+### 3.3 Token-wise Activation Quantization
+
+* Token-wise Activation Quantization은 레이어 전체가 아닌 개별 토큰(Token 또는 Patch) 단위로 서로 다른 스케일링 파라미터를 적용하는 기법입니다.
+
+#### Token-wise 방식이 필요성
+
+<p align = 'center'>
+<img width="338" height="342" alt="image" src="https://github.com/user-attachments/assets/69d4c3b8-bac6-41b9-9ab8-1024001a5c64" />
+</p>
+
+* 하나의 타임스텝($t$)을 고정해놓고, 그 안에 들어있는 수많은 토큰(패치)들 각각의 스케일을 비교
+
+* 동적 범위의 불일치: 특정 패치(토큰)는 값이 매우 크고(Outlier), 다른 패치는 값이 매우 작을 수 있습니다. 레이어 전체에 하나의 스케일을 적용하면, 작은 값을 가진 토큰들은 정보가 뭉개져 버립니다.
+
+* 타임스텝별 변화: Diffusion 과정에서 노이즈 수준이 변함에 따라 활성화 값의 분포가 계속 이동합니다. 정적인(Static) 양자화로는 이를 따라가기 어렵습니다.
+
+
+#### 작동 원리 (Mechanism)
+
+* Token-wise 양자화는 모델이 실행되는 시점(Inference time)에 각 토큰의 통계치를 계산하여 즉석에서 양자화를 수행합니다.
+* 통계값 추출: 현재 처리 중인 토큰 $i$의 활성화 벡터 $x_i$에 대해 최댓값(Max)이나 절대 최댓값(Absmax)을 구합니다.
+* 개별 스케일링: 각 토큰 벡터를 해당 토큰의 최댓값으로 나누어 $[0, 1]$ 또는 $[-1, 1]$ 범위로 정규화합니다.
+* FP 양자화 적용: 정규화된 값을 저정밀도 부동소수점(예: FP6, FP8) 포맷으로 변환합니다. 이때 각 토큰은 자신만의 '스케일' 정보를 별도로 보유하게 됩니다.
+
+
+#### FP4DiT에서의 핵심 장점
+
+* 이상치(Outlier) 저항성: 특정 토큰에 튀는 값이 있어도 해당 토큰의 스케일만 커질 뿐, 다른 토큰의 양자화 정밀도에는 영향을 주지 않습니다.
+
+* FP(부동소수점) 포맷과의 시너지: FP 포맷은 0 근처의 작은 값들을 아주 세밀하게 표현할 수 있습니다.
+    * Token-wise로 범위를 좁혀주면, FP의 비균등한 그리드를 각 토큰의 실제 데이터 분포에 가장 효율적으로 배치할 수 있게 됩니다.
+
+* 정밀도 향상: 특히 W4A6(가중치 4비트, 활성화 6비트)과 같은 극한의 저비트 환경에서도 이미지 생성 품질(CLIP score, FID 등)을 유지하는 핵심 동력이 됩니다.
+
+---
+
+## 4. Results
+
+### 1. 실험 환경 (Experimental Setup)
+* 대상 모델: PixArt-$\alpha$, PixArt-$\Sigma$, Hunyuan-DiT 등 최신 Diffusion Transformer(DiT) 모델.
+* 비트 정밀도: * W4A8: 가중치 4-bit, 활성화 8-bit (거의 손실 없는 성능 타겟).
+    * W4A6: 가중치 4-bit, 활성화 6-bit (초저정밀도 극한 테스트).
+* 비교 대상: 기존의 정수 기반 양자화 방식(Q-Diffusion, TFMQ-DM, ViDiT-Q 등).
+
+
+### 2. 정량적 성능 (Quantitative Results)
+<p align = 'center'>
+<img width="823" height="757" alt="image" src="https://github.com/user-attachments/assets/ec58f19d-c3b1-4079-b830-e9cbc6169d9f" />
+</p>
+
+
+### 3. 정성적 결과: Figure (7)의 시각적 증거
+
+* 시각적 일관성: 기존 INT 기반 양자화 모델들은 이미지의 세부 디테일이 뭉개지거나 색감이 왜곡되는 현상이 발생합니다.
+
+* 결과: FP4DiT는 원본(Full-precision)과 시각적으로 거의 구분이 불가능한 수준의 결과물을 생성함을 보여줍니다. 이는 Token-wise 양자화가 이상치(Outlier)를 효과적으로 방어했기 때문입니다.
+
+### 4. 효율성 및 속도 (Efficiency)
+
+* Calibration 속도: 전체 재학습 없이 소량의 데이터로 최적화하는 PTQ 방식을 사용하여, 기존 방식 대비 가중치 보정(Calibration) 시간을 8배 이상 단축시켰습니다.
+
+* 하드웨어 가속: NVIDIA Blackwell GPU와 같은 최신 하드웨어에서 FP4/FP6 연산 지원을 활용할 경우, 레이어 수준에서 약 1.5배의 속도 향상과 메모리 절감 효과를 거둘 수 있음을 보였습니다.
+
+
+---
+
+## 5. Appendix
+
+### 가중치 (Weight - W4)
+* W4A8과 W4A6 모두 가중치는 FP4를 사용합니다.
+* 일반적으로 E2M1 포맷(지수 2비트, 가수 1비트)을 사용하여, 아주 적은 비트로도 가중치의 큰 값과 작은 값을 효과적으로 표현합니다.
+
+### 활성화 값 (Activation - A8 / A6)
+
+* W4A8: 활성화 값에 FP8 (주로 E4M3 또는 E5M2)을 사용합니다.
+* W4A6: 활성화 값에 FP6 (주로 E3M2)을 사용합니다.
+
+
+---
+  
