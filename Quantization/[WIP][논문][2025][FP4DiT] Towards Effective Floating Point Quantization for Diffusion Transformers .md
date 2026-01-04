@@ -137,7 +137,7 @@ $$f = (-1)^{d_s} 2^{p-b} (1 + \frac{d_1}{2} + \frac{d_2}{2^2} + \dots + \frac{d_
 * 학습 가능한 변수: 가중치를 올림할지 내림할지를 결정하는 이진 게이트(Binary Gate) 역할을 하는 변수 $V$를 도입하여 최적화를 수행합니다.
 
 
-$$\min_{\Delta V} \| Wx - \tilde{W}x \|^2_F + \lambda f_{reg}(\Delta V)$$
+$$\min_{\Delta V} \| Wx - \tilde{W}x \|^2_F + \lambda f_{reg}(\Delta V) \quad(4)$$
 
 * $Wx$: 양자화 전 레이어의 출력 (원본)
 * $\tilde{W}x$: 양자화 후 레이어의 출력
