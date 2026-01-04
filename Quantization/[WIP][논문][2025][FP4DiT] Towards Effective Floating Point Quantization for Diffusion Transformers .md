@@ -136,6 +136,13 @@ $$f = (-1)^{d_s} 2^{p-b} (1 + \frac{d_1}{2} + \frac{d_2}{2^2} + \dots + \frac{d_
 * 손실 최소화: AdaRound는 가중치 변화( $\Delta w$ )가 전체 손실에 미치는 영향을 2차 테일러 확장(Second-order Taylor Expansion)으로 분석하여, 반올림 오차를 최소화하는 방향을 찾습니다.
 * 학습 가능한 변수: 가중치를 올림할지 내림할지를 결정하는 이진 게이트(Binary Gate) 역할을 하는 변수 $V$를 도입하여 최적화를 수행합니다.
 
+
+$$\min_{\Delta V} \| Wx - \tilde{W}x \|^2_F + \lambda f_{reg}(\Delta V)$$
+
+* $Wx$: 양자화 전 레이어의 출력 (원본)
+* $\tilde{W}x$: 양자화 후 레이어의 출력
+* $f_{reg}(\Delta V)$: 가중치가 0(내림) 또는 1(올림)로 수렴하도록 유도하는 정규화 항(Regularization)
+
 #### 2. FP 양자화에서의 기존 AdaRound의 한계
 
 * 일정한 스케일 가정: 기존 AdaRound는 모든 양자화 구간에서 스케일( $s$ )이 일정하다고 가정하는 정수(INT) 양자화에 맞춰 설계되었습니다.
