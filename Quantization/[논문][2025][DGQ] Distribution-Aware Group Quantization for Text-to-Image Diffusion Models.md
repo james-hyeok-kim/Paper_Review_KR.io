@@ -157,4 +157,46 @@ $$\hat{A}\hat{V}=[A_{[:,0]}\hat{V}_{[0,:]},s\cdot2^{-A_{[:,1:]}^{q}}\hat{V}_{[1:
 
 ## 4. EXPERIMENTS
 
+### 4.1 IMPLEMENTATION DETAILS
+
+#### 데이터셋, 모델 및 평가지표
+
+* 양자화 과정 중 교정을 위해 MS-COCO 데이터셋에서 추출한 64개의 캡션을 사용
+* 평가 데이터셋: PartiPrompts 데이터셋
+* 사용 모델: 텍스트-투-이미지(Text-to-Image) 확산 모델로 Stable Diffusion v1.4를 사용
+
+#### 평가지표
+* FID, IS
+* CLIP 점수를 사용해 텍스트와 생성된 이미지 간의 일치도를 평가
+* 연산 비용(BOPs)
+* 샘플 수: 주요 결과 도출에는 30K 샘플을, 어블레이션 연구(Ablation Study)에는 10K 샘플을 사용
+
+
+#### 베이스라인 및 구현 환경
+* Q-Diffusion과 TFMQ-DM을 베이스라인
+* Hugging Face의 diffusers 라이브러리를 사용해 구현
+* 추론단계: 25 Steps
+* 어텐션 비트 수를 활성화 비트 수와 동일하게 설정
+
+#### 가중치 양자화 (Weight Quantization)
+* 성능 평가를 위해 가중치 양자화도 병행하였습니다. 이를 위해 BRECQ와 Adaround 기법을 적용
+* 블록 재구성: 트랜스포머(Transformer) 블록과 잔차(Residual) 블록 모두에 블록 재구성 기법을 적용
+    * 반올림에 발생하는 에러를 낮추기 위해, Block 단위로 출력값 최적화
+* Calibration Data: MS-COCO에서 64개의 캡션 사용
+
+<p align = 'center'>
+<img width="638" height="472" alt="image" src="https://github.com/user-attachments/assets/876f3742-575e-4d74-8c77-c57b004e7595" />
+</p>
+
+
+
+---
+
+## 5. Conclusion
+
+* DGQ 방법론 제안: 텍스트-투-이미지(Text-to-Image) 확산 모델에 특화된 '분포 인식 그룹 양자화
+* 활성화 이상치(Outlier) 보존: 이상치를 식별하고, 채널 또는 픽셀별로 그룹화하여 이를 효과적으로 보존
+* Cross-attention 최적화: 입력 프롬프트에 따른 가변적인 로그 양자화(Logarithmic Quantization) 방식을 적용
+
+
 ---
