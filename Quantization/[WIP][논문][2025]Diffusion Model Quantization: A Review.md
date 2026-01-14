@@ -1,4 +1,4 @@
-<img width="777" height="325" alt="image" src="https://github.com/user-attachments/assets/242c6136-f12e-4860-92d9-ea9a26ceaf8a" /># Diffusion Model Quantization: A Review
+# Diffusion Model Quantization: A Review
 
 저자 : Qian Zeng, Chenggong Hu, Mingli Song, Jie Song
 
@@ -57,18 +57,58 @@ Zhejiang University
 
 ### 2.1 Diffusion Models
 
-
+<p align = 'center'>
 <img width="777" height="325" alt="image" src="https://github.com/user-attachments/assets/1ac36d01-bd63-4c7b-8373-6526c8343f7d" />
-
+</p>
 
 * (a) 시간 단계에 따른 양자화 노이즈 누적 (Error Accumulation)
-
 * (b) 시간 단계별 활성화 범위의 변화 (Activation Distribution Shift)
 * (c) 시간적 특징 불일치 현상 (Temporal Feature Mismatch)
     * 양자화된 시간 임베딩( $\hat{emb}_t$ )이 원래의 시간 단계 $t$보다 다른 단계( $t+\delta_t$ )의 임베딩과 더 높은 유사성을 보이는 현상을 설명합니다.
     * 그래프의 파란색 곡선에 나타난 변곡점들은 양자화로 인해 시간 정보가 혼동되어, 모델이 현재 단계를 부정확하게 인식하게 함으로써 샘플링 경로가 꼬이거나 역행하는 문제를 유발함을 시사합니다.
- 
 
+### 2.2 Model Quantization
+
+#### 균일 양자화(Uniform quantization)
+
+$$x_{int}=clamp(\lfloor\frac{x}{s}\rfloor+z, 0, 2^{b})\quad(9)$$
+
+#### Post-Training Quantization, PTQ
+
+* 추가적은 훈련이 필요없다.
+* 추가 데이터가 전혀 없거나, 아주 적은양의 캘리브레이션 데이터셋(calibration dataset)으로 수행 가능
+
+#### Quantization-Aware Training, QAT
+
+* 훈련 과정 중에 양자화 오류를 모델링하기 위해 모의 양자화(simulated quantization)를 도입
+* 4비트 이하의 저비트 양자화에서도 우수한 성능
+* 역전파(backpropagation) 시 미분이 불가능한 라운딩 연산을 처리하기 위해 Straight-Through Estimator (STE)를 사용하여 기울기(gradient)를 근사화
+
+### 2.3 Challenges in Quantizing Diffusion Models
+
+#### 2.3.1 Challenges from the Diffusion Mechanism
+
+* C#1: 타임스텝별 활성화 분포의 변화 (Activation distributions vary across time steps)
+    * 디퓨전 과정의 각 타임스텝 $t$마다 입력 데이터의 분포가 계속해서 변합니다.
+    * 이로 인해 층별(layer-wise) 활성화 값들이 시간에 따라 크게 달라져 양자화 난이도를 높입니다.
+* C#2: 타임스텝 간 양자화 오차의 누적 (Quantization errors accumulate across time steps)
+    * 단일 단계의 오차가 여러 층을 거치며 전파될 뿐만 아니라, 디퓨전의 반복적인 특성상 샘플링 타임스텝을 따라 오차가 점진적으로 쌓입니다.
+* C#3: 시간 정보 혼란 현상 (Temporal confusion phenomenon)
+    * 타임 임베딩(TimeEmbedding) 레이어를 양자화하면 실제 시간과 양자화된 시간 표현 사이에 불일치가 생겨 샘플링 궤적이 꼬이거나 역행하는 등의 혼란이 발생할 수 있습니다.
+
+#### 2.3.2 Challenges from Model Architectures
+
+* C#4: Concatenate 연산으로 인한 이봉 분포 (Bimodal data distribution from concatenate operations)
+    * U-Net의 스킵 커넥션(shortcut layers)에서 얕은 층의 특징과 깊은 층의 특징을 직접 결합(concatenate)합니다.
+    * 채널 간 데이터 범위 차이가 크기 때문에 가중치와 활성화 값들이 두 개의 정점을 가진 이봉 분포를 보이게 되며, 이는 불균형한 압축과 특징 표현의 불일치를 초래합니다.
+
+* C#5: Cross Attention Quantization으로 텍스트-시각적 특징 정렬 불일치 (Misalignment of textual and visual features)
+    * U-Net 기반 텍스트-이미지 모델은 크로스 어텐션(cross-attention) 모듈을 통해 텍스트 정보를 주입합니다.
+    * 양자화 과정에서 이 정렬이 깨지면 모델이 멀티모달 정보를 정확하게 통합하지 못해 생성 품질이 저하됩니다.
+
+* C#6: 다층적 데이터 변동성 (Data Variance Across Multiple Levels)
+    * DiT는 토큰 기반 Vision Feature을 사용하는데, 이는 시간적·공간적으로 변동성이 매우 큽니다.
+    * 글로벌 어텐션, 텍스트 조건부 어텐션 등 다양한 모듈 간의 가중치 격차와 타임스텝 조건에 따른 활성화 패턴 변화가 복합적으로 작용하여 양자화의 정밀도를 떨어뜨립니다.
 
 ---
 
