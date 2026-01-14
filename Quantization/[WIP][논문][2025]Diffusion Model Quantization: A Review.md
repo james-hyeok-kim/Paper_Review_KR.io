@@ -227,4 +227,94 @@ $$x_{int}=clamp(\lfloor\frac{x}{s}\rfloor+z, 0, 2^{b})\quad(9)$$
 
 ## 4 Benchmarking Experiments
 
+### 4.1 Experimental Setup
+
+* 실험은 크게 세 가지 주요 생성 작업(무조건부, 클래스 조건부, 텍스트 조건부 이미지 생성)을 통해 수행
+
+#### 1. 양자화 및 캘리브레이션 설정
+
+* PTQ(사후 훈련 양자화) 기반 방법: $W8A8$ 및 $W4A8$ 설정에서 평가되었습니다.
+* QAT(양자화 인식 훈련) 기반 방법: $W8A8$, $W4A8$, $W4A4$ 설정에서 평가되었습니다.
+* 캘리브레이션(Calibration): 해당 알고리즘에 고유한 전략이 있으면 이를 적용하고, 그렇지 않은 경우에는 노이즈 제거 파이프라인에서 정기적인 타임스텝 간격으로 데이터셋을 샘플링하여 사용했습니다
+
+#### 2. 생성 작업별 세부 설정
+
+|작업 유형|데이터셋 및 모델|샘플러 및 하이퍼파라미터|평가 지표|
+|:---:|:---:|:---:|:---:|
+|클래스 조건부 생성 |"ImageNet 256×256, LDM-4 "|"DDIM, cfg scale=3.0, 20 steps, η=0.0 "|"IS, FID, sFID, Precision, Recall "|
+|무조건부 생성|"LSUN-Bedrooms/Churches 256×256, LDM-4/8 "|"DDIM, cfg scale=3.0, 20 steps, η=0.0 "|"FID, sFID, Precision, Recall "|
+|텍스트 조건부 생성 |"MS-COCO 512×512, Stable Diffusion v1-4 "|"PLMS, 50 steps, cfg scale=7.5 "|"FID, sFID, CLIP score "|
+
+
+* cfg $scale=3.0$ (Classifier-Free Guidance Scale)의미: 분류기 없는 가이드(Classifier-Free Guidance)의 강도를 조절하는 배율
+* $\eta=0.0$ (Eta): DDIM 샘플링 과정에서의 무작위성(Stochasticity)을 조절하는 계수
+    * $\eta=0.0$: 결정론적 경로
+    * $\eta=1.0$: DDPM 방식처럼 무작위성
+
+
+<p align = 'center'>
+<img width="795" height="525" alt="image" src="https://github.com/user-attachments/assets/020f81aa-a6e8-4fc5-a789-05935e56b9ac" />
+</p>
+
+### 4.2 Benchmark Results
+
+#### 4.2.1 Class-conditional Image Generation
+
+
+1. 실험 설정 및 모델
+
+* 데이터셋 및 모델: ImageNet $256\times256$ 데이터셋과 LDM-4 모델을 사용하여 평가를 진행했습니다.
+* 샘플링 조건: DDIM 샘플러, 가이드 스케일 3.0, 20단계를 사용했습니다.
+* 평가 대상: PTQ 방식(PTQ4DM, Q-Diffusion 등) 7개와 QAT 방식(EfficientDM, QuEST) 2개를 포함한 총 9개의 솔루션을 벤치마킹했습니다.
+
+2. 주요 성능 분석 (W8A8 및 W4A8)
+
+* PTQ의 경쟁력: 높은 비트(W8A8, W4A8) 설정에서는 PTQ 방식이 QAT 방식과 대등하거나 오히려 더 나은 성능을 보이기도 했습니다.
+* 구체적 사례: W8A8 설정에서 PTQ4DM, PTQD, $D^2$-DPM은 FID/sFID 지표에서 LoRA 기반 QAT 방식인 EfficientDM보다 우수한 성적을 거두었습니다
+* 시사점: 양자화 노이즈가 적을 때는 과도한 가중치 미세 조정(fine-tuning)이 오히려 역효과를 낼 수 있음을 시사합니다6.
+
+3. 저비트(W4A4)에서의 한계와 이론적 근거
+
+* PTQ의 실패: 활성화를 4비트로 낮출 경우(W4A4), PTQ 알고리즘들은 대부분 수렴하지 못하고 실패했습니다.
+* 테일러 확장 이론: PTQ는 블록 재구성 시 테일러 확장(Taylor expansion)을 사용하여 손실을 근사하는데, 이는 오차($\Delta x$)가 0에 가까워야 한다는 전제가 필요합니다.
+* 조건 위배: 4비트 양자화에서는 가중치와 활성화의 섭동(perturbation)이 너무 커서 테일러 확장의 전제 조건이 깨지기 때문에 최적화가 어려워집니다. 따라서 초저비트에서는 파라미터 미세 조정(QAT)이 필수적입니다.
+
+4. 양자화 노이즈의 이점 (Beneficial Noise)
+
+* 흥미로운 현상: 일부 방법($D^2$-DPM, EfficientDM 등)은 W8A8보다 W4A8 설정에서 성능이 더 좋게 나타나는 현상이 관찰되었습니다.
+* 이론적 해석: SDE(확률 미분 방정식)는 확률 흐름 ODE와 Langevin 확산 SDE의 조합으로 일반화될 수 있습니다.
+* 오차 상쇄: 양자화 과정의 노이즈가 독이아닌 약이 되는 현상
+    * 원래의 길(ODE/정밀한 모델)
+    * 약간의 흔들림(Langevin SDE/확률적 샘플링)
+
+* ODE(Ordinary Differential Equation, 상미분 방정식)
+    * 확률 흐름 ODE(Probability Flow ODE)를 의미
+    * 확산 모델의 전방 과정(Forward process)은 보통 SDE(확률 미분 방정식)로 모델링되지만, 이와 동일한 주변 확률 밀도(Marginal probability)를 공유하는 결정론적 역과정인 ODE가 존재
+
+$$dx=[f(x,t)-\frac{1}{2}g(t)^{2}\nabla_{x}log~p_{t}(x)]dt$$
+
+* $f(x,t)$: $x(t)$의 표류 계수(Drift coefficient).
+* $g(t)$: $x(t)$의 확산 계수(Diffusion coefficient)
+* $\nabla_{x}log~p_{t}(x)$: **스코어 함수(Score function)**로, 신경망을 통해 추정되는 값
+
+
+#### 4.2.2 Unconditional Image Generation
+
+#### 4.2.3 Text-guided Image Generation
+
+### 4.3 Qualitative Analysis
+
+#### 4.3.1 Visualization Results Analysis
+
+#### 4.3.2 Trajectory Analysis
+
+
+
 ---
+
+## 5. Future Prospects
+
+
+
+---
+
