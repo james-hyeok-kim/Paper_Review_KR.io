@@ -194,9 +194,59 @@ $$\mathcal{L}_{CFM}(\theta) = \mathbb{E}_{t, q(x_1), p_t(x|x_1)} ||v_t(x) - u_t(
 
 #### 2.2.3 Text Generation
 
+1) 텍스트 생성에서의 주요 도전 과제
+    * 확산 모델은 본래 이미지와 같은 연속적인 데이터를 위해 설계되었기 때문에 텍스트에 적용할 때 몇 가지 어려움이 따릅니다.
+    * 이산적 데이터의 특성: 이미지와 달리 단어는 불연속적인 토큰 형태이므로, 일반적인 가우시안 노이즈 주입 방식이 효과적이지 않을 수 있습니다.
+    * 최적화 불안정성: 연속 공간을 위해 설계된 목적 함수들이 텍스트 확산 과정(특히 고차원 공간)에서는 불안정해지는 경향이 있습니다.
+
+2) 효율적인 텍스트 생성 모델 및 기법
+    * Masked-Diffuse LM (Chen et al., 2023a)
+        * 확산 과정의 각 단계에서 교차 엔트로피(Cross-entropy) 손실 함수를 사용하여 모델 내부의 연속적인 표현과 최종적인 이산 텍스트 출력 사이의 간극을 효율적으로 메웁니다.
+    * SeqDiffuSeq (Yuan et al., 2024)
+        * 인코더-디코더 트랜스포머(Encoder-decoder Transformer) 아키텍처를 도입했습니다.
+        * 적응형 노이즈 스케줄(Adaptive noise schedule)과 자가 조건화(Self-conditioning) 기법을 활용하여 텍스트 생성의 효율성을 확보했습니다.
+            * Adaptive Noise Schedule: 전통적인 확산 모델은 모든 타임스텝(timestep)에 미리 정해진 고정된 양의 노이즈를 추가, SeqDiffuSeq는 이를 동적으로 조절
+            * Self-conditioning: 모델이 현재 단계에서 노이즈를 제거할 때, 이전 단계에서 자신이 예측했던 결과물($x_0$에 대한 추정치)을 현재 단계의 추가적인 입력(조건)으로 다시 사용
+    * Lovelace et al. (2024):
+        * 텍스트를 먼저 연속적인 잠재 공간(Continuous latent space)으로 인코딩한 뒤, 해당 공간 안에서 연속 확산 모델을 사용하여 샘플링하는 방법론을 제시했습니다.
+
+
 #### 2.2.4 Audio Generation
 
+1) 오디오 생성의 고유한 도전 과제
+    * 오디오 데이터는 이미지나 텍스트와 다른 특성을 가지고 있어 가속화가 더 까다롭습니다.
+    * 강한 시간적 연속성: 고해상도 오디오를 생성하려면 시간 영역(Time-domain)과 주파수 영역(Frequency-domain)의 정보를 모두 정확하게 재구성해야 합니다.
+    * 인간의 민감도: 오디오의 미세한 왜곡이나 노이즈는 인간의 귀에 매우 쉽게 포착되어 청취 경험에 큰 영향을 미칩니다.
+    * 저지연성 요구: 음성 합성(TTS)이나 실시간 대화 시스템과 같은 응용 분야에서는 매우 낮은 지연 시간(Low-latency)이 필수적입니다.
+    * 다차원적 특성: 스테레오, 공간 오디오 등 오디오의 다차원적 요소를 유지하면서 생성 속도를 높여야 합니다.
+
+2) 주요 가속화 모델 및 기법
+    * WaveGrad (Chen et al., 2020) & DiffWave (Kong et al., 2020)
+        * 확산 단계(Diffusion steps)의 수를 줄여 가속화
+    * FastDPM (Kong & Ping, 2021)
+        * 이산적 단계를 연속적인 단계로 일반화, 노이즈 수준 사이의 일대일 매핑(Bijective mapping)을 사용  
+
+
 #### 2.2.5 3D Generation
+
+1) 3D 생성의 고유한 도전 과제
+    * 3D 생성은 2D 이미지 생성보다 훨씬 더 복잡하며 계산 집약적
+    * 데이터의 특성: 3D 데이터는 볼륨 데이터(Volumetric data)나 포인트 클라우드(Point clouds)와 같은 고해상도 요소를 포함하고 있어 연산 요구량이 기하급수적으로 증가
+        *  볼륨 데이터는 3D 공간을 격자(Grid) 형태의 '복셀(Voxel)' 단위로 나누어 표현하는 방식
+        *  포인트 클라우드는 물체의 표면이나 공간에 흩어져 있는 '수많은 점(Points)'들의 집합입니다. 각 점은 3차원 좌표( $x, y, z$ )와 경우에 따라 색상(RGB) 정보를 가집니다.
+    * 계산 부담: 2D 이미지와 비교했을 때, 3D 공간의 표현과 생성은 하드웨어 자원을 매우 많이 소모하는 작업  
+
+2) 효율성 향상을 위한 주요 전략
+    1) 샘플링 스케줄 최적화 (Efficient Sampling Schedules)
+        * 더 큰 샘플링 단계(Step size)를 사용하거나, 2D와 3D 사이의 샘플링 전략을 수정하고, 다중 뷰 병렬 처리(Multi-view parallelism)를 도입
+        * 관련 연구: Bieder et al. (2023), Li et al. (2024c), Yu et al. (2024b)
+    2) 혁신적인 아키텍처 도입 (Novel Architectures)
+        * 방법: 상태 공간 모델(State-space models)이나 경량화된 특징 추출기(Lightweight feature extractors)를 사용하여 3D 데이터를 처리할 때 발생하는 계산 부담을 완화
+        * 3D Gaussians생성에 드는 비용을 크게 줄일 수 있다.
+    3) 주요 응용 및 평가 (Table 1 참고)
+        * 주요 데이터셋: ShapeNet, Objaverse, HumanML3D, BraTS2020(의료) 등.
+        * 평가 지표: CD(Chamfer Distance), EMD(Earth Mover's Distance), FID, 다양성(Diversity) 등이 품질 측정에 사용됩니다
+
 
 ---
 
