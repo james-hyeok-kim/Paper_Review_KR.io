@@ -334,6 +334,11 @@ $$dx=[f(x,t)-\frac{1}{2}g(t)^{2}\nabla_{x}log~p_{t}(x)]dt$$
 
 #### 4.2.3 Text-guided Image Generation
 
+<p align = 'center'>
+<img width="786" height="291" alt="image" src="https://github.com/user-attachments/assets/afb50927-bc04-4e1a-8ba2-ac4eba646fa4" />
+</p>
+
+
 * Stable Diffusion v1-4 모델을 사용하여 텍스트 가이드 이미지 생성(Text-guided Image Generation) 작업에서 양자화 방법론들의 성능을 평가
 * 데이터셋: MS-COCO $512\times512$ 데이터셋의 캡션을 사용했습니다.
 * 샘플러 및 스텝: PLMS 샘플러를 사용하며, 50번의 샘플링 스텝을 거칩니다.
@@ -350,15 +355,86 @@ $$dx=[f(x,t)-\frac{1}{2}g(t)^{2}\nabla_{x}log~p_{t}(x)]dt$$
 
 #### 4.3.1 Visualization Results Analysis
 
+* ImageNet $256\times256$ 데이터셋에서 각 양자화 기법을 적용한 LDM-4 모델의 생성 결과를 전정밀도(FP32) 모델과 비교하여 분석
+
+<p align = 'center'>
+<img width="783" height="557" alt="image" src="https://github.com/user-attachments/assets/54c22b3c-e271-4740-9011-08659cc0df0d" />
+</p>
+
+
+1. Color Bias
+
+* 서로 다른 색상 채널에 양자화 노이즈가 불균등하게 분포할 때 발생하며 색상의 흐름(Color drift)을 유
+* W4A8 설정에서 TFMQ-DM 기법은 이미지 전체가 어두운 노란색 영역으로 치우치는 현상
+* 양자화 노이즈가 빨간색이나 초록색 채널보다 파란색 채널의 활성화 분포를 더 크게 변화시켜 평균 전이(Mean shift)를 일으켰기 때문
+
+<p align = 'center'>
+<img width="811" height="428" alt="image" src="https://github.com/user-attachments/assets/8cd586d7-82e8-4444-ad8c-c88fc5dae247" />
+</p>
+
+2. Pixel Overexposure
+
+* 채널 간 높은 분산을 가진 활성화 값들이 겹치면서 픽셀이 과도하게 밝게 표현되는 현상
+* PTQD 기법의 경우, 적절한 수준의 높은 분산은 이미지의 대비(Contrast)를 높여 시각적 품질을 개선하기도 하지만, 과도할 경우 노이즈와 같은 픽셀 아티팩트를 생성
+* 양자화로 인해 발생하는 극단적인 값(Extreme values)의 빈도 증가
+
+
+3. Loss of Subtle Details (세부 사항의 손실)
+
+* 연속적인 전정밀도 활성화 값을 불연속적인 이산 영역으로 매핑하므로, 특정 주파수 대역의 정보가 사라져 디테일이 뭉개지는 결과
+* EfficientDM이나 QuEST와 같은 양자화 인식 훈련(QAT) 기반 방식은 피사체의 세부 사항을 효과적으로 보존
+* TFMQ-DM은 색상 편향으로 인해 상당한 디테일을 잃으며, PTQ4DM은 머리카락 영역과 같은 고주파 정보를 일부 유실하는 모습
+
+
+4. Alterations in the Structural Characteristics (구조적 특징의 변형)
+
+* 이미지 특징과 조건 특징을 융합하는 크로스 어텐션(Cross-attention) 가중치를 교란
+
+
 #### 4.3.2 Trajectory Analysis
 
+<p align = 'center'>
+<img width="796" height="482" alt="image" src="https://github.com/user-attachments/assets/09613b1f-098f-485f-8079-fcc8ca0071ba" />
+</p>
 
+* 각 양자화 기법은 분포의 편차(Drift)와 분산의 수렴(Variance convergence) 측면에서 서로 다른 양상
+
+* PTQ4DM
+    * 대부분의 일관된 분포 편차
+    * class 484'에서 편차가 두드러졌습니다.
+    * 데이터의 분산 자체는 FP32 모델과 유사한 수준을 유지했습니다.
+* PTQD
+    * 양자화 후에도 클래스 조건부 인지 능력을 잘 유지했습니다.
+    * 그러나 전반적으로 미세한 계통적 이동(Global systematic shift)이 관찰되었으며 샘플 분산이 약간 높게 나타났습니다
+* $D^{2}$-DPM
+    * 대부분의 카테고리에서 FP32 모델과 가장 유사한 경로
+    * 특히 'class 946'과 '967'에서 PTQ4DM보다 훨씬 나은 상대적 수렴 성능을 입증
+* TFMQ-DM
+    * 특정 카테고리(301, 387)에서 경로가 크게 이탈
+    * 이는 채널 간 활성화 값의 비동기적 편차로 인해 발생하며, 앞서 언급된 색수차(Color bias) 현상의 원인이 됩니다.
+* EfficientDM
+    * 가중치 미세 조정(Weight fine-tuning) 덕분에 카테고리 간 수렴을 가장 효과적으로 제어하며 강력한 클래스 판별력을 보여주었습니다.
+    * 특정 특징들이 전정밀도 모델과 완벽히 일치하지 않더라도 상당히 합리적인 수준 내에서 생성되었습니다.
 
 ---
 
 ## 5. Future Prospects
 
+### 1. 고급 훈련 전략과의 통합 (Integration with Advanced Training Strategies)
 
+* 내용: 자가 지도 학습(Self-supervised learning)이나 소수샷 학습(Few-shot learning)과 같은 최신 훈련 방법론에 양자화 기술을 접목하는 방향입니다.
+
+### 2. 성능 향상을 위한 양자화 인식 미세 조정 (Quantization-Aware Fine-Tuning)
+
+### 3. 벡터 양자화 최적화 (Optimizing Vector Quantization)
+
+* 기존의 가중치 및 활성화 값 양자화를 넘어, 잠재 변수(Latent variables)나 임베딩의 이산적 표현에 벡터 양자화(Vector Quantization) 기술을 적용
+
+### 4. 실제 배포를 위한 하드웨어 최적화 (Adapting for Real-World Deployment)
+
+### 5. 양자화와 모델 해석성 간의 트레이드오프 (Trade-offs and Interpretability)
+
+* 양자화가 디퓨전 모델의 해석 가능성(Interpretability)과 설명 가능성에 어떤 영향을 미치는지 조사
 
 ---
 
