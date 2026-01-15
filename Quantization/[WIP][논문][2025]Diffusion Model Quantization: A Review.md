@@ -300,7 +300,29 @@ $$dx=[f(x,t)-\frac{1}{2}g(t)^{2}\nabla_{x}log~p_{t}(x)]dt$$
 
 #### 4.2.2 Unconditional Image Generation
 
+* LSUN-Bedrooms (LDM-4)와 LSUN-Churches (LDM-8) 데이터셋을 사용
+* 무조건부 이미지 생성(Unconditional Image Generation) 작업에서 성능을 평가
+
+* Calibration Strategy Customization
+    * EDA-DM의 향상된 분포 정렬 타임스텝 샘플링 방식이 전체 지표에서 더 나은 결과
+        * EDA-DM(Enhanced Distribution Alignment for Post-training quantization of Diffusion Models)
+        * 시간적 분포 정렬 보정(TDAC, Temporal Distribution Alignment Calibration)이라는 새로운 전략을 도입 
+
+* 양자화 오류 수정: PTQD와 $D^2$-DPM이 QNCD보다 전반적으로 우수한 성능을 기록
+
+* 양자화 인식 훈련(QAT): 가중치 튜닝 기반의 EfficientDM과 QuEST가 전체 지표에서 압도적인 우위를 차지
+
+* Calibration Strategy
+
+|방법론|핵심 원리 및 특징|
+|:---:|:------:|
+|NDTC (Normally Distributed Time-step Calibration)|"이미지가 점차 완성되는 시점(t=0)에 가까울수록 보정 효과가 크다는 점에 착안하여, t=0 근처를 더 조밀하게 샘플링하는 정규 분포 방식을 사용합니다."
+|TDAC (Temporal Distribution Alignment Calibration)|"각 타임스텝 샘플의 밀도(Density)와 다양성(Variety) 점수를 계산하여, 정보 가치가 높은 시점의 샘플을 더 많이 포함하도록 샘플링 밀도를 조절합니다."|
+|Uniform Sampling|전체 타임스텝 구간에서 일정한 간격으로 중간 입력 데이터를 추출하여 작은 규모의 보정 세트를 구성하는 방식입니다.|
+
 #### 4.2.3 Text-guided Image Generation
+
+
 
 ### 4.3 Qualitative Analysis
 
