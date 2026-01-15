@@ -178,6 +178,26 @@ $$\mathcal{L}_{CFM}(\theta) = \mathbb{E}_{t, q(x_1), p_t(x|x_1)} ||v_t(x) - u_t(
 
 </div>
 
+
+#### 2.2.2 Video Generation
+
+1. 효율적인 학습 프레임워크 (Efficient Training)
+
+* 모델 동결 및 모듈 추가: ED-T2V는 기존의 사전 학습된 이미지 생성 모델(Rombach et al., 2022)을 동결(Freeze)한 상태에서 추가적인 시간적(Temporal) 모듈만을 학습시켜 학습 비용을 절감합니다.
+    * Efficient Diffusion for Text-to-Video)
+    * 이미 잘 학습된 이미지 생성 모델(예: Stable Diffusion)의 지식을 재사용
+    * 시간적 어텐션 (Temporal Attention)
+    * 파라미터 효율적 미세 조정 (PEFT): LoRA(Low-Rank Adaptation)와 같은 기법을 비디오 영역에 적용
+
+* 어댑터 활용: Xing et al. (2024)은 SimDA (Simple Diffusion Adapter), 공간적/시간적 어댑터를 사용하여 원본 T2I 모델은 그대로 두고 새로 추가된 어댑터 모듈만 업데이트하는 방식을 제안했습니다
+    * T2I(Text-to-Image) 모델
+
+#### 2.2.3 Text Generation
+
+#### 2.2.4 Audio Generation
+
+#### 2.2.5 3D Generation
+
 ---
 
 ## 3. Algorithm-Level Efficiency Optimization
