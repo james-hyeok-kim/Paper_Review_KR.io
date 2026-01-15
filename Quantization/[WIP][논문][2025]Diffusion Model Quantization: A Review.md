@@ -309,8 +309,10 @@ $$dx=[f(x,t)-\frac{1}{2}g(t)^{2}\nabla_{x}log~p_{t}(x)]dt$$
         * 시간적 분포 정렬 보정(TDAC, Temporal Distribution Alignment Calibration)이라는 새로운 전략을 도입 
 
 * 양자화 오류 수정: PTQD와 $D^2$-DPM이 QNCD보다 전반적으로 우수한 성능을 기록
+    * 오류 수정 알고리즘이 LSUN-Bedrooms보다 LSUN-Churches 벤치마크에서 풀프레시전(FP32) 모델에 더 가까운 성능
 
 * 양자화 인식 훈련(QAT): 가중치 튜닝 기반의 EfficientDM과 QuEST가 전체 지표에서 압도적인 우위를 차지
+    * W4A8 설정에서도 FID 수치 저하가 매우 적었으며, 샘플링 분산이 큰 환경에서도 분산 폭발(variance explosion) 없이 PTQ 기반 방법들을 능가
 
 * Calibration Strategy
 
@@ -320,8 +322,28 @@ $$dx=[f(x,t)-\frac{1}{2}g(t)^{2}\nabla_{x}log~p_{t}(x)]dt$$
 |TDAC (Temporal Distribution Alignment Calibration)|"각 타임스텝 샘플의 밀도(Density)와 다양성(Variety) 점수를 계산하여, 정보 가치가 높은 시점의 샘플을 더 많이 포함하도록 샘플링 밀도를 조절합니다."|
 |Uniform Sampling|전체 타임스텝 구간에서 일정한 간격으로 중간 입력 데이터를 추출하여 작은 규모의 보정 세트를 구성하는 방식입니다.|
 
+* 기술적 고찰
+    * $\eta$ 값의 영향: LSUN-Churches는 $\eta=0.0$ (DDIM)을 사용하는 반면, LSUN-Bedrooms는 $\eta=1.0$ (사실상 DDPM)을 사용
+    * DDPM처럼 고유 분산이 큰 경우에는 양자화로 인해 누적된 추가 오류를 SDE(확률 미분 방정식)가 흡수하기 어렵
+    * 양자화 모델을 사용할 때는 추가적인 누적 오류의 영향을 억제하기 위해 더 작은 $\eta$ 값을 설정하는 것이 권장
+
+* Variance Overflow
+    * 누적된 오류와 모델 고유의 분산(Variance)이 결합하여 수렴을 방해하고 생성 품질을 급격히 떨어뜨리는 현상
+    * DDIM: 고유 분산이 낮아 양자화 오류에 비교적 안정적임
+    * DDPM: 고유 분산이 크며, 양자화 후 분산 폭발이 일어나기 쉬움
+
 #### 4.2.3 Text-guided Image Generation
 
+* Stable Diffusion v1-4 모델을 사용하여 텍스트 가이드 이미지 생성(Text-guided Image Generation) 작업에서 양자화 방법론들의 성능을 평가
+* 데이터셋: MS-COCO $512\times512$ 데이터셋의 캡션을 사용했습니다.
+* 샘플러 및 스텝: PLMS 샘플러를 사용하며, 50번의 샘플링 스텝을 거칩니다.
+* CFG(Classifier-Free Guidance): 샘플의 품질과 다양성 사이의 균형을 맞추기 위해 7.5로 고정되었습니다.
+* 평가 지표: 생성된 30,000개의 이미지를 바탕으로 FID, sFID, 그리고 텍스트와 이미지의 일치성을 측정하는 CLIP-score를 산출했습니다.
+
+* 오픈소스 솔루션(Q-Diffusion, TFMQ-DM, PCR, DGQ)이 비교
+    * DGQ (최고 성능): 모든 지표에서 가장 뛰어난 성능을 보였습니다. 특히 W8A8과 W4A8 설정 모두에서 가장 높은 CLIP-score를 기록하며, 양자화 후에도 텍스트 가이드에 따른 이미지 생성 능력을 가장 잘 보존하는 것으로 나타났습니다.
+    * Q-Diffusion & TFMQ-DM: 두 모델 모두 전반적인 지표에서 양호한 성능을 보였습니다. 이는 '분할 양자화(Split quantization)'가 이봉(Bimodal) 데이터 분포의 영향을 완화하고, '시간적 특징 정렬(Temporal feature alignment)'이 텍스트-이미지 모델 양자화에 효과적임을 시사합니다.
+    * PCR: 다른 모델들에 비해 상대적으로 높은 FID(수치가 낮을수록 좋음)와 낮은 CLIP-score를 기록하여 성능이 다소 떨어지는 모습을 보였습니다.
 
 
 ### 4.3 Qualitative Analysis
