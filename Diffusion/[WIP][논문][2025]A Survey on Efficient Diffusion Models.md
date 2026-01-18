@@ -447,9 +447,15 @@ $$\frac{d}{dt}\phi_{t}(x)=v_{t}(\phi_{t}(x)), \quad \phi_{0}(x)=x$$
 2) 검색 가이드 초기화 (Retrieval-Guided Initialization)
     1) 데이터베이스에서 입력 프롬프트와 관련된 샘플을 검색하여 모델의 초기 상태를 더 고도화된 정보로 제공함으로써, 반복적인 정제 과정을 대폭 단축
     2) kNN-Diffusion: CLIP 인코더를 사용하여 입력 텍스트와 가장 유사한 이미지 임베딩을 검색합니다. 검색된 임베딩은 생성 과정의 조건부 정보로 활용되어 모델이 더 빠르게 수렴하도록 돕습니다.
-    3) 
+        1) 사용자 입력 프롬프트를 인코딩하여 프롬프트 벡터로 변환하고 이를 Cosine Similarity가 가장 높은 K개의 이미지 벡터를 찾아서 해다
+        2) 수학적으로 보면, 검색된 임베딩은 $p(x_0 | y)$ (텍스트 조건부 확률)의 분포를 훨씬 구체적인 $p(x_0 | y, z_{knn})$으로 좁혀줍니다.
+        3) 모델이 처리해야 할 비선형성이 줄어, 초기 추측값(Initial Guess)이 실제 해(Solution)에 매우 가까워지는 효과
+    3) Re-Imagen: 외부 지식 베이스에서 이미지와 텍스트 쌍을 모두 검색하여 시각적 정보가 드문 객체도 정확하게 생성할 수 있도록 지원
+    4) ReDi (Retrieval-based Diffusion): 단순히 이미지를 찾는 것을 넘어, 미리 계산된 확산 궤적(Trajectories) 자체를 검색 (Stable Diffusion 기준 약 2배의 속도 향상)
 
 #### 3.3.4 Knowledge Distillation
+
+
 
 ### 3.3 Efficient Sampling
 
@@ -458,8 +464,6 @@ $$\frac{d}{dt}\phi_{t}(x)=v_{t}(\phi_{t}(x)), \quad \phi_{0}(x)=x$$
 #### 3.4.1 Quantization
 
 #### 3.4.2 Pruning
-
-#### 
 
 ---
 
