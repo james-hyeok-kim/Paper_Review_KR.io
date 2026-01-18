@@ -346,7 +346,53 @@ $$\frac{d}{dt}\phi_{t}(x)=v_{t}(\phi_{t}(x)), \quad \phi_{0}(x)=x$$
 
 ### 3.2 Efficient Fine-Tuning
 
+1) LoRA (Low-Rank Adaptation)
+    1) LoRA는 사전 학습된 모델의 가중치를 고정한 상태에서, 각 트랜스포머 레이어에 저차원 분해 행렬(Low-rank decomposition matrices)을 삽입하여 효율적으로 학습하는 방법입니다
+    2) 수학적 원리: 사전 학습된 가중치 행렬 $W_0 \in \mathbb{R}^{d \times k}$에 대해 가중치 업데이트를 $\Delta W = BA$로 표현하며, 여기서 $B \in \mathbb{R}^{d \times r}$와 $A \in \mathbb{R}^{r \times k}$는 학습 가능한 저차원 행렬( $r \ll \min(d, k)$ )입니다.
+    3) 효율성: 메모리 요구 사항을 최대 90%까지 절감하며, 추론 시 추가적인 지연 시간 없이 표준 절차를 사용할 수 있습니다.
+        1) 학습할때 필요한 메모리가 줄어든다  
+    4) 주요 변형
+        1) LCM-LoRA: 샘플링 단계를 약 4단계로 줄여주는 범용 가속 모듈입니다.
+        2) Concept Sliders: 이미지 생성 시 특정 속성(예: 나이, 스타일)을 정밀하게 제어할 수 있게 합니다.
+        3) LoRA-Composer: 여러 개의 LoRA를 결합하여 한 이미지 내에서 여러 개념을 동시에 구현합니다.
+2). 어댑터 (Adapter)
+    1) 어댑터는 사전 학습된 모델 내부에 삽입되는 가벼운 모듈로, 원래의 가중치는 동결한 채 특정 작업에 필요한 특징을 학습합니다.
+    2) 구조: 일반적으로 다운 프로젝션(Down-projection), 비선형성(Nonlinearity), 업 프로젝션(Up-projection) 단계로 구성되며, 트랜스포머 블록의 정규화 레이어와 피드 포워드 레이어 사이에 위치합니다.
+    3) 주요 모델
+        1) T2I-Adapter: 스케치, 깊이 맵(Depth map) 등 구조적 가이드를 텍스트-이미지 생성에 추가합니다.
+        2) IP-Adapter: 이미지 프롬프트를 사용하여 참조 이미지와 시각적 일관성이 높은 결과를 생성하며, 분리된 교차 주의(Decoupled cross-attention) 전략을 사용합니다.
+        3) CTRL-Adapter: 감정이나 객체 유형과 같은 특정 속성을 정밀하게 제어합니다
+3) ControlNet
+    1) ControlNet은 사전 학습된 확산 모델에 공간적 조건 제어(Spatial conditioning control)를 추가하는 강력한 아키텍처입니다.
+    2) 제로 컨볼루션(Zero Convolution): 가중치가 0으로 초기화된 컨볼루션 레이어를 사용하여 사전 학습된 모델의 안정성을 해치지 않으면서 조건 정보를 서서히 통합합니다.
+    3) 제어 종류: 가장자리(Canny edge), 스크리블(Scribble), 인체 포즈(OpenPose) 등 다양한 공간 정보를 활용할 수 있습니다.
+    4) 주요 변형
+        1) ControlNet-XS: 통신 대역폭을 개선하여 매개변수 수를 줄이면서도 추론 및 학습 속도를 약 2배 가속했습니다
+        2) ControlNet++: 생성된 이미지와 제어 조건 사이의 정렬을 높이기 위해 픽셀 수준의 사이클 일관성 최적화를 도입했습니다
+        3) ControlNeXt: 무거운 추가 브랜치를 간소화된 구조로 대체하여 학습 가능한 매개변수를 기존 대비 90% 감소시켰습니다
+
+
+
+### 3.3 Efficient Sampling
+
 #### 3.3.1 Efficient Solver
+
+1) SDE 솔버 (SDE Solver)
+    1) SDE 기반 솔버는 무작위성(Stochasticity)을 활용하여 생성 과정에서의 오류를 보정하는 데 강점이 있습니다.
+    2) DiffFlow & Normalizing Flow 활용: 학습 가능한 드리프트(Drift) 항을 도입하거나 정규화 흐름(Normalizing Flow)을 결합하여, 데이터를 노이즈로 변환하거나 그 반대의 과정을 더 빠르게 수렴하도록 돕습니다.
+    3) 적응형 단계 크기(Adaptive Step-size): 고정된 단계가 아닌, 오차 허용 범위에 따라 단계 크기를 동적으로 조절하여 불필요한 계산을 줄입니다.
+    4) GMS (Gaussian Mixture Solver): 역전파 과정이 가우시안 분포를 따른다는 기존 가정을 버리고, 더 유연한 가우시안 혼합 모델(GMM)을 사용하여 적은 단계에서도 정확도를 높입니다.
+    5) SA-Solver (Stochastic Adams Solver): 다단계 수치 해석 기법인 아담스 방법(Adams method)과 예측자-수정자(Predictor-corrector) 구조를 결합하여 속도와 품질의 균형을 맞춥니다.
+    6) Restart: SDE의 오류 수축 능력과 ODE의 효율성을 결합하여, 노이즈 주입과 결정론적 단계를 교차하며 샘플링합니다
+
+2) ODE 솔버 (ODE Solver)
+    1) ODE 기반 솔버는 결정론적(Deterministic) 궤적을 가지므로 SDE보다 빠르게 수렴하는 경향이 있습니다.
+    2) DDIM: 확산 모델 가속화를 위해 ODE를 명시적으로 활용한 초기 모델로, 비마르코프(Non-Markovian) 과정을 통해 샘플링 단계를 획기적으로 줄였습니다.
+    3) PNDM: 수치 솔버를 그래디언트와 전송 성분으로 분해하여 2차 수렴을 달성, 품질 저하 없이 20배 가속을 구현했습니다.
+    4) DPM-solver & DEIS: 확률 흐름 ODE의 반선형(Semi-linear) 구조를 활용한 맞춤형 솔버로, 단 10~20회 반복만으로 고품질 샘플을 생성합니다.
+    5) 속도 매개변수화 (Velocity Parameterization): 속도 변화( $dx$ )를 직접 예측하고 최적화하여 궤적 추정의 정밀도를 높입니다.
+    6) DMCMC: MCMC 기법을 통합하여 초기점을 노이즈가 적은 상태 근처에서 생성함으로써 ODE 솔버의 부담을 줄입니다.
+    7) TrigFlow: 대규모 일관성 모델(Consistency Models)을 위한 통합 프레임워크로, 단 2단계의 샘플링만으로 최첨단 성능을 보여줍니다.
 
 #### 3.3.2 Sampling Scheduling
 
