@@ -346,6 +346,15 @@ $$\frac{d}{dt}\phi_{t}(x)=v_{t}(\phi_{t}(x)), \quad \phi_{0}(x)=x$$
 
 ### 3.2 Efficient Fine-Tuning
 
+<p align = 'center'>
+<img width="440" height="300" alt="image" src="https://github.com/user-attachments/assets/e101b4b0-a529-40e5-9779-5a53cfa1e7bd" />
+<img width="400" height="300" alt="image" src="https://github.com/user-attachments/assets/ee49a6eb-3fe1-4c9c-95f8-79631600b3ca" />
+<img width="600" height="300" alt="image" src="https://github.com/user-attachments/assets/a9fb325e-7085-403c-9cca-319a74dba9b3" />
+</p>
+
+
+
+
 1) LoRA (Low-Rank Adaptation)
     1) LoRA는 사전 학습된 모델의 가중치를 고정한 상태에서, 각 트랜스포머 레이어에 저차원 분해 행렬(Low-rank decomposition matrices)을 삽입하여 효율적으로 학습하는 방법입니다
     2) 수학적 원리: 사전 학습된 가중치 행렬 $W_0 \in \mathbb{R}^{d \times k}$에 대해 가중치 업데이트를 $\Delta W = BA$로 표현하며, 여기서 $B \in \mathbb{R}^{d \times r}$와 $A \in \mathbb{R}^{r \times k}$는 학습 가능한 저차원 행렬( $r \ll \min(d, k)$ )입니다.
@@ -396,6 +405,10 @@ $$\frac{d}{dt}\phi_{t}(x)=v_{t}(\phi_{t}(x)), \quad \phi_{0}(x)=x$$
 
 #### 3.3.2 Sampling Scheduling
 
+<p align = 'center'>
+<img width="400" height="250" alt="image" src="https://github.com/user-attachments/assets/588f70ef-dec9-4d89-ba79-0984b9a4ec80" />
+</p>
+
 * 샘플링 단계의 시점과 순서를 구조화하여 효율성과 품질을 동시에 개선하는 전략을 다룹니다.
 
 1) 병렬 샘플링 (Parallel Sampling)
@@ -427,6 +440,9 @@ $$\frac{d}{dt}\phi_{t}(x)=v_{t}(\phi_{t}(x)), \quad \phi_{0}(x)=x$$
         4) 피카르 반복에서의 고정점 연산자 $\Phi$는 다음 단계의 궤적을 계산하는 함수, 이때 RCFG를 적용하면 연산자가 정의하는 벡터장(Vector Field)이 더 매끄러워(Smoother)집니다.
         5) RCFG로 계산된 가이드 벡터를 바탕으로, 시간 $t=0$부터 $T$까지의 전체 궤적을 병렬로 업데이트
 
+<p align = 'center'>
+<img width="600" height="300" alt="image" src="https://github.com/user-attachments/assets/7f86689b-ae08-4ab8-ac0b-dea294b2ad59" />
+</p>
 
 2) 타임스텝 스케줄 (Timestep Schedule)
     1) 타임스텝 스케줄은 이산적인 샘플링 단계들을 어떻게 선택하고 배열할지에 대한 전략
@@ -455,9 +471,23 @@ $$\frac{d}{dt}\phi_{t}(x)=v_{t}(\phi_{t}(x)), \quad \phi_{0}(x)=x$$
 
 #### 3.3.4 Knowledge Distillation
 
+<p align = 'center'>
+<img width="600" height="300" alt="image" src="https://github.com/user-attachments/assets/3a46c6e6-2cef-4cc0-b94d-e14146b38670" />
+</p>
 
-
-### 3.3 Efficient Sampling
+1) 지식 증류의 기본 원리
+    1) 일반적으로 학생 모델($T_s$)이 교사 모델($T_t$)을 모방하도록 다음의 손실 함수를 최소화하며 학습
+    2) $L_{KD} = \alpha L_{CE}(y, \sigma(T_s(x))) + \beta L_{MSE}(T_s(x), T_t(x))$
+    3) $\alpha$와 $\beta$는 균형을 맞추는 하이퍼파라미터
+2) 벡터장 증류 (Vector Field Distillation)
+    1) 생성 과정의 상미분 방정식(ODE)을 새로운 벡터장으로 변환하여 결정론적 샘플링의 효율성을 높이는 데 집중
+    2) 점진적 증류 (Progressive Distillation): 교사 모델의 2단계 예측 전략을 학생 모델이 1단계 만에 예측하도록 학습, 이 과정을 반복하면 수백 단계의 샘플링을 2~8단계로
+    3) 일관성 모델 (Consistency Models, CM): ODE 궤적 상의 모든 점이 동일한 원점(데이터)으로 수렴하도록 하는 '자기 일관성(Self-consistency)' 속성을 학습, 이를 통해 단 1~2단계 만에 고품질 샘플
+    4) 분포 일치 증류 (Distribution Matching Distillation, DMD): 실제 데이터 분포와 생성된 데이터 분포 사이의 KL 발산(Kullback-Leibler divergence)을 최소화하여 다단계 모델을 단일 단계 생성기로 압축
+3) 생성기 증류 (Generator Distillation)
+    1) 점수 증류 샘플링 (Score Distillation Sampling, SDS): 2D 텍스트-이미지 확산 모델의 지식을 활용하여 3D 장면(NeRF)을 생성합니다. 3D 데이터 없이도 텍스트 프롬프트만으로 정교한 3D 객체를 만들 수 있게 해줍니다.
+    2) 변분 점수 증류 (Variational Score Distillation, VSD): 3D 장면을 단일 점이 아닌 분포로 취급하여 SDS보다 더 높은 다양성과 사실성을 확보
+    3) Diff-Instruct: 추가 데이터 없이 사전 학습된 확산 모델로부터 다양한 생성 모델로 지식을 전달하며, 적분 KL 발산(Integral KL divergence)을 사용하여 분포를 견고하게 비교 
 
 ### 3.4 Compression
 
