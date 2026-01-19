@@ -491,15 +491,44 @@ $$\frac{d}{dt}\phi_{t}(x)=v_{t}(\phi_{t}(x)), \quad \phi_{0}(x)=x$$
 
 ### 3.4 Compression
 
+<p align = 'center'>
+<img width="1039" height="516" alt="image" src="https://github.com/user-attachments/assets/4aa00f0e-ba88-4e42-b5f5-10e7fc4e337b" />
+</p>
+
 #### 3.4.1 Quantization
 
+1) 훈련 후 양자화 (Post-Training Quantization, PTQ)
+    1) PTQ4DM: 확산 모델에 특화된 최초의 보정(Calibration) 데이터 세트 수집 방법을 제안했습니다.
+    2) Q-Diffusion: 타임스텝별로 오차가 누적되는 문제를 해결하기 위해 타임스텝을 고려한 보정 데이터 샘플링과 전용 양자화기를 도입했습니다.
+    3) RAQ: 역확산 과정의 초기 단계에서는 계산 정확도가 품질에 미치는 영향이 적다는 점을 이용해, 초기 단계의 활성화 비트 수를 더 과감하게 줄입니다.
+2) 양자화 인식 훈련 (Quantization-Aware Training, QAT)
+    1) TDQ: 타임스텝 정보에 따라 양자화 간격을 동적으로 조정하여 출력 품질을 높입니다.
+    2) QALoRA: 가중치와 함께 저차원 어댑터(LoRA)를 결합하여 낮은 비트 정밀도에서도 모델의 성능을 보존합니다.
+
 #### 3.4.2 Pruning
+
+1) Diff-Pruning: 확산 모델을 위해 설계된 최초의 가지치기 방법으로, 타임스텝별로 테일러 전개(Taylor expansion)를 활용해 가중치의 중요도를 추정합니다.
+2) LD-Pruner: 잠재 확산 모델(LDM) 전용 기법으로, 잠재 공간(Latent Space)의 정보를 활용해 가지치기가 품질에 미치는 영향을 정밀하게 평가합니다.
+3) Layer Merge: 추론 속도를 높이기 위해 컨볼루션 레이어와 활성화 함수를 결합하거나 제거하며, 동적 계획법(DP)을 통해 최적의 레이어 선택 문제를 해결합니다.
+4) LAPTOPDiff: 확산 모델의 U-Net 구조를 자동으로 압축하기 위한 레이어 가지치기 기술로, 한 번에 효율적으로 계산 가능한 '원샷(one-shot)' 기준을 사용합니다 
+
 
 ---
 
 ## 4. System-Level Efficiency Optimization
 
 ### 4.1 Hardware-Software Co-Design
+
+1) 모바일 기기를 위한 GPU 인식 최적화 (Chen et al., 2023d)
+    1) 특수화된 커널(Specialized kernels)과 최적화된 소프트맥스(Softmax) 연산을 구현하여 추론 지연 시간을 줄입니다.
+2) SDA: 에지 FPGA를 위한 저비트 가속기 (Yang et al., 2023a)
+    1) 양자화 인식 훈련(QAT)과 하이브리드 시스톨릭 어레이(Hybrid Systolic Array) 아키텍처를 결합하여 합성곱(Convolution)과 어텐션(Attention) 연산을 효율적으로 처리
+3) 모바일 플랫폼 최적화 프로세서 (Choi et al., 2024a)
+    1) 패치 유사성 기반의 희소성(Sparsity), 혼합 정밀도(Mixed-precision) 전략, 그리고 혼합 정밀도 연산을 지원하는 DBSC(Dual-mode Bit-Slice Core) 아키텍처를 사용
+
+### 4.2 Parallel Computing
+
+
 
 ---
 
