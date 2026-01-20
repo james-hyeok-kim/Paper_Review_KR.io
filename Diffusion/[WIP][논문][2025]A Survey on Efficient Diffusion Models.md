@@ -528,15 +528,91 @@ $$\frac{d}{dt}\phi_{t}(x)=v_{t}(\phi_{t}(x)), \quad \phi_{0}(x)=x$$
 
 ### 4.2 Parallel Computing
 
+1) DistriFusion
+    1) 모델 입력을 여러 개의 패치(Patches)로 분할하여 여러 GPU에서 독립적으로 처리
+    2) 일관성 유지: 패치 간 상호작용이 사라져 발생할 수 있는 전역적 일관성 문제를 해결하기 위해 활성화 변위의 동적 동기화(Dynamic synchronization of activation displacements) 기술을 사용
+2) PipeFusion
+    1) 이미지를 패치로 나눌 뿐만 아니라 네트워크 레이어 자체를 여러 장치에 분산
+    2) 용을 줄여 NVLink가 아닌 일반적인 PCIe로 연결된 GPU 환경에서도 효율적으로 작동
+3) Swift Diffusion
+    1) ControlNet이나 LoRA와 같은 추가 모듈(Add-on modules)이 포함된 애플리케이션을 위한 최적화 프레임워크
+    2) GPU에서 병렬로 실행될 수 있도록 워크플로우를 최적화하여, 추론 지연 시간을 5배 단축하고 처리량(Throughput)을 2배 개선
+4) Diffusion Pipe
+    1) 학습(Training) 단계의 효율성에 집중한 기술
+    2) 파이프라인 병렬 처리를 통해 학습 속도를 1.41배, 데이터 병렬 처리를 결합하여 추가로 1.28배 가속할 수 있음을 입증 
+
+### 4.3 Caching Technique
+
+1) 근사 캐싱 (Approximate Caching)
+    1) NIRVANA: 텍스트-이미지 생성 효율을 높이기 위해 제안된 시스템
+    2) 이미지 생성 과정에서 발생한 중간 노이즈 상태를 캐싱하여 재사용
+    3) 새로운 프롬프트가 입력되었을 때 처음부터 시작하는 대신 캐시된 상태를 가져와 초기 노이즈 제거 단계를 건너뜁니다
+    4) LCBFU(Least Computationally Beneficial and Frequently Used)라는 맞춤형 캐시 관리 정책을 사용하여 효율성을 극대화 
+
+2) 특징 및 블록 캐싱 (Feature & Block Caching)
+    1) DeepCache
+        1) 이미지의 주요 구조나 형태와 같은 고수준 특징(High-level features)은 인접한 단계 사이에서 거의 변하지 않는다는 점에 착안했습니다.
+        2) 고수준 특징은 캐싱하여 재사용하고 저수준 특징만 업데이트함으로써 U-Net의 계산 부하를 대폭 줄입니다.
+    2) Block Caching
+        1) 자동 캐시 스케줄링: 레이어 출력의 상대적 변화에 따라 캐싱 시점과 위치를 동적으로 결정
+        2) 스케일-시프트 조정(Scale-Shift Adjustment): 캐싱으로 인해 발생할 수 있는 정렬 오류를 미세 조정하여 시각적 아티팩트를 방지  
+
+3) 트랜스포머 기반 캐싱 (Transformer-specific Caching)
+    1) L2C (Learning-to-Cache): 트랜스포머 레이어 간의 중복성을 활용
+        1) 레이어 선택 문제를 미분 가능한 최적화 문제로 변환하여, 특정 타임스텝에서 전체 계산을 수행할지 아니면 캐시된 결과를 사용할지 동적으로 결정
+    2) FORA (Fast-Forward Caching): 트랜스포머의 셀프 어텐션과 MLP 레이어 출력이 연속적인 타임스텝에서 매우 유사하다는 점을 이용
+        1) 정기적인 간격으로 레이어 출력을 캐싱하고 이후 몇 단계 동안 재사용하여 중복 연산을 피합니다.
+    3) MD-DiT & A-DiT: 블록 건너뛰기와 캐싱 전략을 통합한 프레임워크
+        1)  시간적 일관성을 바탕으로 중간 잔차 특징을 전략적으로 재사용하며, 학습 없이도 타임스텝에 따라 계산 자원을 지능적으로 할당
 
 
 ---
 
 ## 5. Frameworks
 
+<p align = 'center'>
+<img width="700" height="450" alt="image" src="https://github.com/user-attachments/assets/deb0f68c-ebbe-467e-a237-0f45f5f499c9" />
+</p>
+
+### 1. 학습 및 추론 통합 지원 프레임워크
+
+1) Flash Attention: 타일링(tiling) 및 재계산 기술을 통해 메모리 사용량과 지연 시간을 줄여 어텐션 계산을 가속화하며, 특히 확산 트랜스포머(DiT) 모델에 효과적입니다.
+2) xFormers: 모듈식 설계를 통해 메모리 효율적인 트랜스포머 최적화를 제공하여 자원 집약적인 작업에서 효율적인 계산을 가능하게 합니다.
+3) DeepSpeed: 원래 대규모 모델 학습을 위해 설계되었으나, 이제는 분산 추론까지 기능을 확장하여 여러 GPU에 걸친 대규모 배포를 지원합니다.
+4) OneFlow: 컴파일러 기반 아키텍처를 활용하여 학습과 추론 워크플로우를 모두 간소화하며, 엔드 투 엔드 최적화를 제공합니다.
+
+
+### 2. 추론 전용 가속 프레임워크
+
+1) Stable-Fast: Hugging Face Diffusers 에코시스템에 최적화되어 실시간 애플리케이션을 위한 저지연 추론을 우선시합니다.
+2) Onediff: 확산 모델에 특화된 워크로드에 맞춰 캐싱(caching) 및 양자화(quantization)와 같은 최첨단 기술을 통합하여 가속화를 제공합니다.
+3) DeepCache & TGATE: 시간적 중복성을 활용하는 혁신적인 캐싱 전략을 도입하여, 특히 U-Net 기반 모델의 추론 시 계산 오버헤드를 줄입니다.
+4) xDiT: 확산 트랜스포머(DiT) 아키텍처를 타겟으로 하며, 대규모 병렬 처리를 통해 추론 확장성을 향상시킵니다.
+
+
 ---
 
 ## 6. Future Work
+
+
+### 1. 확산 모델과 자동 회귀 모델의 하이브리드화 (Hybridizing Diffusion and Autoregressive Models)
+
+* 확산 모델과 자동 회귀(Autoregressive) 모델 각각의 장점을 결합하는 방향입니다.
+* 핵심 아이디어: 자동 회귀 트랜스포머에서 사용하는 KV 캐싱(Key-Value caching) 기술을 확산 모델에 적용하여 생성 속도를 높이고 스트리밍 방식의 생성을 지원하는 것입니다.
+* 대표 사례: Block Diffusion은 생성을 블록 단위로 분할하고 노이즈 제거 단계 전반에 자동 회귀 스타일의 캐싱을 적용하여 효율성을 높였습니다. 이를 통해 확산 모델이 자동 회귀 모델의 온라인 처리 능력과 효율성을 이어받을 수 있는 기회를 제공합니다. 
+
+### 2. 분류기 없는 가이드(CFG)의 제거 (Without Classifier-Free Guidance)
+
+* 현재 생성 품질을 높이기 위해 널리 사용되는 분류기 없는 가이드(Classifier-Free Guidance, CFG)는 계산 오버헤드가 크다는 단점이 있습니다.
+* 해결 방안: 모델 가이드(Model-guidance, MG)와 같은 새로운 훈련 목표가 제안되었습니다. MG는 데이터 분포만 모델링하는 대신 조건의 사후 확률을 직접 통합하여 CFG의 필요성을 없앱니다.
+* 기대 효과: CFG에 필요한 두 번의 네트워크 순전파(forward pass)를 피함으로써 추론 속도를 2배로 높이고, 모델 훈련 수렴 속도를 6.5배 가속하며 성능을 약 60% 향상시킬 수 있습니다. 이는 계산 자원을 대폭 절감하면서도 고품질을 유지하는 유망한 방향입니다. 
+
+### 3. 비디오 확산을 위한 효율적인 어텐션 메커니즘 (Efficient Attention Mechanisms for Video Diffusion)
+
+* 비디오 데이터는 프레임 수에 따라 시퀀스 길이가 길어지며, 어텐션 연산 비용이 시퀀스 길이의 제곱에 비례하여 증가하는 문제가 심각합니다.
+* AdaSpa: 확산 트랜스포머(DiT)의 계층적 희소성(Hierarchical sparsity)을 활용하여 계산량을 크게 줄입니다.
+* 희소 3D 어텐션 (Sparse 3D attention): 비디오 데이터의 3D 어텐션 맵에서 반복적인 패턴을 식별하여 프레임 수에 대해 선형 복잡도를 갖는 어텐션을 구현합니다.
+* 결합 효과: 이러한 효율적인 어텐션을 일관성 증류(Consistency distillation) 기술과 결합하면 고해상도 비디오 생성을 최대 7.8배 가속할 수 있습니다.
 
 ---
 
