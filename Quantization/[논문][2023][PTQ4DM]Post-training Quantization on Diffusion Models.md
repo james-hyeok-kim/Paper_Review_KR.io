@@ -135,7 +135,7 @@ $$x_{int}=clamp(\lfloor\frac{x}{s}\rceil-z,p_{min},p_{max}) \quad (1)$$
 <img width="544" height="298" alt="image" src="https://github.com/user-attachments/assets/bb485e1c-f6ab-4bc6-8099-cba0f856bc9a" />
 
 
-* 이 질문에 답하기 위해 저자들은 $\mu$, $\Sigma$, $x_{t-1}$을 생성하는 연산만 개별적으로 양자화하여 성능 변화(FID, IS 점수 등)를 측정했습니다
+* 이 질문에 답하기 위해 저자들은 $\mu$, $\Sigma$ (분산), $x_{t-1}$을 생성하는 연산만 개별적으로 양자화하여 성능 변화(FID, IS 점수 등)를 측정했습니다
 * 결과: 32비트 모델(FP)과 비교했을 때, $\mu$, $\Sigma$, $x_{t-1}$을 각각 혹은 모두 양자화하더라도 성능 저하가 거의 없었습니다
 * 예: FP 모델의 FID는 21.63인데, 세 가지를 모두 양자화했을 때의 FID는 21.99로 큰 차이가 없음7.
 
