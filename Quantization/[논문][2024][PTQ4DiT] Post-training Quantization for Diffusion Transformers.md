@@ -36,6 +36,8 @@ Git : https://github.com/adreamwu/PTQ4DiT
 
 * CSB (Channel-wise Salience Balancing): 활성화 값과 가중치의 채널 간 극단적인 값들이 서로 보완적인 관계(동시에 극단적이지 않음)에 있다는 점을 이용해, 이 분포를 재배치하여 양자화 난이도를 낮춥니다.
 * SSC (Spearman's p-guided Salience Calibration): 시간에 따른 활성화 값의 변화를 캡처하기 위해, 보완성이 큰 타임스텝에 가중치를 더 두어 동적으로 salience를 조정합니다.
+    * 보완성이 작은데, abs value가 높은건 quantization error 생기고 이거는 수정이 어차피 안된다. (Bit width 결정)
+    * 그래서 이 논문에서는 balancing 할수있는건 해보고 그상태에서 quantization을 하자 (Outlier가 줄어 Bit width가 줄길 기대)
 * 오프라인 재파라미터화(Offline Re-parameterization): 양자화 과정에서 발생하는 추가 연산을 추론 단계가 아닌 오프라인에서 미리 처리하여 추론 속도 저하를 방지합니다
 
 ### 5. 연구 결과 요약
