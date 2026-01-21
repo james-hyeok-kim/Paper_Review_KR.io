@@ -147,6 +147,8 @@ $$\hat{w}=s\cdot clip(round(\frac{w}{s}),c_{min},c_{max})$$
 * 하나의 양자화기로는 한계
 
 
+### 3.3. Post-Training Quantization of Diffusion model
+
 
 ---
 
