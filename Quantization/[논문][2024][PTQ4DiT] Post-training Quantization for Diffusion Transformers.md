@@ -201,16 +201,14 @@ $$s_{\rho}(X^{(1:T)}) = \sum_{t=1}^{T} \eta_t \cdot s(X^{(t)}) \quad(10)$$
     * ImageNet 256x256 (250 steps): PTQ4DiT의 FID는 4.63으로, FP 모델의 4.53에 근접한 수치를 기록했습니다.
 <p align = 'center'>
 <img width="518" height="467" alt="image" src="https://github.com/user-attachments/assets/f2babc0e-68c1-4403-a454-0bba16e32e0e" />
+<img width="600" height="350" alt="image" src="https://github.com/user-attachments/assets/d2c6d954-e02f-400a-933f-b12eb49d29f7" />
 </p>
+
 
 * 4비트 가중치 양자화 (W4A8) 결과
     * 독보적인 회복력: 훨씬 더 까다로운 4비트 설정에서 타 방법들은 극심한 성능 저하를 보였으나, PTQ4DiT는 안정적인 결과를 냈습니다.
     * 오차 폭 비교 (250 steps): PTQ4DM이 FID가 68.05나 급증한 반면, PTQ4DiT는 단 2.56 증가에 그쳤습니다.
     * 고해상도($512\times512$) 성과: Q-Diffusion 대비 FID를 41.26, sFID를 9.83 낮추며 압도적인 성능 격차를 증명했습니다.
-
-<p align = 'center'>
-<img width="600" height="350" alt="image" src="https://github.com/user-attachments/assets/d2c6d954-e02f-400a-933f-b12eb49d29f7" />
-</p>
 
 #### 3. 효율성 및 강건성 (Efficiency & Robustness)
 
