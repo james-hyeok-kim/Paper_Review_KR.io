@@ -25,7 +25,7 @@ Meta
 </p>
 
 <p align = 'center'>
-\<img width="567" height="217" alt="image" src="https://github.com/user-attachments/assets/091ed03a-48bd-4587-a95a-9671a99000c0" />
+<img width="567" height="217" alt="image" src="https://github.com/user-attachments/assets/091ed03a-48bd-4587-a95a-9671a99000c0" />
 </p>
 
 * 회전 불변성(Rotational Invariance): LLM의 가중치 행렬에 회전 행렬을 곱해도 전체 네트워크의 출력값은 변하지 않는 특성을 활용합니다.
@@ -39,11 +39,11 @@ Meta
 
 ### 3. 두 가지 SpinQuant 전략
 
-* SpinQuant$_{no_had}$:
+* $SpinQuant_{no_had}$:
     * 학습된 회전 행렬을 기존 가중치에 흡수(merge)시키는 방식입니다.
     * 장점: 추론(Inference) 시 모델 구조를 변경하거나 추가 연산을 할 필요가 없습니다.
 
-* SpinQuant$_{had}$:
+* $SpinQuant_{had}$:
     * 4-bit와 같은 극도로 낮은 비트의 활성화값(Activation)이나 KV 캐시(KV cache) 양자화가 필요한 경우 사용합니다.
     * 장점: 온라인 하다마드(Hadamard) 회전을 추가하여 내부 이상치를 더욱 효과적으로 제어합니다.
 
@@ -111,14 +111,14 @@ Meta
 * 작동 방식: Value 행렬($W_v$)에 $R_2$를 곱하고, $W_o$에 들어가는 입력에 $R_2^T$를 곱합니다.
 * 헤드별 적용 (Head-wise): $R_2$는 어텐션 헤드(Head) 크기에 맞는 작은 행렬( $(D_{head}, D_{head})$ )이며, 각 레이어마다 독립적으로 선택됩니다
 * 효과: Value 캐시(KV Cache 중 V)와 $W_o$ 입력의 이상치를 줄여줍니다. $W_v$와 $W_o$ 사이에는 비선형 함수(ReLU 등)가 없으므로, 이 두 회전은 서로 상쇄되어 전체 결과에 영향을 주지 않습니다.
-* SpinQuant$_{no_had}$ 전략:위에서 설명한 **$R_1$과 $R_2$**만을 사용하여 최적화하는 방식입니다. 
+* $SpinQuant_{no_had}$ 전략:위에서 설명한 **$R_1$과 $R_2$**만을 사용하여 최적화하는 방식입니다. 
 
 #### 3. 추가적인 온라인 회전 (Hadamard): $R_3, R_4$
 
 * 피드포워드(FFN) 내부 ( $R_4$ ): FFN 블록 내부, 다운 프로젝션(Down projection) 레이어의 입력값에 있는 이상치를 줄이기 위해 하다마드 행렬 $R_4$를 곱합니다
 * KV 캐시 ( $R_3$ ): KV 캐시를 낮은 비트로 양자화해야 할 때, Key/Value 저장 직전에 하다마드 행렬 $R_3$를 곱해줍니다.
 * 특징: 이들은 실시간으로 계산해야 하므로 연산량이 적은 하다마드 행렬(Hadamard Matrix)을 사용합니다. 이를 통해 추론 지연(latency)을 최소화합니다
-* SpinQuant$_{had}$ 전략:학습된 회전( $R_1, R_2$ )에 온라인 하다마드 회전( $R_3, R_4$ )까지 모두 포함하여 성능을 극대화한 방식입니다.
+* $SpinQuant_{had}$ 전략:학습된 회전( $R_1, R_2$ )에 온라인 하다마드 회전( $R_3, R_4$ )까지 모두 포함하여 성능을 극대화한 방식입니다.
 
 ### 3.2 Cayley-OPTIMIZED ROTATION
 
@@ -150,10 +150,10 @@ $$R' = (I - \frac{\alpha}{2}Y)^{-1}(I + \frac{\alpha}{2}Y)R \quad (3)$$
 
 * SpinQuant는 두 가지 모드($no\_had$, $had$) 모두에서 기존 방법론들을 압도했습니다.
 
-* (1) W4A8 (가중치 4-bit, 활성화 8-bit) 설정SpinQuant$_{no_had}$ (가중치 흡수 방식)만으로도 충분히 강력합니다.
+* (1) W4A8 (가중치 4-bit, 활성화 8-bit) 설정 $SpinQuant_{no_had}$ (가중치 흡수 방식)만으로도 충분히 강력합니다.
     * 성과: LLaMA-3 8B 모델에서 전체 정밀도(Full Precision) 모델과의 점수 차이를 불과 1.0점으로 좁혔습니다.
     * 이는 추가적인 온라인 연산 없이 가중치 교체만으로 달성한 결과입니다.
-* (2) W4A4 (가중치 4-bit, 활성화 4-bit) 설정 - "가장 어려운 구간"이 설정에서는 대부분의 기존 방법들이 실패하지만, **SpinQuant$_{had}$**는 뛰어난 성능을 보였습니다.
+* (2) W4A4 (가중치 4-bit, 활성화 4-bit) 설정 - "가장 어려운 구간"이 설정에서는 대부분의 기존 방법들이 실패하지만, $SpinQuant_{had}$는 뛰어난 성능을 보였습니다.
     * 비교: LLaMA-2 7B 모델 기준, 기존의 LLM-QAT 방식보다 19.1점, SmoothQuant보다 25.0점 더 높은 정확도를 기록했습니다.
     * 전체 정밀도 모델과의 성능 차이를 2.9점까지 줄였습니다5.
 
@@ -172,7 +172,7 @@ $$R' = (I - \frac{\alpha}{2}Y)^{-1}(I + \frac{\alpha}{2}Y)R \quad (3)$$
 #### 4. 속도 및 효율성 (Speed Measurement)
 
 * 추론 속도: M1 Pro CPU에서 테스트한 결과, 4-bit 양자화 모델은 16-bit 모델보다 약 3배 빠릅니다.
-* 오버헤드: 성능을 위해 온라인 하다마드 회전($R_3, R_4$)을 추가한 SpinQuant$_{had}$를 사용하더라도, 지연 시간(Latency) 증가는 약 8%에 불과했습니다.
+* 오버헤드: 성능을 위해 온라인 하다마드 회전($R_3, R_4$)을 추가한 $SpinQuant_{had}$를 사용하더라도, 지연 시간(Latency) 증가는 약 8%에 불과했습니다.
 ---
 
 ## 5. DISTRIBUTION VISUALIZATIONS BEFORE AND AFTER ROTATION
