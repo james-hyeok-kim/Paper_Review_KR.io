@@ -258,4 +258,14 @@ $$\sqrt{10^2} = 10, \sqrt{7.07^2 + 7.07^2} \approx 10$$
 * 계산 속도가 매우 빨라서, 실시간으로 데이터가 변하는 활성화값(Activation)이나 KV 캐시를 회전시키는 데 사용됩니다 ( $R_3, R_4$ ).
 * SpinQuant는 "정밀한 학습된 회전( $R_1, R_2$ )"과 "빠른 하다마드 회전( $R_3, R_4$ )"을 조합하여 속도와 정확도를 모두 잡았습니다.
 
+
+<p align = 'center'>
+<img width="280" height="70" alt="image" src="https://github.com/user-attachments/assets/5bfc2341-0fb5-4081-860e-b8d881709066" />
+</p>
+
+
+* 계산 결과
+    * 첫 번째 원소: $\frac{1}{\sqrt{2}} (10 + 2) = \frac{12}{\sqrt{2}} \approx 8.48$
+    * 두 번째 원소: $\frac{1}{\sqrt{2}} (10 - 2) = \frac{8}{\sqrt{2}} \approx 5.66$
+
 ---
