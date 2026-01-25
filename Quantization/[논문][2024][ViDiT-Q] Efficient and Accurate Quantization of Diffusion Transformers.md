@@ -36,6 +36,7 @@ Shiyao Li1, Zinan Lin3, Guohao Dai24, Shengen Yan2, Huazhong Yang1, Xuefei Ning1
 ### 4. 주요 기여 및 성과
 
 * 성능 유지: ViDiT-Q는 W8A8(8비트) 및 W4A8(4비트 가중치/8비트 활성화) 양자화에서 시각적 품질 저하가 거의 없는 결과를 달성
+    * A8W8 / A8W4 섞어서 사용해서 정확히 A8W4는 아니다
 * 효율성 증대: 효율적인 GPU 커널 구현을 통해 2-2.5배의 메모리 절약과 1.4-1.7배의 지연 시간(Latency) 단축
 
 ---
@@ -292,9 +293,9 @@ $$x_{int}=Q(x;s,z,b)=clamp(\lfloor\frac{x}{s}\rfloor+z,0,2^{b}-1) \quad \quad (2
     * 타임스텝 분할: 민감도가 시간에 따라 다르므로, 노이즈 제거 과정을 4개의 구간으로 나눕니다.
     * 그룹별 예산 할당: 목표 비트(예: 평균 4비트)가 주어지면, 레이어를 세 그룹(Cross-Attn, Spatial/FFN, Temporal-Attn)으로 나누고, FP16 모델과의 MSE 오차를 기준으로 각 그룹에 비트 예산을 할당합니다.
     * 그룹별 맞춤형 민감도 분석: 각 그룹 내부에서는 해당 그룹이 주로 영향을 미치는 "특정 지표(Metric)"를 기준으로 민감도를 측정합니다.
-        * Cross-Attn 그룹 $\rightarrow$ ClipScore (텍스트 정합성)
-        * Spatial/FFN 그룹 $\rightarrow$ VQA (시각적 품질)
-        * Temporal-Attn 그룹 $\rightarrow$ FlowScore (시간적 일관성)
+        * Cross-Attn 그룹 $\rightarrow$ ClipScore (텍스트 정합성) $\rightarrow$ 5.5-bit
+        * Spatial/FFN 그룹 $\rightarrow$ VQA (시각적 품질) $\rightarrow$ 4.05-bit
+        * Temporal-Attn 그룹 $\rightarrow$ FlowScore (시간적 일관성) $\rightarrow$ 4.34-bit
     * 비트 할당: 각 그룹 내에서 가장 민감한 레이어부터 차례대로 높은 비트(예: 8비트)를 할당하여 예산을 맞춥니다.
 
 
