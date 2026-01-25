@@ -306,7 +306,7 @@ $$x_{int}=Q(x;s,z,b)=clamp(\lfloor\frac{x}{s}\rfloor+z,0,2^{b}-1) \quad \quad (2
 
 * 대상 모델
     * 비디오: OpenSORA (Transformer 기반 비디오 생성 모델).
-    * 이미지: PixArt-$\alpha$ (Transformer 기반 이미지 생성 모델).
+    * 이미지: PixArt- $\alpha$ (Transformer 기반 이미지 생성 모델).
 * 평가 지표
     * VBench(비디오 품질 종합 벤치마크), FID(이미지 품질), ClipScore(텍스트 정합성), DOVER(심미적 품질) 등 다각적인 지표를 사용했습니다.
 * 하드웨어: Nvidia A100 GPU에서 CUDA 커널을 직접 구현하여 측정했습니다4.
