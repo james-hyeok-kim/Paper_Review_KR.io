@@ -4,7 +4,7 @@
 
 1Tsinghua University 2MMLab, CUHK 3Shenzhen Technology University
 
-출간 : Proceedings of the Computer Vision and Pattern Recognition(CVPR), 2025
+출간 : Proceedings of the Computer Vision and Pattern Recognition(CVPR), 2025 (2024 arXiv)
 
 논문 : [PDF](https://arxiv.org/pdf/2406.17343)
 
