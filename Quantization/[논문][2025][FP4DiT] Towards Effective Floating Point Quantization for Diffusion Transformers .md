@@ -227,8 +227,9 @@ $$\frac{\partial h'(V')}{\partial V'} = \frac{1}{s} \cdot (\text{시그모이드
 ## 4. Results
 
 ### 1. 실험 환경 (Experimental Setup)
-* 대상 모델: PixArt-$\alpha$, PixArt-$\Sigma$, Hunyuan-DiT 등 최신 Diffusion Transformer(DiT) 모델.
-* 비트 정밀도: * W4A8: 가중치 4-bit, 활성화 8-bit (거의 손실 없는 성능 타겟).
+* 대상 모델: PixArt- $\alpha$ , PixArt- $\Sigma$ , Hunyuan-DiT 등 최신 Diffusion Transformer(DiT) 모델.
+* 비트 정밀도
+    * W4A8: 가중치 4-bit, 활성화 8-bit (거의 손실 없는 성능 타겟).
     * W4A6: 가중치 4-bit, 활성화 6-bit (초저정밀도 극한 테스트).
 * 비교 대상: 기존의 정수 기반 양자화 방식(Q-Diffusion, TFMQ-DM, ViDiT-Q 등).
 
