@@ -73,8 +73,10 @@ dengjuncan@zju.edu.cn, list@zju.edu.cn, wangzeyu2020@zju.edu.cn, guhong@vivo.com
 #### 1. 후보 할당 세트 구성 (Candidate Assignment Sets)
 * 거리 계산: 각 가중치 서브 벡터( $w_{o,i/d}$ )와 코드북 내의 모든 코드워드 사이의 유클리드 거리를 계산합니다.
 * 상위 n개 선택: 계산된 거리를 바탕으로 가장 가까운 상위 $n$개의 코드워드 인덱스를 추출하여 후보 할당 세트 $A_c$를 구성합니다.
-* 수식 표현: 이를 수식으로 나타내면  $ A_{c}=\{a_{o,i/d}\}_{n}=arg~min_{k}^{n}||w_{o,i/d}-c(k)||_{2}^{2} \quad(5) $ 와 같습니다.
 * 가정: 연구진은 이 후보 세트 안에 해당 서브 벡터를 가장 잘 표현할 수 있는 최적의 할당(optimal assignment)이 포함되어 있다고 가정합니다.
+* 수식 표현
+
+$$ A_{c} = a_{o,i/d}^{(n)} = \arg\min_{k} \| w_{o,i/d} - c(k) \|_2^2 \quad (5) $$
 
 #### 2. 동시 보정 (Simultaneous Calibration)
 * 후보 세트가 정해지면, 어떤 코드워드가 실제로 가장 적합한지 결정하기 위해 비율(ratio) 개념을 도입합니다.
