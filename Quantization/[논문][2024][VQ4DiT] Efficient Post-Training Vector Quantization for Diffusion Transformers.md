@@ -8,7 +8,7 @@
 
 dengjuncan@zju.edu.cn, list@zju.edu.cn, wangzeyu2020@zju.edu.cn, guhong@vivo.com, xukedong@vivo.com,huangkejie@zju.edu.cn
 
-출간 : Proceedings of the AAAI Conference on Artificial Intelligence, 2025
+출간 : Proceedings of the AAAI Conference on Artificial Intelligence, 2025 (arXiv 2024)
 
 논문 : [PDF](https://ojs.aaai.org/index.php/AAAI/article/view/33782)
 
