@@ -257,7 +257,7 @@ $$\frac{MSE_{after}}{MSE_{before}} \approx \left(1 - \frac{\log_2 \sqrt{C}}{\log
 ## 5. Experiment
 
 ### 5.1 Experimental Setting
-* 대상 모델: PixArt-$\Sigma$, PixArt-$\alpha$, FLUX.1-schnell, FLUX.1-dev와 비디오 생성 모델인 OpenSORA v1.2를 포함합니다.
+* 대상 모델: PixArt- $\Sigma$ , PixArt- $\alpha$ , FLUX.1-schnell, FLUX.1-dev와 비디오 생성 모델인 OpenSORA v1.2를 포함합니다.
 * 프롬프트 세트: 이미지 생성을 위해 COCO, MJHQ-30K, sDCI 데이터셋에서 각 1024개의 프롬프트를 사용했으며, 비디오 생성을 위해 OpenSORA 및 Vbench 세트를 활용했습니다.
 * 평가 지표
     * 이미지: 품질 측정을 위한 FID, 인간 선호도를 반영하는 IR, 수치적 유사성을 위한 PSNR 및 SSIM을 사용합니다.
