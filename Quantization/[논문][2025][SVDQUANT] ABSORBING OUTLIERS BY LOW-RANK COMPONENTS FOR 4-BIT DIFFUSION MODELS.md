@@ -223,7 +223,7 @@ $$\mathbb{E}[\|R - Q(R)\|_F] \le \frac{c \sqrt{\text{size}(R)}}{q_{max}} \cdot \
 
 
 <p align = 'center'>
-<img width="257" height="344" alt="image" src="https://github.com/user-attachments/assets/97f71348-1a0c-45af-a505-09855781824a" />
+<img width="200" height="300" alt="image" src="https://github.com/user-attachments/assets/97f71348-1a0c-45af-a505-09855781824a" />
 </p>
 
 * $W$ (검은색 실선): 원래 모델의 가중치 행렬입니다
@@ -236,5 +236,35 @@ $$\mathbb{E}[\|R - Q(R)\|_F] \le \frac{c \sqrt{\text{size}(R)}}{q_{max}} \cdot \
     * $\hat{W}$의 초기 32개 특잇값은 매우 급격하게 감소합니다. SVDQuant는 이 지배적인(dominant) 값들을 16비트 고정밀 분기가 담당하게 하여 양자화 오차를 원천 차단합니다.
 * 잔차의 안정화
     * 상위 값들을 제거하고 남은 잔차 $R$의 곡선은 매우 낮고 평탄한 형태를 띱니다. 이는 가중치의 값 범위가 크게 압축되고 이상치가 사라졌음을 의미하며, 결과적으로 4비트(INT4/FP4)로 양자화하더라도 정보 손실이 거의 발생하지 않는 상태가 됩니다.
+
+---
+
+## 5. Experiments
+
+
+### 1. 실험 환경 (Setups)
+
+* 대상 모델: FLUX.1 (12B), PixArt-Σ (600M), SANA (1.6B), SDXL (2.6B) 등 UNet과 DiT 구조를 모두 포함합니다.
+* 데이터셋: Midjourney 스타일의 MJHQ-30K와 사실적인 이미지 중심의 sDCI (Densely Captioned Images)를 사용해 범용성을 평가했습니다.
+* 비교 대상: 가중치 전용 양자화인 NF4, 8비트 양자화 기법인 ViDiT-Q, MixDQ, 그리고 산업 표준인 TensorRT 등과 비교했습니다.
+* 주요 지표: 이미지 품질(FID, Image Reward), 모델 간 유사도(LPIPS, PSNR, SSIM) 등을 측정했습니다.
+
+### 2. 주요 결과 (Results)
+
+#### 시각적 품질 (Visual Quality)
+
+* 8비트 결과: 16비트 모델과 거의 차이가 없는 무손실 품질을 보여주며, 기존 8비트 베이스라인들을 능가했습니다.
+* 4비트 결과: W4A4 환경에서도 NF4(W4A16)보다 높은 품질을 유지했습니다. 특히 FLUX.1-dev에서는 인간의 선호도를 반영하는 Image Reward 점수가 원본 16비트 모델을 뛰어넘기도 했습니다.
+* 텍스트 정렬: 다른 4비트 방식들이 텍스트 프롬프트의 세부 사항(예: 흔들 의자 등)을 놓치는 것과 달리, SVDQuant는 텍스트 정보를 정확히 이미지에 반영했습니다.
+
+#### 메모리 및 속도 향상 (Memory & Speedup)
+
+* 모델 크기: 12B 파라미터의 FLUX.1 모델 크기를 22.2 GiB에서 6.1 GiB로 약 3.6배 줄였습니다.
+* 노트북 GPU (RTX 4090 16GB): 메모리 부족으로 인한 CPU 오프로딩을 없애고 전체 모델을 GPU에 올림으로써 10.1배의 속도 향상을 기록했습니다.
+* 최신 GPU (RTX 5090): Blackwell 아키텍처의 NVFP4 정밀도를 활용해 16비트 모델 및 기존 4비트 가중치 전용 모델보다 3.1배 빠른 추론 속도를 달성했습니다.
+
+#### LoRA 통합 (Integrate with LoRA)
+* 재양자화 과정 없이 기존의 다양한 스타일 LoRA(Realism, Anime 등)를 즉시 적용할 수 있습니다.
+* Nunchaku 엔진은 LoRA 분기를 SVD 저차원 분기에 융합하여 실행 오버헤드를 최소화합니다.
 
 ---
