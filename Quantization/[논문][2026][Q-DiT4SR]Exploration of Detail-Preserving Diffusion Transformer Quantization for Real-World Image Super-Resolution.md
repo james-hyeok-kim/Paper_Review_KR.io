@@ -103,6 +103,39 @@
 
 ### 3.1. Preliminaries
 
+#### 1. 활성값 양자화 (Activation Quantization)
+* 하다마르 변환 적용: 입력 활성값 $X$에 정규화된 하다마르 행렬 $H_n$을 곱하여 $Z = XH_n$으로 변환합니다.
+* 가우시안 가정: 변환된 활성값 $Z$는 토큰 단위로 가우시안 분포 $Z_{t,:} \approx \mathcal{N}(0, \sigma_t^2 I)$를 따른다고 가정합니다. 여기서 $\sigma_t$는 각 토큰의 분산을 추정한 값입니다.
+* 균등 양자화: $\mathcal{N}(0, 1)$에 최적화된 대칭 균등 양자화기 $Q_{uni}(\cdot)$를 사용하여 다음과 같이 양자화합니다:
+
+$$Q_G(x) = \sigma_t Q_{uni}\left(\frac{Hx}{\sigma_t}\right) \quad (2)$$
+
+#### 2. 가중치 양자화 (Weight Quantization)
+
+가중치 역시 활성값과 유사한 방식으로 변환 및 분해 과정을 거칩니다:도메인 변환: 가중치 행렬 $W$에도 하다마르 변환을 적용하여 $W_H = WH_n$을 얻습니다.저계수 분해(Low-rank Decomposition): $W_H$에서 중요한 정보를 담고 있는 저계수 분기 $W_{LRB}$(예: rank $r=32$)를 추출하여 이는 풀-프리시전(FP)으로 유지합니다.잔차 양자화: 남은 잔차 부분인 $W_{res} = W_H - W_{LRB}$에 대해 출력 채널별로 분산을 추정하여 양자화를 수행합니다.최종 재구성: 양자화된 잔차와 FP 저계수 분기를 더한 후, 역 변환을 통해 최종 가중치 $\hat{W}$를 복원합니다:
+$$\hat{W} = (W_{LRB} + Q_w(W_{res}))H_n^\top$$
+
+#### 하다마르 적용 예시
+
+* 데이터에 큰 이상치(10.0)가 포함된 경우
+
+* 입력 벡터 $x = [10.0, 1.0, 2.0, 1.0]$ 가 있다고 가정해 봅시다. 여기서 '10.0'은 다른 값들에 비해 매우 커서 양자화 시 오차를 크게 유발하는 이상치입니다.
+
+* 변환 과정 ($z = x H_n$)
+
+$$
+\begin{aligned}
+z &= \begin{bmatrix} 10.0 & 1.0 & 2.0 & 1.0 \end{bmatrix}
+\times \begin{bmatrix} 
+0.5 & 0.5 & 0.5 & 0.5 \\ 
+0.5 & -0.5 & 0.5 & -0.5 \\ 
+0.5 & 0.5 & -0.5 & -0.5 \\ 
+0.5 & -0.5 & -0.5 & 0.5 
+\end{bmatrix} \\
+&= \begin{bmatrix} 7.0 & 5.0 & 4.0 & 4.0 \end{bmatrix}
+\end{aligned}
+$$
+
 ### 3.2. Hierarchical SVD
 
 ### 3.3. Variance-Aware Spatio Mixed Precision
