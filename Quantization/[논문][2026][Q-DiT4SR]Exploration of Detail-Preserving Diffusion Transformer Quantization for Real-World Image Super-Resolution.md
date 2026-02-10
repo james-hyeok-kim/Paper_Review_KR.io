@@ -35,8 +35,8 @@
 ### 3. 연구의 의의
 
 <p align = 'center'>
-<img width="600" height="362" alt="image" src="https://github.com/user-attachments/assets/b9d7fd64-0b39-4a52-9cd4-f79196188362" />
-<img width="610" height="374" alt="image" src="https://github.com/user-attachments/assets/0147523e-d6f5-4168-b78a-a226593b2427" />
+<img width="400" height="200" alt="image" src="https://github.com/user-attachments/assets/b9d7fd64-0b39-4a52-9cd4-f79196188362" />
+<img width="400" height="200" alt="image" src="https://github.com/user-attachments/assets/0147523e-d6f5-4168-b78a-a226593b2427" />
 </p>
 
 * 제안된 방식은 W4A4(가중치 4비트, 활성화 4비트)라는 매우 공격적인 환경에서도 성능 저하를 최소화하면서 모델 크기를 5.8배 줄이고 연산량을 60배 이상 절감
@@ -98,7 +98,9 @@
 
 ## 3. Method
 
-<img width="525" height="275" alt="image" src="https://github.com/user-attachments/assets/a02ab7a3-bf8b-44c0-8058-be8bcf39bb50" />
+<p align = 'center'>
+<img width="650" height="350" alt="image" src="https://github.com/user-attachments/assets/a02ab7a3-bf8b-44c0-8058-be8bcf39bb50" />
+</p>
 
 
 ### 3.1. Preliminaries
@@ -166,8 +168,9 @@ $$W^{(p,q)} \approx \hat{W}^{(p,q)} = \sigma_{p,q} u_{p,q} v_{p,q}^\top \quad (5
 
 #### 3. 최종 가중치 재구성 및 연산
 
+<p align = 'center'>
 <img width="552" height="426" alt="image" src="https://github.com/user-attachments/assets/c6dca471-c5fe-48d2-b76d-4bafeb65b0d1" />
-
+</p>
 
 $$\hat{W} = (W_{SVD-G} + W_{SVD-L})H_n^\top + Q_w(W_{res} - W_{SVD-L})H_n^\top \quad (10)$$
 
@@ -197,8 +200,9 @@ $$\hat{W} = (W_{SVD-G} + W_{SVD-L})H_n^\top + Q_w(W_{res} - W_{SVD-L})H_n^\top \
 
 #### 3. VaSMP의 주요 특징 및 장점
 
-
+<p align = 'center'>
 <img width="462" height="356" alt="image" src="https://github.com/user-attachments/assets/bd32bb03-c1e1-490e-b34f-e4bd019078ca" />
+</p>
 
 
 * 완전한 데이터 프리 (Data-free): 이미지를 단 한 장도 넣지 않고 가중치의 통계값만으로 비트를 결정할 수 있습니다.
@@ -207,8 +211,9 @@ $$\hat{W} = (W_{SVD-G} + W_{SVD-L})H_n^\top + Q_w(W_{res} - W_{SVD-L})H_n^\top \
 
 ### 3.4. Variance-Aware Temporal Mixed Precision
 
+<p align = 'center'>
 <img width="461" height="339" alt="image" src="https://github.com/user-attachments/assets/68ad5af2-dd72-41b3-bee1-b43ed62d9992" />
-
+</p>
 
 #### 1. 도입 동기 (Motivation)
 
@@ -217,8 +222,25 @@ $$\hat{W} = (W_{SVD-G} + W_{SVD-L})H_n^\top + Q_w(W_{res} - W_{SVD-L})H_n^\top \
 * 기존 방식의 문제: 대부분의 기존 방식은 모든 시간 단계에 동일한 정밀도를 적용하여, 민감한 단계에서 발생하는 누적 오류를 제대로 제어하지 못합니다.
 
 
-#### 2. 비트 할당 메커니즘① 민감도 측정 (Sensitivity Metric)각 레이어 $l$과 시간 단계 $t$에서의 평균 토큰 분산 $v_{l,t}$를 계산하여 이를 시간적 민감도 지표로 활용합니다.이를 위해 아주 적은 양의 저해상도(LR) 이미지로 구성된 교정 세트를 사용하여 통계량을 수집합니다.② 왜곡 모델링 (Distortion Modeling)활성화 값이 가우시안 분포($\mathcal{N}(0, v_{l,t})$)를 따른다는 가정하에, 비트 폭 $b$에 따른 기대 왜곡량을 다음과 같이 정의합니다:
-$$D_{l,t}(b) = v_{l,t} \kappa(b)$$여기서 $\kappa(b)$는 표준 가우시안 분포에서의 최적 클리핑을 적용한 왜곡 계수입니다.③ 시간적 스케줄링 (Temporal Scheduling)목표: 고정된 전체 활성화 비트 예산(예: 평균 4비트) 내에서 모든 시간 단계의 총 왜곡을 최소화하는 것입니다.해결 방법: 동적 프로그래밍(Dynamic Programming, DP)을 사용하여 각 시간 구간별로 최적의 비트 폭을 할당하는 '계단식 스케줄'을 생성합니다.3. VaTMP의 효과적응형 정밀도: 분산이 높아 오류에 취약한 초기 단계에는 더 높은 비트(예: 5비트)를 할당하고, 상대적으로 덜 민감한 단계에는 낮은 비트(예: 3비트)를 할당하여 자원을 효율적으로 배분합니다.세부 구조 보존: 특히 W4A4와 같이 활성화 비트가 매우 낮은 공격적인 설정에서 미세한 질감과 국부 구조를 훨씬 더 잘 보존합니다.요약하자면, VaTMP는 "데이터가 복잡하게 변하는 시점에는 정밀하게, 단순해지는 시점에는 가볍게" 활성화 값을 처리하여 저비트에서도 고화질을 유지하는 기술입니다.
+#### 2. 비트 할당 메커니즘
+
+1) 민감도 측정 (Sensitivity Metric)
+    1) 각 레이어 $l$과 시간 단계 $t$에서의 평균 토큰 분산 $v_{l,t}$를 계산하여 이를 시간적 민감도 지표로 활용합니다.
+    2) 이를 위해 아주 적은 양의 저해상도(LR) 이미지로 구성된 교정 세트를 사용하여 통계량을 수집합니다.
+2) 왜곡 모델링 (Distortion Modeling)
+    1) 활성화 값이 가우시안 분포( $\mathcal{N}(0, v_{l,t})$ )를 따른다는 가정하에, 비트 폭 $b$에 따른 기대 왜곡량을 다음과 같이 정의합니다:
+    2) 여기서 $\kappa(b)$는 표준 가우시안 분포에서의 최적 클리핑을 적용한 왜곡 계수입니다.
+
+$$D_{l,t}(b) = v_{l,t} \kappa(b)$$
+
+3) 시간적 스케줄링 (Temporal Scheduling)
+    1) 목표: 고정된 전체 활성화 비트 예산(예: 평균 4비트) 내에서 모든 시간 단계의 총 왜곡을 최소화하는 것입니다.
+    2) 해결 방법: 동적 프로그래밍(Dynamic Programming, DP)을 사용하여 각 시간 구간별로 최적의 비트 폭을 할당하는 '계단식 스케줄'을 생성합니다.
+
+#### 3. VaTMP의 효과
+
+1) 적응형 정밀도: 분산이 높아 오류에 취약한 초기 단계에는 더 높은 비트(예: 5비트)를 할당하고, 상대적으로 덜 민감한 단계에는 낮은 비트(예: 3비트)를 할당하여 자원을 효율적으로 배분합니다.
+2) 세부 구조 보존: 특히 W4A4와 같이 활성화 비트가 매우 낮은 공격적인 설정에서 미세한 질감과 국부 구조를 훨씬 더 잘 보존합니다.
 
 
 ---
@@ -226,6 +248,32 @@ $$D_{l,t}(b) = v_{l,t} \kappa(b)$$여기서 $\kappa(b)$는 표준 가우시안 �
 ## 4. Experiments
 
 ### 4.1. Settings
+
+1) 모델 아키텍처 및 하드웨어
+
+* 백본(Backbone) 모델: 모든 실험에는 DiT4SR 아키텍처를 기본 모델로 채택했습니다.
+* 양자화 범위: 모든 MM-DiT 블록을 양자화하되, 수치적 안정성을 위해 Softmax 레이어는 8비트 정밀도로 고정했습니다.
+* 스케일 인자: 모든 실험은 x4 배율로 진행되었습니다.
+* 사용 하드웨어: 교정(Calibration)과 평가 모두 단일 NVIDIA RTX A6000 GPU에서 수행되었습니다.
+* MM-DiT: Multimodal DiT
+
+2) 데이터셋 구성
+
+* 교정 데이터셋(Calibration Set): 가중치 및 활성화 통계 수집을 위해 RealSR 훈련 데이터에서 무작위로 샘플링한 32장의 이미지( $128 \times 128$ 크기)를 사용했습니다.
+* 테스트 데이터셋(Test Datasets): 성능 검증을 위해 4가지 실제 벤치마크 데이터셋인 DrealSR, RealSR, RealLR200, RealLQ250을 사용했습니다.
+
+3) 평가 지표 (Metrics)
+
+* 성능 평가를 위해 참조 방식에 따라 두 가지 범주의 지표를 사용했습니다
+* Full-Reference(전체 참조): 원본 고화질 이미지와 비교하는 LPIPS 지표를 사용했습니다.
+* No-Reference(비참조): 원본 없이 화질 자체를 평가하는 지표로 MUSIQ, MANIQA, CLIPIQA, LIQE를 활용했습니다.
+
+4) 비교 대상 방법론
+
+* 일반 PTQ 및 DiT 전용 방식: SVDQuant, QuaRot, FlatQuant, Q-DiT, PTQ4DiT 등.
+* 확산 모델 및 SR 전용 방식: Q-Diffusion, PassionSR 등.
+* 효율적 미세 조정 방식: QueST, EfficientDM 등.
+
 
 ### 4.2. Main Results
 
