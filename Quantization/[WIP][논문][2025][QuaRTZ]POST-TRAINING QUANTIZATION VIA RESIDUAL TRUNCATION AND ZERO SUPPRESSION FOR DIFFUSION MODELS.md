@@ -283,7 +283,7 @@ A100 GPU 기준
 1) 실험 환경 (Setup)
     1) 모델
         1) UNet 기반: LDM, Stable Diffusion (SD) v1.4, SDXL-Turbo.
-        2) DiT (Transformer) 기반: PixArt-$\Sigma$, FLUX.1-schnell.
+        2) DiT (Transformer) 기반: PixArt- $\Sigma$ , FLUX.1-schnell.
     2) 평가 지표: FID (이미지 품질), CLIP Score (텍스트 정합성), ImageReward (인간 선호도), LPIPS/PSNR (유사도) 등을 사용했습니다.
     3) 비교 대상: TFMQ-DM, DGQ, SVDQuant 등 최신 양자화 기법들과 비교했습니다.
 
@@ -296,7 +296,7 @@ A100 GPU 기준
     3) 텍스트-이미지 생성 (Text-to-Image)
         1) SDv1.4 & SDXL-Turbo: 기존 W4A6(6비트 활성화) 모델들보다 W4A4(4비트)인 QuaRTZ가 더 뛰어난 성능을 보였습니다.
         2) FLUX.1-schnell: FID 6.98을 기록하며, 보조 가지(Auxiliary Branch)를 사용하는 SVDQuant(FID 7.07)보다 더 나은 성능을 달성했습니다. 이는 QuaRTZ가 순수 4비트만으로도 고성능을 낼 수 있음을 증명합니다.
-        3) 한계점: PixArt-$\Sigma$ 모델에서는 SVDQuant보다 성능이 다소 떨어졌는데, 이는 SVDQuant가 이상치(Outlier) 보정을 위한 별도의 모듈을 사용하기 때문으로 분석했습니다.
+        3) 한계점: PixArt- $\Sigma$ 모델에서는 SVDQuant보다 성능이 다소 떨어졌는데, 이는 SVDQuant가 이상치(Outlier) 보정을 위한 별도의 모듈을 사용하기 때문으로 분석했습니다.
 
 ### 5.3 ABLATION STUDY
 
