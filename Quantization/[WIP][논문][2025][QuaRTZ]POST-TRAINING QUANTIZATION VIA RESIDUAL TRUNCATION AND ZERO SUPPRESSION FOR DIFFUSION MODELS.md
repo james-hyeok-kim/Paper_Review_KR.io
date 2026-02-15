@@ -131,6 +131,51 @@ QuaRTZ (Quantization via Residual Truncation and Zero suppression)
 
 ---
 
+## 3. QUANTIZATION VIA RESIDUAL TRUNCATION AND ZERO SUPPRESSION
+
+<p align = 'center'>
+<img width="704" height="367" alt="image" src="https://github.com/user-attachments/assets/a7b68d52-f495-49af-a9a9-12d296ed8ec9" />
+</p>
+
+### 1. 핵심 가설 (Hypothesis)
+
+* 이상치(Outliers): 큰 값을 가지며, 이미지의 주요 특징(salient features)과 큰 폭의 수정(correction)을 담당합니다.
+
+* 최하위 비트(LSBs): 0에 가까운 작은 값들의 미세한 변화를 나타내며, 텍스처(textures)와 부드러운 그라디언트(smooth gradients)를 형성하는 데 결정적입니다.
+
+* 기존의 4비트 양자화는 이 LSB를 잃어버리기 때문에 이미지가 뭉개지는 현상이 발생했습니다.
+
+### 2. 2단계 양자화 프로세스 (Two-Stage Quantization)
+
+1) 1단계: 8비트 정수 양자화 (8-bit Integer Quantization)
+    1) 이유: 4비트로 바로 변환하면 단계(step size)가 너무 커져서 오차가 크지만, 8비트는 단계가 촘촘하여 라운딩 에러(rounding error)를 최소화할 수 있습니다.
+    2) 이 과정에서 데이터의 전체 범위(이상치 포함)를 표현할 수 있게 됩니다.
+
+2) 2단계: 4비트 압축 (4-bit Compression via LZS)
+    1) 8비트 데이터에는 불필요한 정보(Redundancy)가 많다는 점을 이용해 이를 4비트로 압축합니다. 특히 작은 값들은 앞부분(상위 비트)이 모두 0으로 채워져 있다는 점에 착안하여 LZS (Leading Zero Suppression) 기법을 사용합니다.
+    2) 그룹화 (Grouping): 데이터를 작은 그룹(예: 16개 또는 32개 단위)으로 묶습니다.
+    3) FLAG 계산: 각 그룹 내에서 가장 큰 값(가장 높은 활성 비트 위치)을 기준으로 FLAG를 계산합니다.
+        1) FLAG는 해당 그룹의 값들이 공통적으로 가지고 있는 '앞쪽의 0(Leading Zeros)'의 개수를 기반으로 결정됩니다.
+    4) 시프트 및 압축 (Shifting): 계산된 FLAG만큼 비트를 오른쪽으로 시프트(Right-shift)하여 4비트 공간에 밀어 넣습니다.
+        1) 작은 값 (대부분의 경우): 앞쪽의 불필요한 0들을 제거하고, 뒤쪽의 LSB(정밀한 정보)를 그대로 보존합니다.
+        2) 큰 값 (이상치): 큰 자릿수(Magnitude)를 보존하고, 필요하다면 하위 비트를 일부 희생합니다.
+
+### 3. 결과 및 추론 (Inference)
+
+* 이 방식을 통해 4비트 용량만 차지하면서도 이상치의 크기와 작은 값의 정밀도(LSB)를 모두 잡을 수 있습니다.
+* 추론 시에는 저장해둔 FLAG 값을 이용해 연산 결과(MMA output)를 다시 복원(조정)할 수 있어 추가적인 고정밀도 연산 장치가 필요 없습니다.
+
+#### 4. 예제
+
+공식, 여기서 clz는 앞쪽 0의 개수
+
+$$FLAG = \max(29 - \text{clz}(m), 0)$$ 
+
+$$[3, -2, 5, 0], Flag = 0 (정보 손실 없음)$$
+
+$$[100, 3, -2, 10], Flag = 4 (right \quad shift 4)$$
+
+$$ 3>>4 = 0, -2 >> 4 = 0, 10 >> 4 = 0 $$
 
 
 ---
