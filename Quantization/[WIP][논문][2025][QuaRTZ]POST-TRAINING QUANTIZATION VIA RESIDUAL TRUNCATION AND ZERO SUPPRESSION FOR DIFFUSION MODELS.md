@@ -116,8 +116,11 @@ QuaRTZ (Quantization via Residual Truncation and Zero suppression)
 ### 3. 기존 PTQ 연구들의 초점: 이상치(Outliers)
 
 1) 기존의 PTQ 연구들은 주로 이상치(Outliers) 처리에 집중해 왔습니다.
+
 2) 대표적인 방법: PTQ4DM, Q-Diffusion, TFQM-DM 등의 연구는 시간적 정렬(Temporal alignment)이나 조건부 스케일링(Condition-aware scaling) 등을 통해 값이 큰 이상치로 인한 오차를 줄이려 했습니다.
+
 3) 최신 연구: 최근 DGQ는 텍스트-이미지 모델을 W4A6(가중치 4비트, 활성화 6비트)로 양자화했고, SVDQuant는 4비트 정밀도에 도달했습니다.
+
 
 ### 4. 기존 연구의 한계와 QuaRTZ의 차별점
 
@@ -128,6 +131,7 @@ QuaRTZ (Quantization via Residual Truncation and Zero suppression)
 3) 이는 추가적인 파라미터를 필요로 하고, 아키텍처를 수정해야 하며, 혼합 정밀도(Mixed-precision) 연산을 요구하므로 순수한 4비트 양자화의 효율성 이점을 갉아먹습니다.
 
 4) QuaRTZ의 접근: 이에 반해, 본 논문의 QuaRTZ는 보조 브랜치 없이 순수 4비트만으로 미세한 텍스처 품질을 보존하는 것을 목표로 합니다. 기존 연구가 '이상치'에만 집중했던 것과 달리, QuaRTZ는 '이상치'와 '최하위 비트(LSB)'를 동시에 고려한다는 점에서 차별화됩니다.
+
 
 ---
 
@@ -165,7 +169,7 @@ QuaRTZ (Quantization via Residual Truncation and Zero suppression)
 * 이 방식을 통해 4비트 용량만 차지하면서도 이상치의 크기와 작은 값의 정밀도(LSB)를 모두 잡을 수 있습니다.
 * 추론 시에는 저장해둔 FLAG 값을 이용해 연산 결과(MMA output)를 다시 복원(조정)할 수 있어 추가적인 고정밀도 연산 장치가 필요 없습니다.
 
-#### 4. 예제
+### 4. 예제
 
 공식, 여기서 clz는 앞쪽 0의 개수
 
@@ -176,6 +180,7 @@ $$[3, -2, 5, 0], Flag = 0 (정보 손실 없음)$$
 $$[100, 3, -2, 10], Flag = 4 (right \quad shift 4)$$
 
 $$ 3>>4 = 0, -2 >> 4 = 0, 10 >> 4 = 0 $$
+
 
 
 ---
@@ -196,17 +201,121 @@ $$ 3>>4 = 0, -2 >> 4 = 0, 10 >> 4 = 0 $$
 * 의미: 확산 모델의 활성화 값(Activation)은 대부분 0 근처에 몰려 있고 큰 값은 드물기 때문에, 이 조건은 항상 만족되며 이론적으로 더 우월함을 보장합니다.
 
 
+#### 증명
+
+1) 단계 크기 ( $s$ )의 정의
+    1) 4비트 양자화: $2^3$ (부호 제외 3비트) $\rightarrow$ 8개 구간
+    2) 8비트 양자화: $2^7$ (부호 제외 7비트) $\rightarrow$ 128개 구간
+    3) $s_4 = 16 s_8$
+
+2) 부등식 설정: 일반적인 양자화 오차는 단계 크기의 절반($s/2$)을 넘지 않습니다.
+    1) 일반 4비트 오차 상한 ( $E_q^4$ ): $\frac{s_4}{2} = \frac{16s_8}{2} = 8s_8$
+    2) 8비트 오차 상한 ( $E_q^8$ ): $\frac{s_8}{2} = 0.5s_8$ 
+
+3) QuaRTZ의 총 오차( $E_{total}$ )는 "1차 8비트 양자화 오차"와 "2차 LZS 압축 오차( $E_{LZS}$ )"의 합
+
+$$E_{total} \le E_q^8 + \mathbb{E}[E_{LZS}] < E_q^4$$
+
+$$0.5s_8 + \mathbb{E}[E_{LZS}] < 8s_8$$
+
+$$\therefore \mathbb{E}[E_{LZS}] < 7.5s_8$$
+
+4) 압축으로 인해 발생하는 오차의 평균(기댓값)이 $7.5s_8$보다 작다면 QuaRTZ가 이득
+
+5) LZS 오차의 분석 (Worst Case)
+    1) LZS는 값이 작을 때는 오차가 0이고, 값이 클 때(이상치)만 하위 비트를 잘라내어 오차가 발생합니다.
+    2) 오차가 발생하는 조건: 8비트 정수 기준 절댓값이 8 이상일 때 ( $|m| \ge 8$ ).
+    3) 최악의 경우 (Worst Case): 가장 큰 값을 표현하기 위해 비트를 가장 많이 잘라내는 경우입니다. 이때 최대 4비트가 잘려나가며, 손실되는 값의 크기는 최대 $(2^4 - 1) = 15$배의 $s_8$입니다.
+
+$$E_{LZS}(max) \approx 15 s_8$$
+
+6) 확률 조건 도출
+
+"이상치가 발생할 확률"을 $P$라고 할 때
+
+$$\mathbb{E}[E_{LZS}] \approx (\text{최대 오차}) \times P$$
+
+$$\mathbb{E}[E_{LZS}] \le 15s_8 \times P$$
+
+* 이 값이 앞서 구한 조건( $7.5s_8$ )보다 작아야 하므로
+
+$$15s_8 \times P < 7.5s_8$$
+
+양변을 $15s_8$로 나누면 최종 조건이 증명됩니다.
+
+$$P < \frac{7.5}{15} = 0.5$$
+
 ### 2. 정보 효율성: 비트 단위 엔트로피 (Bit-wise Entropy)
 
-4비트 공간을 얼마나 알차게 사용하고 있는지를 분석했습니다.엔트로피 증가: Figure 4를 통해, 모든 레이어에서 QuaRTZ가 일반 INT4보다 더 높은 엔트로피를 가짐을 보여줍니다.의미: 일반 INT4는 0이 많아 비트 낭비가 심한 반면, QuaRTZ는 불필요한 0을 제거(Leading Zero Suppression)했기 때문에 4개의 비트가 모두 고르게 사용되며 정보 밀도가 높습니다.
+<p align = 'center'>
+<img width="711" height="333" alt="image" src="https://github.com/user-attachments/assets/a1dfb35d-b7cf-4364-8d5f-50216608cb82" />
+</p>
+
+* 엔트로피 증가: Figure 4를 통해, 모든 레이어에서 QuaRTZ가 일반 INT4보다 더 높은 엔트로피를 가짐을 보여줍니다.
+
+* 의미: 일반 INT4는 0이 많아 비트 낭비가 심한 반면, QuaRTZ는 불필요한 0을 제거(Leading Zero Suppression)했기 때문에 4개의 비트가 모두 고르게 사용되며 정보 밀도가 높습니다.
+
 
 ### 3. 경험적 분석: 분포 보존 (Empirical Analysis)
 
-실제 데이터 분포가 어떻게 변하는지 히스토그램(Figure 3)으로 확인했습니다.INT4의 문제: 일반 INT4는 0 근처에서 값들이 듬성듬성하게 찍히는(Rounding error) 현상이 발생하여 미세한 텍스처 정보를 잃습니다.QuaRTZ의 장점: QuaRTZ는 0 근처의 미세한 값들(LSB)을 잘 보존하여 원래 분포와 유사한 형태를 유지하면서도, 동시에 이상치(Outlier)의 크기 정보도 놓치지 않았습니다.+1
+* INT4의 문제: 일반 INT4는 0 근처에서 값들이 듬성듬성하게 찍히는(Rounding error) 현상이 발생하여 미세한 텍스처 정보를 잃습니다.
+* QuaRTZ의 장점: QuaRTZ는 0 근처의 미세한 값들(LSB)을 잘 보존하여 원래 분포와 유사한 형태를 유지하면서도, 동시에 이상치(Outlier)의 크기 정보도 놓치지 않았습니다.
 
 ### 4. 하드웨어 효율성: 지연 시간 (Latency Analysis)
 
-이 방식이 실제 하드웨어에서 얼마나 빠른지 분석했습니다 (A100 GPU 기준).연산 비용: 압축을 풀 때 사용하는 비트 시프트(Bit-shift) 연산은 GPU의 텐서 코어 연산(MMA)에 비해 비용이 거의 들지 않습니다 (무시할 수준).메모리 이득: 데이터 전송량(Traffic)이 INT8 대비 거의 절반으로 줄어듭니다.속도: 표 1(Table 1)에 따르면, PyTorch 기본 구현에 비해 월등히 빠른 속도를 보여줍니다 (예: $4096 \times 4096$ 레이어 기준 PyTorch 5.4ms vs QuaRTZ 0.18ms).
+A100 GPU 기준
+
+<p align = 'center'>
+<img width="685" height="286" alt="image" src="https://github.com/user-attachments/assets/6b2b30ac-311e-45f3-9cae-a4ba875484ec" />
+</p>
+
+* 연산 비용: 압축을 풀 때 사용하는 비트 시프트(Bit-shift) 연산은 GPU의 텐서 코어 연산(MMA)에 비해 비용이 거의 들지 않습니다 (무시할 수준).
+* 메모리 이득: 데이터 전송량(Traffic)이 INT8 대비 거의 절반으로 줄어듭니다.
+* 속도: 표 1(Table 1)에 따르면, PyTorch 기본 구현에 비해 월등히 빠른 속도를 보여줍니다 (예: $4096 \times 4096$ 레이어 기준 PyTorch 5.4ms vs QuaRTZ 0.18ms).
+
 
 ---
+
+## 5. EXPERIMENTS AND ANALYSIS
+
+### 5.1 SETUP
+
+1) 실험 환경 (Setup)
+    1) 모델
+        1) UNet 기반: LDM, Stable Diffusion (SD) v1.4, SDXL-Turbo.
+        2) DiT (Transformer) 기반: PixArt-$\Sigma$, FLUX.1-schnell.
+    2) 평가 지표: FID (이미지 품질), CLIP Score (텍스트 정합성), ImageReward (인간 선호도), LPIPS/PSNR (유사도) 등을 사용했습니다.
+    3) 비교 대상: TFMQ-DM, DGQ, SVDQuant 등 최신 양자화 기법들과 비교했습니다.
+
+### 5.2 MAIN RESULTS
+
+2) 주요 결과 (Main Results)
+    1) W4A4 (가중치 4비트, 활성화 4비트) 설정에서 실험한 결과입니다.
+    2) 비조건부 생성 (Unconditional Generation)
+        1) LDM 모델에서 일반적인 4비트 양자화(Naive INT4)는 이미지가 완전히 붕괴(FID 327.01)되었으나, QuaRTZ는 FID 7.11을 기록하며 8비트 모델(W4A8)에 근접한 성능을 보였습니다.
+    3) 텍스트-이미지 생성 (Text-to-Image)
+        1) SDv1.4 & SDXL-Turbo: 기존 W4A6(6비트 활성화) 모델들보다 W4A4(4비트)인 QuaRTZ가 더 뛰어난 성능을 보였습니다.
+        2) FLUX.1-schnell: FID 6.98을 기록하며, 보조 가지(Auxiliary Branch)를 사용하는 SVDQuant(FID 7.07)보다 더 나은 성능을 달성했습니다. 이는 QuaRTZ가 순수 4비트만으로도 고성능을 낼 수 있음을 증명합니다.
+        3) 한계점: PixArt-$\Sigma$ 모델에서는 SVDQuant보다 성능이 다소 떨어졌는데, 이는 SVDQuant가 이상치(Outlier) 보정을 위한 별도의 모듈을 사용하기 때문으로 분석했습니다.
+
+### 5.3 ABLATION STUDY
+
+3) 절제 연구 (Ablation Study)
+    1) 그룹 크기의 영향양자화 그룹 크기(Group Size, $G_s$ )가 성능에 미치는 영향을 분석했습니다.
+    2) 트레이드오프: 그룹 크기가 커질수록( $G_s$ 증가), 그룹 내에 이상치가 포함될 확률이 높아집니다. 이상치가 포함되면 전체를 많이 시프트(Shift)해야 하므로 작은 값들(LSB)이 잘려 나갑니다.
+    3) 결과: 그룹 크기가 커질수록 FID 점수가 선형적으로 나빠집니다.
+    4) 권장: 저자들은 지연 시간과 이미지 품질의 균형을 위해 그룹 크기 16 또는 32를 권장합니다.
+
+
+4) 확장성: LLM에의 적용 (Potential Applications to LLMs)
+    1) 대상: Qwen2, LLaMA2, LLaMA3 모델.
+    2) 결과: 4비트 QuaRTZ를 적용했을 때 펄플렉서티(Perplexity) 증가율이 +4.5% ~ +10.7% 수준으로 억제되었습니다.
+    3) 의미: 이는 LSB(최하위 비트) 보존이 언어 모델에서도 유효하며, QuaRTZ가 범용적인 저비트 양자화 기술로 쓰일 수 있음을 시사합니다
+
+---
+
+
+
+
+
 
