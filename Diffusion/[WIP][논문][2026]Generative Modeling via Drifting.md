@@ -155,6 +155,11 @@ $$\mathcal{L}=\mathbb{E}_{\epsilon}[||f_{\theta}(\epsilon) - stopgrad(f_{\theta}
 
 ### 3.3. Designing the Drifting Field
 
+<p align = 'center'>
+<img width="354" height="387" alt="image" src="https://github.com/user-attachments/assets/a4b869ab-f33f-4d1c-bc46-dbee2c9a0a47" />
+</p>
+
+
 * 핵심 아이디어는 생성된 샘플이 실제 데이터 쪽으로는 끌려가고(인력), 현재 생성된 다른 샘플들로부터는 밀려나게(척력) 만드는 것
 
 #### 1. 기본 개념: 인력과 척력 (Attraction and Repulsion)
@@ -229,6 +234,33 @@ $$\sum_{j}\mathbb{E}[||\phi_{j}(x)-stopgrad(\phi_{j}(x)+V(\phi_{j}(x)))||^{2}]$$
 | 쌍(Pairing) | 생성물 $x$와 타겟 $x_{target}$의 쌍이 필요함 (Supervised) | 샘플 간의 쌍이 필요 없으며 분포 관점에서 접근함 (Unsupervised) |
 
 ### 3.5. Classifier-Free Guidance
+
+* 확산 모델에서 생성 품질을 높이기 위해 널리 사용되는 CFG 기법을 드리프트 모델(Drifting Models)의 프레임워크에 어떻게 통합했는지 설명
+
+#### 1. 기본 원리
+
+* 분류기 없는 가이드(CFG)는 클래스 조건부 분포와 무조건부 분포 사이를 외삽(extrapolate)하여 생성 품질을 향상시키는 기법입니다.
+* 드리프트 모델에서 클래스 레이블 $c$가 주어지면, 목표 데이터 분포 $p$는 $p_{data}(\cdot|c)$가 되며 여기서 양성 샘플($y^+$)을 추출합니다.
+
+#### 2. 가이드 구현 방식: 음성 샘플의 혼합
+
+* 가이드를 달성하기 위해, 음성 샘플(Negative samples)의 분포를 다음과 같이 혼합하여 정의합니다
+
+$$\tilde{q}(\cdot|c) \triangleq (1-\gamma)q_{\theta}(\cdot|c) + \gamma p_{data}(\cdot|\emptyset)$$
+
+* 여기서 $\gamma \in [0, 1)$는 혼합 비율(mixing rate)이며, $p_{data}(\cdot|\emptyset)$는 무조건부 데이터 분포를 나타냅니다.
+* 이 학습 목표를 통해 최종적으로 모델이 근사하고자 하는 분포 $q_\theta$는 다음과 같은 선형 결합 형태가 됩니다
+
+$$q_{\theta}(\cdot|c) = \alpha p_{data}(\cdot|c) - (\alpha - 1) p_{data}(\cdot|\emptyset)$$
+
+* 이때 $\alpha = \frac{1}{1-\gamma} \ge 1$이며, 이는 기존 CFG의 정신과 일치합니다.
+
+#### 3. 실무적 적용 및 장점
+
+* 실제 구현: 훈련 시에 생성된 데이터 외에도 무조건부 데이터( $p_{data}(\cdot|\emptyset)$ )에서 추가적인 음성 샘플을 추출하여 사용합니다.
+* 훈련 시 동작: 기존 확산 모델은 추론 시에 조건부/무조건부 모델을 모두 실행해야 하므로 연산량이 늘어나지만, 드리프트 모델에서 CFG는 훈련 시의 행동으로 설계되었습니다.
+* 원스텝 유지: 결과적으로 추론(Inference) 시에는 별도의 추가 연산 없이 단 한 번의 신경망 실행(1-NFE)으로 가이드가 적용된 고품질 이미지를 생성할 수 있는 속도 측면의 장점을 그대로 유지합니다.
+
 
 ---
 
