@@ -113,6 +113,7 @@
 
 #### 1. 기존 확산 모델 (Standard Diffusion Models)
 * 픽셀 공간(Pixel Space)에서 작동
+
 $$L_{DM} = \mathbb{E}_{x, \epsilon \sim N(0,1), t} [||\epsilon - \epsilon_{\theta}(x_{t}, t)||_{2}^{2}]$$
 
 #### 2. 잠재 확산 모델 (Latent Diffusion Models, LDMs)
