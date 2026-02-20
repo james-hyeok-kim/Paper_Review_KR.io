@@ -1,7 +1,7 @@
 # Scalable Diffusion Models with Transformers
 저자 : William Peebles* UC Berkeley, Saining Xie New York University
 
-출간 : 2023 CVPR
+출간 : 2023 ICCV, arxiv 2022
 
 논문 : [PDF](https://arxiv.org/pdf/2212.09748)
 
