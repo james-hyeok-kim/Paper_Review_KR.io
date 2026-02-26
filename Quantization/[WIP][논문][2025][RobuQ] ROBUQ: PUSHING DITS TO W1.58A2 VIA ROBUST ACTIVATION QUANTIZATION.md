@@ -15,12 +15,13 @@ Yucheng Lin1, Kaisen Yang3, Xianglong Yan1, Yulun Zhang1†
 
 *QAT*
 
-| 레이어 구분 | 활성화 비트 폭 (Activation Bit-width) | 비고 |
-| :--- | :--- | :--- |
-| **일반 선형 레이어** (qkv, proj, fc1, fc2) | 1-bit ~ 4-bit (가변) | 평균 2-bit(A2) 또는 3-bit(A3) 목표치에 맞춰 DP 알고리즘으로 자동 할당됩니다. |
-| **Attention Scores** (A-A Matrix Mult) | 8-bit | 매우 민감하지만 전체 연산량에서 차지하는 비중이 작아 높은 정밀도를 유지합니다. |
-| **adaLN-Zero 레이어** | 4-bit | 안정적인 학습을 위해 4비트로 고정합니다. |
-| **임베딩 및 최종 레이어** | 32-bit (FP) | 가중치와 마찬가지로 활성화 값도 양자화하지 않습니다. |
+| 레이어 구분 | 가중치 비트 폭 (Weight) | 활성화 비트 폭 (Activation) | 비고 |
+| :--- | :--- | :--- | :--- |
+| **일반 선형 레이어**<br>(qkv, proj, fc1, fc2) | 1.58-bit (Ternary) | 1~4 bit (가변) | AMPN 알고리즘을 통해 레이어별로 최적의 비트를 할당합니다. |
+| **SVD 저역통과 분기**<br>(Low-rank branch) | 32-bit (FP) | 32-bit (FP) | 양자화로 인한 정보 손실을 보상하는 보조 경로입니다. |
+| **Attention Scores**<br>(A-A Matrix Mult) | 8-bit (연산 정밀도) | 8-bit | 활성화 값 간의 행렬 곱으로, 높은 정밀도가 필요한 핵심 구간입니다. |
+| **adaLN-Zero 레이어** | 4-bit | 4-bit | 모델 안정성을 위해 4-bit로 고정하여 처리합니다. |
+| **임베딩 및 최종 레이어** | 32-bit (FP) | 32-bit (FP) | 입출력 데이터의 품질을 위해 양자화를 적용하지 않습니다. |
 
 ---
 
