@@ -31,5 +31,11 @@ Yucheng Lin1, Kaisen Yang3, Xianglong Yan1, Yulun Zhang1†
 | **mlp.fc1** (MLP First Layer) | 약 2.00 bit | 약 3.04 bit | 목표 평균치에 근접한 할당량 |
 | **mlp.fc2** (MLP Second Layer) | 약 1.64 bit | 약 2.31 bit | 상대적으로 낮은 비트 할당 (예산 절감) |
 
+
+<img width="457" height="638" alt="image" src="https://github.com/user-attachments/assets/2818e7cb-d7e1-43fc-910e-92249deb9bf6" />
+
+<img width="1127" height="549" alt="image" src="https://github.com/user-attachments/assets/db7efff8-2123-4f3c-864e-55d0ac47aa80" />
+
+
 ---
 
