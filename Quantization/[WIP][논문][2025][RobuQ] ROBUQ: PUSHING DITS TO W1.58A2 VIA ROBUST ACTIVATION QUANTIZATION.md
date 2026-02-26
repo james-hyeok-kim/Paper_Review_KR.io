@@ -23,5 +23,13 @@ Yucheng Lin1, Kaisen Yang3, Xianglong Yan1, Yulun Zhang1†
 | **adaLN-Zero 레이어** | 4-bit | 4-bit | 모델 안정성을 위해 4-bit로 고정하여 처리합니다. |
 | **임베딩 및 최종 레이어** | 32-bit (FP) | 32-bit (FP) | 입출력 데이터의 품질을 위해 양자화를 적용하지 않습니다. |
 
+
+| 레이어 이름 (Layer Name) | W1.58A2 (평균 2-bit 목표) | W1.58A3 (평균 3-bit 목표) | 비고 |
+| :--- | :---: | :---: | :--- |
+| **attn.proj** (Attention Projection) | **약 2.75 bit** | **약 3.89 bit** | 두 설정 모두에서 가장 높은 정밀도 유지 |
+| **attn.qkv** (QKV Projection) | 약 2.21 bit | 약 2.96 bit | Attention 관련 레이어 우선 할당 |
+| **mlp.fc1** (MLP First Layer) | 약 2.00 bit | 약 3.04 bit | 목표 평균치에 근접한 할당량 |
+| **mlp.fc2** (MLP Second Layer) | 약 1.64 bit | 약 2.31 bit | 상대적으로 낮은 비트 할당 (예산 절감) |
+
 ---
 
