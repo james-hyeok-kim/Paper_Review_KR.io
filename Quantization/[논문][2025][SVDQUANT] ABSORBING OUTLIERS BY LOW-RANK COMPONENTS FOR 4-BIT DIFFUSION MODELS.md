@@ -261,6 +261,10 @@ $$\mathbb{E}[\|R - Q(R)\|_F] \le \frac{c \sqrt{\text{size}(R)}}{q_{max}} \cdot \
 
 ### 2. 주요 결과 (Results)
 
+<p align = 'center'>
+<img width="717" height="774" alt="image" src="https://github.com/user-attachments/assets/146c30b9-6071-43e4-9a18-bdeb98269456" />
+</p>
+
 #### 시각적 품질 (Visual Quality)
 
 * 8비트 결과: 16비트 모델과 거의 차이가 없는 무손실 품질을 보여주며, 기존 8비트 베이스라인들을 능가했습니다.
