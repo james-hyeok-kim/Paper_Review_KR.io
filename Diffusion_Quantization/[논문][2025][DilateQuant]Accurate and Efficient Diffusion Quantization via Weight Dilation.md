@@ -38,12 +38,12 @@ Xuewen Liu1, 2 Zhikai Li1, 2 Qingyi Gu1, ∗
 $$\mathcal{L} = MSE(B_k(out_{k-1}) - \hat{B}_k(\hat{out}_{k-1}))$$
 
 * 이 방식은 원래의 방대한 학습 데이터가 필요 없으며, 역전파(Backpropagation) 경로가 짧아 메모리 사용량을 최소화합니다.
-
-
+    * Calibration Dataset만 사용 (Evaluation data set 일부를 사용)
 
 ### 결과 및 요약
 
 * DilateQuant는 기존의 QAT(양자화 인식 학습) 수준의 정확도를 유지하면서도, PTQ(사후 양자화) 수준의 효율성을 달성했습니다.
+    * PTQ의 속도로 QAT 가능하게 하다   
 * 효율성: 기존 최신 기술(EfficientDM) 대비 타임스텝 보정 시간 160배 단축, 학습 시간 2배 단축이라는 놀라운 성과를 거두었습니다.
 * 정확도: 4-bit 및 6-bit 양자화 환경에서 DDPM, LDM, Stable-Diffusion 등 다양한 모델과 데이터셋에 걸쳐 기존 방식보다 훨씬 뛰어난 이미지 생성 품질(FID)을 입증했습니다.
 
