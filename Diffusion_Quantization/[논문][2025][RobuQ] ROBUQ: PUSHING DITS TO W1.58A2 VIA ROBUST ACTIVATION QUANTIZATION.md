@@ -100,12 +100,12 @@ Yucheng Lin1, Kaisen Yang3, Xianglong Yan1, Yulun Zhang1†
 
 ### 3.2 RobustQuantizer: 하다마르 변환의 효과적 활용
 
+<p align = 'center'>
 <img width="817" height="382" alt="image" src="https://github.com/user-attachments/assets/82853826-9938-42c7-940a-1e6f40c31213" />
-
+</p>
 
 * Activations control: 하다마르 변환(Hadamard Transform) 도입, $X \rightarrow HX$
 * Weight도 하다마르 변환 적용, $W \rightarrow HW$
-* 
 
 #### 3.2.1 초기 베이스라인 및 전략
 
