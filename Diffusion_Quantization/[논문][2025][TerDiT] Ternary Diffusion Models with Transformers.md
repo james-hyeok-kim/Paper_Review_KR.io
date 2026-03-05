@@ -15,12 +15,14 @@ Junchi Yan, Senior Member, IEEE, Peng Gao, Hongsheng Li, Member, IEEE
 
 ### QAT
 
-
+<div align="center">
+   
 | 레이어 | 가중치 (Weight) | 활성화값 (Activation) | 비고 |
 | :--- | :---: | :---: | :--- |
 | **Self-attention, Feedforward, <br>MLP Linear** | (Ternary, <br>1.58-bit) | Full-precision (FP) | 가중치 전용(Weight-only) 양자화 방식을 사용합니다. |
 | **adaLN 모듈 내 MLP 레이어** | (Ternary, <br>1.58-bit) | Full-precision (FP) | 삼진 양자화로 인한 불안정성을 해결하기 위해 레이어 뒤에 RMS Norm을 추가합니다. |
 
+</div>
 ---
 
 ## 1. Introduction
@@ -101,10 +103,14 @@ Junchi Yan, Senior Member, IEEE, Peng Gao, Hongsheng Li, Member, IEEE
 <img width="883" height="237" alt="image" src="https://github.com/user-attachments/assets/31b886d1-55e9-4a35-932c-76bfcb5e7627" />
 </p>
 
+<div align="center">
+   
 | 지표 | Large-DiT-4.2B (FP) | TerDiT-4.2B (Ternary) | 절감 효과 |
 | :--- | :--- | :--- | :--- |
 | 체크포인트 크기 | 16GB  | 1.1GB  | 약 14.5배 감소 |
 | 최대 메모리 할당 | 17,027MB  | 1,919MB  | 약 8.8배 감소 |
+
+</div>
 
 * 메모리 이점: 4.2B 규모의 거대 모델을 단 2GB 미만의 GPU 메모리로 구동할 수 있어 모바일이나 FPGA 등 저사양 기기 배포 가능성을 확인했습니다.
 * 추론 속도: 현재는 전용 하드웨어 가속기 부족으로 인해 언패킹(Unpacking) 과정에서 FP 모델보다 느리지만(97s vs 83s), 향후 하드웨어-소프트웨어 공동 설계를 통해 개선될 여지가 큽니다.
