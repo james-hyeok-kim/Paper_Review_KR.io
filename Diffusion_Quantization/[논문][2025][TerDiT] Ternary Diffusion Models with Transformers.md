@@ -64,6 +64,7 @@ Junchi Yan, Senior Member, IEEE, Peng Gao, Hongsheng Li, Member, IEEE
 ### B. 모델 양자화 (Model Quantization)
 
 * 양자화 함수: BitNet b1.58과 유사한 absmean 양자화 함수를 채택하여 가중치를 $\{-1, 0, +1\}$ 중 하나의 값으로 변환합니다.
+    * BitNet b1.58의 Ternary 양자화 방식은 가중치 행렬의 평균 절댓값( $absmean$ )을 기준으로 스케일링한 뒤 반올림하는 방식
 * 훈련 방식: STE(Straight-Through Estimator)를 사용하여 미분 불가능한 성분을 통과해 그레이디언트를 전파하며, 훈련 중에는 풀 프리시전(Full-precision) 파라미터를 유지합니다.
     * Forward ternary, Backward pass full precision
     * 훈련 중에는 가중치가 아주 조금씩 변함, 변화량이 반영되지 않아 학습 불가능
