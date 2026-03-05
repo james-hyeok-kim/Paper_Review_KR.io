@@ -23,6 +23,7 @@ Junchi Yan, Senior Member, IEEE, Peng Gao, Hongsheng Li, Member, IEEE
 | **adaLN 모듈 내 MLP 레이어** | (Ternary, <br>1.58-bit) | Full-precision (FP) | 삼진 양자화로 인한 불안정성을 해결하기 위해 레이어 뒤에 RMS Norm을 추가합니다. |
 
 </div>
+
 ---
 
 ## 1. Introduction
