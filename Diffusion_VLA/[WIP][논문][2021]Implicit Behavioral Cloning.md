@@ -30,9 +30,11 @@ Robotics at Google
 ### 2. 제안된 방식: 암시적 정책 (Implicit Policies)
 
 * 개념: 정책을 직접적인 매핑이 아닌, 관측치와 동작을 모두 입력으로 받는 연속 에너지 함수 $E_{\theta}(o, a)$의 최소화 문제(argmin)로 재구성합니다.
-* 공식: $\pi_{\theta}(o) = \text{argmin}_a E_{\theta}(o, a)$
 * 작동 방식: 추론 시점에 주어진 관측치 $o$에 대해 샘플링 또는 경사 하강법을 통한 최적화를 수행하여 최적의 동작을 찾아내는 암시적 회귀(Implicit Regression)를 수행합니다.
 * EBM 활용: 이를 위해 조건부 에너지 기반 모델(Energy-Based Modeling, EBM) 문제를 해결하는 방식을 채택합니다.
+* 공식
+
+$$\pi_{\theta}(o) = \text{argmin}_a E_{\theta}(o, a)$$
 
 ### 3. 연구의 핵심 결과 및 의의
 
