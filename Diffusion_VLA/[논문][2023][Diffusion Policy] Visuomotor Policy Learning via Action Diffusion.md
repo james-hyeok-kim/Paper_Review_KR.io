@@ -95,6 +95,34 @@ https://diffusion-policy.cs.columbia.edu/
 
 * 시뮬레이션과 실제 환경을 포함한 총 15개 작업에서 벤치마크를 수행한 결과, 기존 최첨단(SOTA) 방식들보다 평균 46.9%의 성능 향상을 보이며 그 효과를 입증했습니다.
 
+### 5. 수식적 차이
+
+#### 5.1. 기본 수식
+
+* Implicit BC: 정책 $\pi_{\theta}$를 관측치 $o$와 동작 $a$에 대한 연속 **에너지 함수 $E_{\theta}(o, a)$의 최소화 문제(argmin)**로 정의합니다.
+   * $\pi_{\theta}$는 정책을 표기하는 기호
+   * $o \to a$로 가는 지도
+
+$$\pi_{\theta}(o) = \text{argmin}_a E_{\theta}(o, a)$$
+
+
+* Diffusion Policy: 정책을 조건부 노이즈 제거 확산 프로세스(Conditional Denoising Diffusion Process)로 모델링합니다. 직접적인 에너지 값을 출력하는 대신, 동작 분포의 점수 함수(Score function)의 기울기를 학습합니다.
+    * $x^K \to x^0$로 가는 계단의 한 칸
+
+$$x^{k-1} = \alpha(x^k - \gamma \epsilon_{\theta}(O_t, A_t^k, k) + \mathcal{N}(0, \sigma^2 I))$$
+
+
+#### 5.2. 손실 함수 (Loss Function)
+
+* Implicit BC: 정답 동작의 에너지는 낮추고 샘플링된 가짜 동작의 에너지는 높이도록 하는 InfoNCE 손실 함수를 사용합니다.
+
+$$\mathcal{L}_{InfoNCE} = \sum_{i=1}^N -\log(\tilde{p}_{\theta}(y_i | x, \{\tilde{y}_i^j\}))$$
+
+* Diffusion Policy: 실제 노이즈와 모델이 예측한 노이즈 사이의 차이를 줄이는 평균 제곱 오차(MSE) 손실 함수를 사용합니다.
+
+$$\mathcal{L} = \text{MSE}(\epsilon^k, \epsilon_{\theta}(O_t, A_t^k, k))$$
+
+
 ---
 
 ## 2. Diffusion Policy Formulation
