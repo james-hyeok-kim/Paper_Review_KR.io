@@ -55,7 +55,6 @@ $$\pi_{\theta}(o) = \text{argmin}_a E_{\theta}(o, a)$$
 * 이론적 뒷받침: 암시적 모델은 다중 모드(multi-modal) 분포뿐만 아니라 불연속 함수를 표현할 수 있는 능력이 있음을 이론적으로 정당화합니다.
 
 
-
 ---
 
 ## 2. Background: Implicit Model Training and Inference
@@ -108,7 +107,7 @@ $$\mathcal{L}_{InfoNCE} = \sum_{i=1}^{N} -\log(\tilde{p}_\theta(y_i | x, \{\tild
 ### 3.1. 미분 미사용(Derivative-free) 최적화
 
 <p align = 'center'>
-<img width="876" height="378" alt="image" src="https://github.com/user-attachments/assets/948158b2-cef4-49b5-b0f4-605abc686843" />
+<img width="700" height="300" alt="image" src="https://github.com/user-attachments/assets/948158b2-cef4-49b5-b0f4-605abc686843" />
 </p>
 
 * 경사 값을 사용하지 않고 샘플링을 통해 최솟값을 찾는 방식입니다.
@@ -128,7 +127,7 @@ $$\mathcal{L}_{InfoNCE} = \sum_{i=1}^{N} -\log(\tilde{p}_\theta(y_i | x, \{\tild
 ### 3.2 자기회귀적(Auto-regressive) 최적화
 
 <p align = 'center'>
-<img width="877" height="429" alt="image" src="https://github.com/user-attachments/assets/96cbb346-18c4-4964-ac36-2ecce0011322" />
+<img width="700" height="300" alt="image" src="https://github.com/user-attachments/assets/96cbb346-18c4-4964-ac36-2ecce0011322" />
 </p>
 
 #### 3.2.1. 핵심 메커니즘: 차원별 순차 결정
@@ -172,11 +171,12 @@ $$\mathcal{L}_{InfoNCE} = \sum_{i=1}^{N} -\log(\tilde{p}_\theta(y_i | x, \{\tild
 
 | 구분 | 명시적(Explicit) 모델 | 암시적(Implicit) 모델 |
 | :--- | :--- | :--- |
-| **수식** | $\hat{y} = F_\theta(x)$ | $\hat{y} = \text{argmin}_y E_\theta(x, y)$ |
+| **수식** | $\hat{y} = F_{\theta}(x)$ | $\hat{y} = \arg\min_{y} E_{\theta}(x, y)$ |
 | **추론 방식** | 단일 네트워크 통과 (Feed-forward) | 최적화 과정을 통한 반복적 탐색 |
 | **특징** | 계산이 빠르나 불연속성 표현에 취약함 | 계산량은 많으나 복잡한 다중 모드 분포 표현에 강함 |
 
 </div>
+
 
 ---
 
