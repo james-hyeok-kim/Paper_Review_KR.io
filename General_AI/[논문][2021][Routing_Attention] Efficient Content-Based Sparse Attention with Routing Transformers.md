@@ -4,7 +4,7 @@
 
 소속 : Google Research - {aurkor, msaffar, avaswani, grangier}@google.com
 
-발표 : 2021 ACL
+발표 : 2021 ACL & TACL(Transactions of the Association for Computational Linguistics)
 
 논문 : [PDF](https://arxiv.org/pdf/2003.05997)
 
