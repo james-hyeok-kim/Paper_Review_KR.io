@@ -5,6 +5,8 @@ Impact of Data Normalization on Deep Neural Network for Time Series Forecasting
 
 소속 : IEEE meber
 
+발표 : ICMLA 2019 (The 18th IEEE International Conference on Machine Learning and Applications)
+
 논문 : [PDF](https://arxiv.org/pdf/1812.05519)
 
 ## 초록
