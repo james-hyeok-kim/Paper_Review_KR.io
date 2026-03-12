@@ -208,6 +208,127 @@ $$x(t + \Delta t) \approx x(t) + v(x(t), t) \cdot \Delta t$$
 ---
 
 
+## 3. Method
+
+<p align = 'center'>
+<img width="979" height="457" alt="image" src="https://github.com/user-attachments/assets/cd465e88-7dd6-40f0-a880-ced3d9574a05" />
+</p>
+
+### 3.1 Flow Matching Preliminaries (기초)
+
+* 선형 확률 경로 (Linear Probability Path): 노이즈( $x_0$ )에서 데이터( $x_1$ )로 가는 경로를 직선으로 정의합니다.
+    * $x_t = (1 - t)x_0 + t x_1$
+* 목표 속도 (Target Velocity): 이 경로를 따라갈 때의 일정한 속도는 $v_t(x) = x_1 - x_0$가 됩니다.
+* 학습 목표: 신경망 $v_\theta(x_t, t)$가 이 고정된 속도( $x_1 - x_0$ )를 예측하도록 MSE 손실 함수를 사용하여 학습합니다.
+
+### 3.2 Dual-Timestep Scheduling (핵심 혁신)
+
+* 기존의 REPA 방식이 외부 모델을 '선생님'으로 썼다면, Self-Flow는 서로 다른 시점의 자기 자신을 선생님으로 활용합니다.
+* 시점 샘플링 ( $t, s$ ): 하나의 데이터에 대해 두 개의 시점을 샘플링합니다. 이때 $s$는 $t$보다 항상 작거나 같도록 설정합니다 ( $0 \leq s \leq t \leq 1$ ).
+    * 학생(Student): 더 많은 노이즈가 섞인 $x_t$를 입력받습니다.
+    * 교사(Teacher): 노이즈가 적어 정보가 더 뚜렷한 $x_s$를 입력받습니다.
+* 정보 비대칭 (Information Asymmetry): 학생은 데이터에 대한 정보가 부족한 상태에서, 더 많은 정보를 가진 교사의 내부 상태(Feature)를 예측해야 하는 과제를 수행하게 됩니다.
+
+### 3.3 Internal Alignment (내부 정렬 학습)
+
+* EMA Teacher: 교사 모델은 현재 학습 중인 모델의 가중치를 지수 이동 평균(EMA)한 버전을 사용하여 학습의 안정성을 높입니다.
+* 정렬 손실 함수 ( $L_{align}$ )
+    * 학생 모델의 중간 레이어 특징값(Feature)과 교사 모델의 특징값을 비교하여 일치하도록 만듭니다.
+    * 이를 통해 모델은 단순한 픽셀 복구(생성)를 넘어, 데이터의 추상적인 구조와 의미(표현)를 스스로 학습하게 됩니다.
+* 최종 손실 함수: 생성 손실( $L_{FM}$ )과 정렬 손실( $L_{align}$ )을 합쳐서 동시에 최적화합니다.
+
+### 3.4 Multi-Modal and Multi-Task (확장성)
+
+* Self-Flow 설명
+* 통합 아키텍처: 이미지, 비디오, 오디오를 각각의 VAE/오토인코더를 통해 잠재 공간(Latent Space)으로 보낸 뒤, 동일한 DiT(Transformer) 블록에서 처리합니다.
+* 유연한 스케줄링: 데이터의 종류(양식)에 상관없이 동일한 Dual-Timestep 방식을 적용할 수 있어, 별도의 튜닝 없이도 멀티모달 확장이 용이합니다.
 
 
 ---
+
+## 4. Experiments
+
+### 1. 실험 설정 (Implementation Details)
+
+* 모델 구조: DiT(Diffusion Transformer)를 기본 아키텍처로 사용하며, 290M부터 최대 4B(40억 개) 파라미터까지 모델 크기를 확장하며 실험했습니다.
+* 데이터셋: 이미지(ImageNet, 고해상도 내부 데이터), 비디오(내부 비디오 데이터셋), 오디오(음악 및 효과음 데이터)를 모두 사용했습니다.
+* 비교 대상: 외부 인코더(DINOv2)를 사용하는 최신 기법인 REPA와 아무런 추가 기법이 없는 Vanilla Flow Matching을 주요 대조군으로 삼았습니다.
+
+### 2. 텍스트-이미지 생성 및 스케일링 법칙 (Scaling Laws)
+
+<p align = 'center'>
+<img width="977" height="276" alt="image" src="https://github.com/user-attachments/assets/53e337fd-02f5-426d-a5f2-c3ad960d5fb0" />
+<img width="972" height="350" alt="image" src="https://github.com/user-attachments/assets/e0c35c3a-4ecb-4d46-a8f3-df27b0348350" />
+</p>
+
+* 수렴 속도: 동일한 품질(FID 지표 기준)에 도달하는 시간이 REPA보다 약 2.8배 빠릅니다.
+* 성능 우위: 625M 파라미터 크기의 Self-Flow 모델이 1B(10억 개) 파라미터 크기의 REPA 모델보다 더 좋은 성능을 기록했습니다.
+* 병목 해결: REPA는 외부 모델 성능에 의존하므로 특정 수준에서 성능 향상이 멈추는(Plateau) 현상이 발생하지만, Self-Flow는 모델이 커질수록 성능이 계속해서 향상되는 전형적인 스케일링 법칙을 따릅니다.
+
+### 3. 비디오 및 오디오 생성 결과
+
+* 비디오 (Video): FVD(Fréchet Video Distance) 지표에서 최고 성능을 기록했습니다. 외부 이미지 인코더에 의존하지 않기 때문에 비디오의 시간적 일관성(Temporal Consistency)을 해치지 않고도 학습이 가능했습니다.
+* 오디오 (Audio): FAD(Fréchet Audio Distance) 지표를 통해 측정했을 때, 음악 생성과 일반적인 소리 생성 모두에서 Vanilla 모델보다 훨씬 뛰어난 품질을 보였습니다.
+
+### 4. 멀티모달 공동 학습 (Joint Multi-modal Training)
+
+* 상호 보완 효과: 각 양식(Modality)을 따로 학습할 때보다 함께 학습할 때 성능이 더 향상되는 '긍정적 전이(Positive Transfer)' 현상을 관찰했습니다.
+* 이는 Self-Flow를 통해 학습된 내부 표현(Representation)이 서로 다른 데이터 형식 간의 공통된 의미 구조를 잘 파악하고 있음을 시사합니다.
+
+### 5. 다운스트림 과제: 로보틱스 (Action Prediction)
+
+<p align = 'center'>
+<img width="497" height="496" alt="image" src="https://github.com/user-attachments/assets/a4b201c4-17f1-4212-8230-dba590f9c64f" />
+</p>
+
+* 생성 모델이 단순한 '그림 그리기'를 넘어 세상을 이해하는 '월드 모델'로서 기능할 수 있는지 테스트했습니다.
+* 실험: 로봇의 시점 비디오를 보고 다음 행동(Action)을 예측하는 과제를 수행했습니다.
+* 결과: Self-Flow로 학습된 모델은 시각적 추론 능력이 뛰어나, 기존 방식들보다 로봇의 복잡한 움직임을 더 정확하게 예측했습니다. 이는 모델 내부의 자가 정렬(Self-alignment) 과정이 물리적 세계에 대한 이해도를 높였음을 의미합니다.
+
+
+
+---
+
+## 5. Limitations and Future Work
+
+### 1. 한계점 (Limitations)
+
+#### 오토인코더(VAE)에 대한 의존성
+
+* 본 논문은 DINOv2와 같은 '의미론적(Semantic)' 외부 모델 의존성은 제거했지만, 여전히 이미지를 잠재 공간(Latent Space)으로 압축하기 위해 사전 학습된 VAE(오토인코더)를 사용합니다.
+* 즉, 픽셀 수준에서 직접 학습하는 것이 아니라 이미 고정된 잠재 공간 위에서 학습한다는 한계가 있습니다.
+
+#### 계산 복잡도 (Training Overhead)
+
+* Dual-Timestep Scheduling 방식은 학생(Student)과 교사(Teacher) 모델이 서로 다른 데이터를 처리해야 하므로, 일반적인 Flow Matching에 비해 단계당 연산량이 다소 많습니다.
+* 비록 수렴 속도가 빨라 전체 학습 시간은 단축되었지만, 메모리나 연산 자원이 제한된 환경에서는 부담이 될 수 있습니다.
+
+#### 멀티모달 간의 불균형
+
+* 이미지, 비디오, 오디오를 동시에 학습할 때 각 데이터 간의 샘플링 비율이나 가중치 조절이 완벽하지 않을 수 있습니다.
+* 특정 양식(예: 이미지)의 데이터가 압도적으로 많을 경우, 상대적으로 적은 양식(예: 오디오)의 학습 품질이 영향을 받을 수 있는 가능성이 존재합니다.
+
+### 2. 향후 연구 방향 (Future Work)
+
+#### 엔드투엔드(End-to-End) 학습
+
+* 현재는 고정된 VAE를 사용하지만, 향후에는 VAE와 Flow Matching 모델을 동시에(End-to-End) 처음부터 끝까지 학습시키는 방향을 제시합니다.
+* 이렇게 하면 잠재 공간 자체가 생성 모델에 최적화되어 더욱 강력한 성능을 낼 수 있을 것으로 기대합니다.
+
+#### 더 큰 규모로의 확장 (Scaling Up)
+
+* 현재 4B(40억 개) 파라미터까지 실험했지만, LLM(거대언어모델)처럼 수십, 수백억 개의 파라미터로 확장했을 때 Self-Flow가 보여줄 잠재력에 대해 기대를 표하고 있습니다.
+* 데이터셋의 규모 역시 더 키울 계획임을 밝힙니다.
+
+#### 지능형 에이전트 및 월드 모델(World Models)
+
+* 단순히 고품질의 미디어를 생성하는 것을 넘어, 물리 법칙을 이해하고 행동을 예측하는 '범용 월드 모델'로의 발전을 목표로 합니다. 
+* 특히 로보틱스 분야에서 환경을 시뮬레이션하고 다음 행동을 결정하는 핵심 두뇌로 Self-Flow를 활용하는 연구가 유망할 것으로 보고 있습니다.
+
+#### 이산 데이터와 연속 데이터의 통합
+
+* 현재는 시각/청각과 같은 연속적인 데이터를 주로 다루지만, 텍스트나 코드와 같은 이산적인(Discrete) 데이터까지 하나의 Flow Matching 프레임워크 안에서 완벽하게 통합하는 연구를 계획하고 있습니다.
+
+
+---
+
