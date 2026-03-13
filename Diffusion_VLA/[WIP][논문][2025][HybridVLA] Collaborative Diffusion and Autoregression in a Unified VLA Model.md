@@ -1,4 +1,4 @@
-# HybridVLA: Collaborative Diffusion and Autoregression in a Unified VLA Model (2025)
+# HybridVLA: Collaborative Diffusion and Autoregression in a Unified VLA Model
 
 저자 : 
 
@@ -17,7 +17,7 @@ Peking University;
 
 Project web page: hybrid-vla.github.io
 
-발표 : 
+발표 : ICCV 2025 (International Conference on Computer Vision) 3월
 
 논문 : [PDF](https://arxiv.org/pdf/2503.10631)
 
