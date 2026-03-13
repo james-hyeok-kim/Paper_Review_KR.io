@@ -12,7 +12,7 @@ Tiancai Wang3 Xiaoyan Sun1‡
 
 Project Page: https://wenyuqing.github.io/llada-vla/
 
-발표 : 
+발표 : arXiv(2025년 2월 14일)
 
 논문 : [PDF](https://arxiv.org/pdf/2509.06932)
 
