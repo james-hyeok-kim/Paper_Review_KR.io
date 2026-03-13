@@ -8,7 +8,7 @@ Jiayi Chen1,∗ Wenxuan Song1,∗,‡ Pengxiang Ding2,3 Ziyang Zhou1 Han Zhao2,3
 
 ∗Equal contribution ‡Project lead: songwenxuan0115@gmail.com  Corresponding author
 
-발표 : 
+발표 : ICLR 2025((International Conference on Learning Representations 2025), 5월
 
 논문 : [PDF](https://arxiv.org/pdf/2511.01718)
 
