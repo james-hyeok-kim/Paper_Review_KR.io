@@ -14,10 +14,9 @@ Chengyang Zhao4,1 Xizhou Zhu6,1 Yu Qiao1, Jifeng Dai6,1 Yuntao Chen7†
 
 https://robodita.github.io
 
-발표 : 
+발표 : ICCV 2025 (International Conference on Computer Vision 2025), 10월 21일
 
 논문 : [PDF](https://arxiv.org/pdf/2503.19757)
-
 
 
 ---
