@@ -24,6 +24,17 @@ https://robodita.github.io
 
 ## 0. Summary
 
+### 핵심 기술 및 구조
+
+* 통합 확산 트랜스포머 (Unified DiT)
+* 인컨텍스트 컨디셔닝 (In-context Conditioning)
+* 효율적인 설계: 334M(약 3.3억 개)의 파라미터
+
+### 논문의 의의 (Significance)
+
+* 액션 생성 패러다임의 전환 (헤드에서 몸통으로): 거대 모델 자체가 직접 액션
+* 데이터 효율성과 일반화 능력의 조화: 대규모 데이터(OXE)로 사전 학습한 지식을 바탕, 극소수의 샘플(10-shot)만으로 환경에 빠르게 적응할 수 있음을 증명
+* 가볍고 강력한 오픈 소스 베이스라인 제공: (334M)
 
 ---
 
@@ -81,6 +92,10 @@ https://robodita.github.io
 ---
 
 ## 3. Method
+<p align = 'center'>
+<img width="662" height="303" alt="image" src="https://github.com/user-attachments/assets/cf63264a-e341-40c6-a234-10c7447797e3" />
+</p>
+
 
 ### 3.1 아키텍처 (Architecture)
 
