@@ -107,4 +107,63 @@ $${L}_{\text{ce}} = -\sum_{j=1}^{N} \log P(x_{j} \mid x_{<j}, c)$$
 
 ---
 
+## 2. Related Work
+
+### 1. 전통적 로봇 조작 및 VLM의 통합
+
+* 강화학습(Reinforcement Learning) $\rightarrow$ 모방 학습(Imitation Learning).
+* 최근 연구들은 비전-언어 모델(VLM)의 강력한 추론 능력을 로봇 조작에 이식하려는 시도.
+
+### 2. 비전-언어-행동(VLA) 모델
+
+* VLA 모델은 VLM의 능력을 활용하여 저수준의 $SE(3)$ 포즈(Pose)를 직접 예측.
+* RT-2: 7-자유도(7-DoF) 행동을 이산적인 바구니(Bins)로 양자화하여 자기회귀적으로 예측.
+* OpenVLA: Open X-Embodiment 데이터셋을 활용해 대규모 사전 학습을 수행.
+* 한계: 이러한 자기회귀 방식은 행동을 이산화하는 과정에서 행동의 연속성을 파괴하여 정밀한 제어를 방해한다는 단점이 있습니다.
+
+### 3. 로봇 공학에서의 확산 모델 (Diffusion Models)
+
+* Octo 및 RDT-1B: 트랜스포머 구조에 확산 헤드를 추가하여 유연한 행동 예측을 가능하게 했습니다.
+
+### 4. 확산 기반 VLA 모델과 HybridVLA의 차별점
+
+* 기존의 확산 기반 VLA 모델( $\pi_0$, CogACT, DiVLA 등)은 VLM 뒤에 별도의 확산 헤드를 붙이는 방식을 취했습니다.
+* '이중 시스템' 설계는 VLM을 단순한 특징 추출기로만 사용하여, VLM이 가진 사전 학습된 추론 능력을 충분히 활용하지 못합니다.
+* HybridVLA의 독창성: 기존 연구들과 달리, 단일 LLM 내에서 확산 행동 생성과 차기 토큰 예측을 통합하여 두 패러다임이 서로를 강화하도록 설계되었습니다.
+
 ---
+
+## 3. HybridVLA Method
+
+
+### 3.1 HybridVLA Architecture (모델 구조)
+
+* Pretrained VLM Base: 7B 모델은 Llama-2를, 2.7B 모델은 Phi-2를 LLM 백본으로 사용.
+* Vision Encoders: 7B 모델은 DINOv2와 SigLIP을 조합하여 강력한 시각 특징을 추출하고, 2.7B 모델은 CLIP을 사용.
+* Output Processing: LLM의 출력 토큰은 두 갈래로 처리
+    * 확산 기반 행동( $a_{t+1}^d$ )은 MLP를 통해 연속적인 좌표로 변환
+    * 자기회귀 기반 행동( $a_{t+1}^{ar}$ )은 디토크나이저(Detokenizer)를 통해 이산 토큰에서 복원.
+
+### 3.2 Collaborative Training Recipe (협력적 학습 레시피)
+
+* 토큰 시퀀스 설계
+    * 로봇 상태( $f_r$ ), 확산 노이즈, 자기회귀 토큰을 하나의 시퀀스로 구성합니다.
+    * 확산 토큰을 <BOD>와 <EOD> 마커로 감싸서 경계를 명확히 하고, 자기회귀 토큰보다 앞에 배치하여 정답 유출(Leakage)을 방지.
+* 하이브리드 목적 함수
+    * $L_{dif}$: 예측 노이즈와 실제 노이즈 간의 MSE 손실.
+    * $L_{ce}$: 이산 액션 토큰에 대한 교차 엔트로피 손실.
+    * 공식: $L_{hybrid} = L_{dif} + L_{ce}$.
+* 단계별 학습
+    * Open X-Embodiment, DROID 등 대규모 로봇 데이터셋에서 사전 학습을 거친 후
+    * 특정 작업 데이터로 파인튜닝을 진행합니다.
+
+### 3.3 Collaborative Action Ensemble (협력적 행동 앙상블)
+
+* Diffusion Inference: DDIM 샘플링을 사용하여 4단계의 반복적인 노이즈 제거 과정을 거칩니다. 이때 KV 캐시(KV Cache)를 활용해 중복 계산을 줄이고 속도를 높입니다.
+* Autoregressive Inference: 확산 토큰의 연속적 표현을 조건(Condition)으로 삼아 더 정밀한 토큰 예측을 수행합니다.
+* 적응적 융합 로직: 자기회귀 토큰의 평균 신뢰도( $c_{t+1}^{ar}$ )를 기준으로 판단합니다.
+   * $c_{t+1}^{ar} > 0.96$: 두 모델의 예측값을 평균 내어 실행합니다 ( $a_{t+1} = (a_{t+1}^d + a_{t+1}^{ar}) / 2$ ).
+   * $c_{t+1}^{ar} < 0.96$: 확산 모델의 예측값만 사용합니다 ( $a_{t+1} = a_{t+1}^d$ ).
+ 
+
+
