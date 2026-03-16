@@ -109,6 +109,8 @@ Project Page: https://wenyuqing.github.io/llada-vla/
 
 #### 3.2.1 모델 아키텍처 (Model Architecture)
 
+# adding screen shot
+
 
 
 * 구성 요소: 언어 백본(LLaDA: Large Language Diffusion Models), 시각 인코더(SigLIP-2), 그리고 이를 연결하는 프로젝터(MLP)로 구성됩니다.
@@ -132,3 +134,69 @@ Project Page: https://wenyuqing.github.io/llada-vla/
 
 
 ---
+
+## 4. Experiment
+
+
+### 1. 실험 환경 설정 (Setup)
+
+* SimplerEnv: 현실 물리 법칙과 시각적 외형을 정교하게 모방한 시뮬레이션으로, WidowX 로봇을 사용해 4가지 조작 작업을 평가합니다.
+* CALVIN: 긴 호흡(Long-horizon)의 언어 조건부 로봇 조작을 위한 벤치마크로, 5개의 연속적인 작업을 얼마나 잘 수행하는지(Avg. Len.)를 측정합니다.
+* 실제 WidowX 로봇: 실제 환경에서 8가지 작업(학습된 작업 4개, 일반화 작업 4개)을 수행하며 실질적인 성능을 테스트합니다.
+
+### 2. 주요 정량적 결과 (Quantitative Results)
+
+# Table 2
+
+* 실험 결과 LLaDA-VLA는 기존의 자기회귀(AR) 기반 모델들을 압도하는 성능을 보여주었습니다.
+* 시뮬레이션 최고 성능: CALVIN 벤치마크에서 OpenVLA 대비 평균 연속 작업 성공 지표가 0.74 향상되어 4.01을 기록했습니다.
+    * Avg.Len: 연속 작업 완료 평균 길이(Average Episode Length), 얼마나 오랫동안 실수 없이 연속적으로 임무를 수행할 수 있는지 측정하는 지표
+
+# Table 3,4
+
+* 실제 로봇 성공률: 실제 환경에서 평균 성공률 58%를 달성하며, 강력한 경쟁 모델인 $\pi_0$(35%)와 CogACT(30%)를 크게 앞질렀습니다.
+* 강력한 일반화: 학습 데이터에 없던 새로운 물체나 방해 요소가 있는 환경(OOD)에서도 $\pi_0$보다 25% 높은 평균 성공률을 기록했습니다. 
+
+### 3. 소거 연구 (Ablation Study)
+
+# Table 5,6
+
+* Localized Special-token Classification (LSC): 이를 적용했을 때 성공 지표가 0.79 상승하며, 동작 토큰에 집중하는 것이 학습 난이도를 크게 낮춘다는 것을 증명했습니다.
+* Hierarchical Action-structured Decoding (HAD): 일반 디코딩 대신 이 방식을 썼을 때 성능이 0.58 추가로 상승하여, 계층적 구조가 부드러운 궤적 생성에 필수적임을 보여주었습니다.
+* 동작 덩어리 크기 (Action Chunk Size): 한 번에 5개의 동작 스텝을 생성할 때 가장 최적의 성능(4.01)을 보였으며, 너무 많거나 적으면 성능이 하락했습니다. 
+
+---
+
+## 5. Conclusion
+
+### 1. 연구의 핵심 요약
+
+* 본 논문은 사전 학습된 확산 기반 시각-언어 모델(d-VLMs)을 로봇 제어에 활용한 최초의 Vision-Language-Diffusion-Action 모델(LLaDA-VLA)을 제안했습니다.
+    * LLaDA-VLA가 '최초'라고 주장하는 이유는 "사전 학습된 언어 확산 모델(d-VLM)을 그대로 로봇 백본으로 사용한 최초의 사례"
+* 연구진은 기존의 자기회귀(AR) 방식이 아닌 확산 패러다임을 통해 로봇 정책 학습의 새로운 가능성을 열었습니다. 
+
+### 2. 기술적 기여 (Key Designs)
+
+* 국소적 특수 토큰 분류 (LSC): 일반 어휘와 로봇 동작 사이의 도메인 격차를 해소하여 학습 효율을 극대화했습니다.
+* 계층적 동작 구조 디코딩 (HAD): 마스크 확산 모델이 구조화된 동작 궤적을 생성할 수 있게 하여, 물리적으로 더 일관성 있고 타당한 결과를 만들어냈습니다. 
+
+### 3. 실험적 성과 및 의의
+
+* 성능 입증: 제안된 설계들을 통해 LLaDA-VLA는 여러 시뮬레이션 벤치마크와 실제 로봇 실험에서 SOTA(State-of-the-Art, 최고 수준) 성능을 달성했습니다. 
+* 미래 가치: 이번 연구 결과는 로봇 조작 분야에서 확산 기반 모델(d-VLMs)의 응용 가능성을 입증하는 견고한 토대가 되었으며, 향후 관련 연구들이 나아갈 길을 제시했습니다. 
+
+---
+
+## Appendix
+
+<div align = 'center'>
+
+| 구분 | $\pi_0$ (pi-0) | LLaDA-VLA |
+| :---: | :---: | :---: |
+| **기반 모델 (Backbone)** | 기존의 자기회귀(AR) 방식인 PaliGemma를 기반으로 함 <br> LLM AR(inference) + Diffusion(Action) | 사전 학습된 확산 기반 VLM(d-VLM)인 LLaDA-V를 백본으로 사용 <br> Diffusion(Inference + Action) |
+| **확산 방식** | Flow-matching 기법을 별도로 결합하여 동작을 생성 | 모델 자체가 마스크 확산(Masked Diffusion) 방식으로 토큰을 예측 |
+| **데이터 형태** | 연속적인(Continuous) 수치 데이터로 동작을 출력함 | 동작을 이산적인(Discrete) 토큰으로 변환하여 언어처럼 처리함 |
+</div>
+
+---
+
