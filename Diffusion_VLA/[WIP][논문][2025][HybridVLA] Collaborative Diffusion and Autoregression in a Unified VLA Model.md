@@ -28,9 +28,10 @@ Project web page: hybrid-vla.github.io
 ### 1. 논문 요약 (Summary)
 
 * HybridVLA는 로봇 조작(Manipulation)을 위해 Diffusion + Autoregressive를 하나의 LLM에 통합한 비전-언어-행동(VLA) 모델
-    * Image + Text(command) $\rightarrow$ LLM prefix $\rightarrow$ Iteration 4 times $\rightarrow$ MLP $\rightarrow$ 로봇 행동의 물리적 수치
-    * 첫 Image는 Gaussian Noise
+    * Image(Vision Encoder) + Text(Tokenizer) + Robot state(MLP) + Diffusion(MLP, with Random data for Robot actions) $\rightarrow$ LLM prefix $\rightarrow$ Iteration 4 times $\rightarrow$ MLP $\rightarrow$ 로봇 행동의 물리적 수치
     * 예측 하는 대상이 행동이 아니라 노이즈(제거 될 노이즈)
+        * 단일 팔: 7차원 벡터 $(\Delta x, \Delta y, \Delta z, Roll, Pitch, Yaw, Gripper)$.
+        * [0.12, -0.85, 2.1, 0.05, -1.2, 0.4, 0.9]
     * prefix length가 너무 크면, DINOv2 or SigLIP같은 인코더를 통해 Visual Tokens으로 변환
         * HybridVLA (7B): DINOv2와 SigLIP
         * HybridVLA (2.7B): 가벼운 CLIP 모델만
@@ -60,6 +61,8 @@ $${L}_{\text{ce}} = -\sum_{j=1}^{N} \log P(x_{j} \mid x_{<j}, c)$$
     * 신뢰도 0.96 기준 (Threshold, $\theta$)
     * $c_{t+1}^{ar} = \frac{1}{n} \sum_{i=1}^{n} P(token_i)$
     * $(0.98 + 0.95 + 0.99 + 0.97 + 0.96 + 0.94 + 0.93) \div 7 = 6.72 \div 7 = \mathbf{0.96}$
+    * 0.96 넘으면 확산 모델의 행동( $a_{t+1}^{d}$ )과 AR 모델의 행동( $a_{t+1}^{ar}$ )을 산술 평균 : $a_{t+1} = (a_{t+1}^{d} + a_{t+1}^{ar}) / 2$
+    * 0.96 미만일 때 확산 모델 기반의 행동( $a_{t+1}^{d}$ )에만 100% 의존하여 로봇을 조작: $a_{t+1} = a_{t+1}^{d}$
 * 성과: 시뮬레이션(RLBench) 및 실제 환경 테스트에서 기존 최고 수준(SOTA) 모델 대비 성공률을 각각 14%, 19% 향상시켰으며, 단일 팔 및 양팔 로봇 모두에서 강력한 성능을 입증했습니다.
 
 ### 2. 논문의 의의 (Significance)
@@ -77,6 +80,29 @@ $${L}_{\text{ce}} = -\sum_{j=1}^{N} \log P(x_{j} \mid x_{<j}, c)$$
 
 ## 1. Introduction
 
+# Figure 2 copy해서 넣기
+
+
+
+### 2. 기존 VLA 모델들의 딜레마
+
+* 자기회귀(AR) 방식의 한계
+    * VLM의 강력한 상식 추론 능력을 그대로 물려받지만
+    * 행동(Action)을 이산적으로 예측하기 때문에 정밀한 제어 불가
+* 확산(Diffusion) 방식의 한계
+    * 정밀하고 연속적인 제어가 가능하지만, 대개 VLM 뒤에 별도의 '확산 헤드'를 붙이는 방식
+    * 이 경우 헤드는 VLM이 뽑아준 특징만 참고, VLM의 추론 능력을 충분히 활용하지 못함
+
+### 3. HybridVLA의 핵심 제안: "우아한 통합"
+
+* 단일 LLM 백본: 확산 기반의 연속적인 행동과 자기회귀 기반의 맥락적 추론을 하나의 대규모 언어 모델(LLM) 안으로 흡수.
+* 협력적 학습 및 앙상블: 확산 모델의 노이즈 제거 과정을 다음 토큰 예측 프로세스에 매끄럽게 녹여냈으며, 작업 성격에 따라 두 예측을 적응적으로 융합하는 메커니즘을 설계했습니다.
+
+### 4. 주요 성과 및 기여
+
+* SOTA 달성: 시뮬레이션에서 14%, 실제 환경에서 19%의 평균 성공률 향상을 기록했습니다.
+* 강력한 일반화: 보지 못한 물체, 배경, 위치, 조명 조건에서도 안정적인 조작 성능을 보여주었습니다.
+* 유연한 모델 크기: 7B 모델뿐만 아니라 2.7B 모델(Phi-2 기반)에서도 효과를 입증하여 모델 크기에 구애받지 않는 범용성을 보여줍니다.
 
 
 ---
