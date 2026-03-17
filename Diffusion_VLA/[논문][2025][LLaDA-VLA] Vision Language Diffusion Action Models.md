@@ -109,8 +109,9 @@ Project Page: https://wenyuqing.github.io/llada-vla/
 
 #### 3.2.1 모델 아키텍처 (Model Architecture)
 
-# adding screen shot
-
+<p align = 'center'>
+<img width="389" height="263" alt="Image" src="https://github.com/user-attachments/assets/834aa933-3b1a-4f59-be25-2f21cde98093" />
+</p>
 
 
 * 구성 요소: 언어 백본(LLaDA: Large Language Diffusion Models), 시각 인코더(SigLIP-2), 그리고 이를 연결하는 프로젝터(MLP)로 구성됩니다.
@@ -146,20 +147,26 @@ Project Page: https://wenyuqing.github.io/llada-vla/
 
 ### 2. 주요 정량적 결과 (Quantitative Results)
 
-# Table 2
+<p align = 'center'>
+<img width="488" height="317" alt="Image" src="https://github.com/user-attachments/assets/84cdf44e-e426-488a-9f44-a321d85c7446" />
+</p>
 
 * 실험 결과 LLaDA-VLA는 기존의 자기회귀(AR) 기반 모델들을 압도하는 성능을 보여주었습니다.
 * 시뮬레이션 최고 성능: CALVIN 벤치마크에서 OpenVLA 대비 평균 연속 작업 성공 지표가 0.74 향상되어 4.01을 기록했습니다.
     * Avg.Len: 연속 작업 완료 평균 길이(Average Episode Length), 얼마나 오랫동안 실수 없이 연속적으로 임무를 수행할 수 있는지 측정하는 지표
 
-# Table 3,4
+<p align = 'center'>
+<img width="762" height="254" alt="Image" src="https://github.com/user-attachments/assets/c0f5e1a8-b196-4fea-993f-230ae6b962bd" />
+</p>
 
 * 실제 로봇 성공률: 실제 환경에서 평균 성공률 58%를 달성하며, 강력한 경쟁 모델인 $\pi_0$(35%)와 CogACT(30%)를 크게 앞질렀습니다.
 * 강력한 일반화: 학습 데이터에 없던 새로운 물체나 방해 요소가 있는 환경(OOD)에서도 $\pi_0$보다 25% 높은 평균 성공률을 기록했습니다. 
 
 ### 3. 소거 연구 (Ablation Study)
 
-# Table 5,6
+<p align = 'center'>
+<img width="381" height="343" alt="Image" src="https://github.com/user-attachments/assets/57d2db24-5a12-4fab-8bd4-1d7e59bd3b35" />
+</p>
 
 * Localized Special-token Classification (LSC): 이를 적용했을 때 성공 지표가 0.79 상승하며, 동작 토큰에 집중하는 것이 학습 난이도를 크게 낮춘다는 것을 증명했습니다.
 * Hierarchical Action-structured Decoding (HAD): 일반 디코딩 대신 이 방식을 썼을 때 성능이 0.58 추가로 상승하여, 계층적 구조가 부드러운 궤적 생성에 필수적임을 보여주었습니다.
