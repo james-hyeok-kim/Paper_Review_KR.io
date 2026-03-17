@@ -79,13 +79,17 @@ https://diffusion-policy.cs.columbia.edu/
 
 * Action 만 Diffusion 으로 예측
     * Vision Encoder + Diffusion Predictor
-    * ResNet or ViT
+    * Vision Encoder: ResNet or ViT
         * ViT: MHA + MLP + Layer Norm + Residual Connection
+    * Diffusion: 1D U-Net or DiT
+        * 1D U-Net
+            * 단순 상황 + 공식 소스코드
+        * 좀더 복잡한 상황에서는 Transformer 기반 DiT
 
 * Diffusion Policy는 동작을 직접 출력하는 대신, 조건부 노이즈 제거 확산 프로세스(Conditional Denoising Diffusion Process)를 사용합니다.
     * CNN에서는 FiLM(Feature-wise Linear Modulation)방식을 사용
     * Transformer에서는 Cross-Attention을 이용
-    * 시각관측 정보(카메라) + 로봇 상태 + 관측 수평선(과거 데이터)
+    * 시각관측 정보(카메라) + 로봇 상태 + 관측 수평선(과거부터 현재까지의 데이터 범위)
 * 그라디언트 필드 학습: 모델은 동작 분포의 점수 함수(Score function) 그라디언트를 학습합니다.
 * 반복적 최적화: 추론 시점에 가우시안 노이즈에서 시작하여, 학습된 그라디언트 필드를 따라 동작을 반복적으로 정제(Refine)하여 최종 동작을 생성합니다.
 
