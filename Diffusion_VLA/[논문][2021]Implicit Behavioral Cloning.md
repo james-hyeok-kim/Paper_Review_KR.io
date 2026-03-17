@@ -100,7 +100,7 @@ $$\mathcal{L}_{InfoNCE} = \sum_{i=1}^{N} -\log(\tilde{p}_\theta(y_i | x, \{\tild
     * 해당 가짜 동작의 에너지 ( $E_\theta(x_i, \tilde{y}_i^j)$ )를 상대적으로 높입니다.
 
 
-### 3. 추론 방법 (Inference)
+### 3. 추론 방법 (Inference) (아래 3가지 모두 사용하여 추론)
 
 * 학습된 에너지 모델 $E_\theta(x, y)$가 있다면, 새로운 입력 $x$에 대해 에너지를 최소화하는 $y$를 찾기 위해 확률적 최적화(Stochastic Optimization)를 수행합니다. 
 
