@@ -200,7 +200,7 @@ Project Page: https://wenyuqing.github.io/llada-vla/
 
 | 구분 | $\pi_0$ (pi-0) | LLaDA-VLA |
 | :---: | :---: | :---: |
-| **기반 모델 (Backbone)** | 기존의 자기회귀(AR) 방식인 PaliGemma를 기반으로 함 <br> LLM AR(inference) + Diffusion(Action) | 사전 학습된 확산 기반 VLM(d-VLM)인 LLaDA-V를 백본으로 사용 <br> Diffusion(Inference + Action) |
+| **기반 모델 (Backbone)** | 기존의 자기회귀(AR) 방식인 PaliGemma를 기반으로 함 LLM AR(inference) + Diffusion(Action) | 사전 학습된 확산 기반 VLM(d-VLM)인 LLaDA-V를 백본으로 사용 Diffusion(Inference + Action) |
 | **확산 방식** | Flow-matching 기법을 별도로 결합하여 동작을 생성 | 모델 자체가 마스크 확산(Masked Diffusion) 방식으로 토큰을 예측 |
 | **데이터 형태** | 연속적인(Continuous) 수치 데이터로 동작을 출력함 | 동작을 이산적인(Discrete) 토큰으로 변환하여 언어처럼 처리함 |
 </div>
