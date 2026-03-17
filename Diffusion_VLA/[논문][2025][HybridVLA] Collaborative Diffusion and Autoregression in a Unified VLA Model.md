@@ -25,7 +25,9 @@ Project web page: hybrid-vla.github.io
 
 ## 0. Summary 
 
-# Figure 2 copy
+<p align = 'center'>
+<img width="742" height="360" alt="Image" src="https://github.com/user-attachments/assets/326ab57f-0299-47c5-b3e0-892cb078589f" />
+</p>
 
 ### 1. 논문 요약 (Summary)
 
@@ -82,8 +84,9 @@ $${L}_{\text{ce}} = -\sum_{j=1}^{N} \log P(x_{j} \mid x_{<j}, c)$$
 
 ## 1. Introduction
 
-# Figure 2 copy해서 넣기
-
+<p align = 'center'>
+<img width="742" height="360" alt="Image" src="https://github.com/user-attachments/assets/326ab57f-0299-47c5-b3e0-892cb078589f" />
+</p>
 
 ### 2. 기존 VLA 모델들의 딜레마
 
@@ -170,7 +173,9 @@ $${L}_{\text{ce}} = -\sum_{j=1}^{N} \log P(x_{j} \mid x_{<j}, c)$$
 
 ## 4. Experiment
 
-# Table 2 복사
+<p align = 'center'>
+<img width="750" height="262" alt="Image" src="https://github.com/user-attachments/assets/93366892-1222-451d-a1b5-74a6b6e3ae75" />
+</p>
 
 ### 4.1 시뮬레이션 실험 (Simulation Experiment)
 
