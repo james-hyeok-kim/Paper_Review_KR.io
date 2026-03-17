@@ -106,6 +106,8 @@ $$A_t^{\tau+\delta} = A_t^{\tau} + \delta v_{\theta}(A_t^{\tau}, o_t)$$
 
 ## 3. Overview
 
+* (이미지/언어) + (액션 $\rightarrow$ MLP) $\rightarrow$ 단일 트랜스포머(PaliGemma(SigLIP: Vision Encoder + Gemma-2B) + Action Expert: MoE) $\rightarrow$ Flow Matching 반복 $\rightarrow$ 최종 로봇 동작 
+
 ### 1. 데이터 혼합 (Pre-training Mixture)
 
 * 자체 데이터셋: 7가지 로봇 구성과 68개의 과업에서 수집된 고도의 숙련도가 필요한 조작 데이터입니다.
@@ -150,8 +152,8 @@ $$A_t^{\tau+\delta} = A_t^{\tau} + \delta v_{\theta}(A_t^{\tau}, o_t)$$
    
 | 전문가 구분 | 담당 데이터 (Token Routing) | 설명 |
 | :--- | :--- | :--- |
-| **VLM 백본 (Expert 1)** | 이미지($I_t^n$) 및 언어 명령($l_t$) | 기존 PaliGemma가 학습한 인터넷 스케일의 시각·언어 지식을 활용합니다. |
-| **액션 전문가 (Expert 2)** | 로봇 상태($q_t$) 및 행동($A_t^\tau$) | VLM 사전 학습에서 보지 못한 로봇 특화 데이터를 처리하기 위해 추가된 300M 규모의 가중치입니다. |
+| **VLM 백본 <\br> (Expert 1)** | 이미지($I_t^n$) 및  <\br>  언어 명령($l_t$) | 기존 PaliGemma가 학습한 인터넷 스케일의 시각·언어 지식을 활용합니다. |
+| **액션 전문가 <\br> (Expert 2)** | 로봇 상태($q_t$) 및  <\br> 행동($A_t^\tau$) | VLM 사전 학습에서 보지 못한 로봇 특화 데이터를 처리하기 위해 추가된 300M 규모의 가중치입니다. |
 
 </div>
 
