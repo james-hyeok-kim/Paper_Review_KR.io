@@ -153,7 +153,7 @@ $$\mathcal{L}_{InfoNCE} = \sum_{i=1}^{N} -\log(\tilde{p}_\theta(y_i | x, \{\tild
 
 ### 3.3. 랑제빈 샘플링(Langevin Sampling)
 
-* 에너지 함수의 경사(Gradient) 정보를 활용하여 점진적으로 최솟값에 접근하는 방식입니다.
+* 에너지 함수의 경사(Gradient, $\nabla_y E$ ) 정보를 활용하여 점진적으로 최솟값에 접근하는 방식입니다.
 
 #### 3.3.3. 장점과 한계
 
@@ -175,7 +175,15 @@ $$\mathcal{L}_{InfoNCE} = \sum_{i=1}^{N} -\log(\tilde{p}_\theta(y_i | x, \{\tild
 | **추론 방식** | 단일 네트워크 통과 (Feed-forward) | 최적화 과정을 통한 반복적 탐색 |
 | **특징** | 계산이 빠르나 불연속성 표현에 취약함 | 계산량은 많으나 복잡한 다중 모드 분포 표현에 강함 |
 
+| 추론 방식 | 적용된 작업 (Task) 특징 | 액션 차원 (Action Dimension) |
+| :--- | :--- | :--- |
+| **미분 미사용 (DFO)** | 시뮬레이션 푸시(Simulated Pushing), 실제 로봇 작업(Real World) | 주로 **2차원** |
+| **자기회귀적 DFO** | 평면 쓸기(Planar Sweeping), 양팔 쓸기(Bi-Manual Sweeping) | **3차원** 또는 **12차원** |
+| **랑제빈 샘플링** | D4RL 벤치마크, 입자(Particle) 환경 | 3차원에서 최대 **32차원** (고차원) |
+
 </div>
+
+
 
 
 ---
