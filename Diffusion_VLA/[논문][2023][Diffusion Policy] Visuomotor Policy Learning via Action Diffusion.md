@@ -77,6 +77,11 @@ https://diffusion-policy.cs.columbia.edu/
 
 ### 2. Diffusion Policy의 핵심 아이디어
 
+* Action 만 Diffusion 으로 예측
+    * Vision Encoder + Diffusion Predictor
+    * ResNet or ViT
+        * ViT: MHA + MLP + Layer Norm + Residual Connection
+
 * Diffusion Policy는 동작을 직접 출력하는 대신, 조건부 노이즈 제거 확산 프로세스(Conditional Denoising Diffusion Process)를 사용합니다.
     * CNN에서는 FiLM(Feature-wise Linear Modulation)방식을 사용
     * Transformer에서는 Cross-Attention을 이용
