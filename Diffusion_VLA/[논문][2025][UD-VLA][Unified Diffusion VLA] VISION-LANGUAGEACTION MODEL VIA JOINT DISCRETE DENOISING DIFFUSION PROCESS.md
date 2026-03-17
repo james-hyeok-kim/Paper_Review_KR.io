@@ -26,8 +26,8 @@ Jiayi Chen1,∗ Wenxuan Song1,∗,‡ Pengxiang Ding2,3 Ziyang Zhou1 Han Zhao2,3
     * 이미지 전역적 일관성 + 액션의 상관관계 파악, 양방향 어텐션
     * 액션이 미래 이미지를 미리 참조하여 '역운동학(Inverse Kinematics)'적으로 동작할 수 있도록 인과적(Causal) 구조를 결합했습니다.
     * Block 내에서는 양방향 어텐션: 텍스트, 이미지, 미래 이미지, 액션 블록
-    * Casual Mask Attention : 미래 이미지 $\rightarrow$ 액션 사이, 미래 이미지 $\rightarrow$ 현재 이미지 사이
-    * 금지사항: 액션 $\rightarrow$ 미래 이미지, 미래 정보 $\rightarrow$ 현재 입력
+    * Casual Mask Attention : 미래 이미지 $\rightarrow$ 액션 사이 / 미래 이미지 $\rightarrow$ 현재 이미지 사이
+    * 금지사항: 액션 $\rightarrow$ 미래 이미지 / 미래 정보 $\rightarrow$ 현재 입력
 * 학습 방식: 사전 학습된 시각-언어 모델(VLM)을 기반으로 하며, 비디오 데이터를 통한 '미래 상태 모델링(1단계)'과 로봇 데이터를 통한 '공동 최적화(2단계)'의 파이프라인을 거쳐 학습됩니다.
 * 성능: CALVIN, LIBERO, SimplerEnv 등 주요 로봇 벤치마크에서 기존 최고 수준(SOTA)을 경신했으며, 기존 자기회귀(Autoregressive) 방식보다 4배 빠른 추론 속도를 구현했습니다.
 
