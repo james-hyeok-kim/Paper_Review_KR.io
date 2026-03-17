@@ -17,6 +17,8 @@ Jiayi Chen1,∗ Wenxuan Song1,∗,‡ Pengxiang Ding2,3 Ziyang Zhou1 Han Zhao2,3
 ## 0. Summary
 
 ### 0.1. UD-VLA 모델 요약
+* Model Architecture
+    * Unified Token Space(Text + Image + Robot action) $\rightarrow$ Hybrid Attention $\rightarrow$ JD3P(DiT이나, Discrete Tokens output)
 * 핵심 메커니즘 (JD3P): 'Joint Discrete Denoising Diffusion Process'라는 독자적인 확산 공정을 제안했습니다.
     * 미래 이미지와 액션 토큰을 하나의 동기화된 궤적 내에서 동시에 정제(Denoising)
     * 시각적 예측과 물리적 행동이 서로 시너지를 내도록 설계.
@@ -124,6 +126,10 @@ Jiayi Chen1,∗ Wenxuan Song1,∗,‡ Pengxiang Ding2,3 Ziyang Zhou1 Han Zhao2,3
 ---
 
 ## 3. Method
+
+<p align = 'center'>
+<img width="1127" height="433" alt="image" src="https://github.com/user-attachments/assets/49a66cb8-048c-4c32-9d91-fd22a5d09afc" />
+</p>
 
 ### 3.1 Unified Diffusion VLA
 
