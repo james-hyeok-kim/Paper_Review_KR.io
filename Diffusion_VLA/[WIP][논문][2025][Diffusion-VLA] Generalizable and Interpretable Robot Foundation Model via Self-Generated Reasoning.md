@@ -135,7 +135,7 @@ $$L_{diff} = \mathbb{E}_{x_0, \epsilon, t} \left[ ||\epsilon - \epsilon_\theta(x
 * $\epsilon_\theta$: 확산 모델이 예측해 낸 노이즈
 * $c$: 조건(Condition). DiVLA에서는 VLM이 '추론 주입 모듈(FiLM)'을 통해 쏴주는 추론 결과와 시각적 특징이 바로 이 조건으로 작용하여 행동을 유도합니다.
 
-$$L_{ntp} = -\sum_{i} \log P(x_i | x_{<i}, c)$$
+$$L_{ntp} = -\sum_{i} \log P(x_i \mid x_{\lt i}, c)$$
 
 * $x_i$: 모델이 맞춰야 할 정답 토큰 (예: "육각렌치를", "오른쪽에", "놓는다" 등)
 * $x_{<i}$: 이전에 이미 생성된 토큰들
