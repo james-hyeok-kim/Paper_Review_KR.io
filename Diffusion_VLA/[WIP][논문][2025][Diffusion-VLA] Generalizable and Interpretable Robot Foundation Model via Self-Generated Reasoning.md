@@ -143,5 +143,65 @@ $$L_{ntp} = -\sum_{i} \log P(x_i \mid x_{\lt i}, c)$$
 
 ---
 
+## 4. Experiments
+
+<p align = 'center'>
+<img width="564" height="222" alt="image" src="https://github.com/user-attachments/assets/cd6e77ae-1639-4e00-99db-1fefd36dedc0" />
+</p>
+
+### 1. 다중 작업 및 시각적 일반화 (Multi-Task Learning & Visual Generalization, 4.2)
+
+* 로봇이 사용자의 다양한 명령을 얼마나 잘 수행하는지, 그리고 주변 환경이 변해도 헷갈리지 않는지.
+
+* 다중 작업 (Multi-task): 물건 선택하기, 세워진 냄비 뒤집기, 큐브를 상자에 넣기 등 5가지 기본 작업. 
+* 시각적 방해 극복 (Visual Generalization)
+    * 로봇 주변에 엉뚱한 물건(방해꾼)을 막 늘어놓거나, 바닥 배경을 바꾸거나, 화려한 조명을 켜서 로봇을 방해.
+    * 다른 모델들은 성능이 뚝 떨어졌지만, DiVLA는 흔들림 없이 가장 높은 평균 성공률을 유지(Robustness).
+
+### 2. 공장 분류 작업 (End-to-End Sorting, 4.3)
+
+* 실제 산업 현장처럼, 테이블 위에 어지럽게 널려 있는 물건들을 4가지 카테고리(장난감 자동차, 털장갑, 인형, 육각렌치)로 분류해서 상자에 넣는 복잡한 작업.
+* 학습 때 본 물건(Seen)과 처음 보는 물건(Unseen)을 섞어 놓고, 물건들이 서로 겹쳐 있는 아주 어려운(Cluttered) 상황.
+* 결과
+    * DiVLA는 평균 66.2%의 성공률, 2등인 OpenVLA(45.3%)를 큰 격차.
+    * 특히 방해물이 아주 많은 극한 상황에서 Diffusion Policy(DP) 모델은 성공률이 9.2%로 폭락했지만, DiVLA는 60%.
+
+### 3. 로봇의 속마음 엿보기: 행동 분석 (Behavior Analysis, 4.4)
+
+* DiVLA의 '추론 주입 모듈' 효과.
+    * 상황을 유연하게 '해석'
+* 유추 능력: 로봇에게 처음 보는 '드라이버'를 줬더니, 모델이 스스로 "이건 육각렌치랑 비슷하게 생겼네?"라고 판단해서 육각렌치 상자에 분류해 넣음.
+* 자기 수정 (Self-correction): 로봇이 "파란색 장난감 차를 잡는다"라고 생각하고 손을 뻗고 있을 때, 연구진이 중간에 몰래 '육각렌치'로 물건을 바꿔치기. 로봇이 즉각적으로 자신의 생각을 "육각렌치를 잡는다"로 바꾸고 그에 맞게 행동을 수정.
+
+### 4. 제로샷 빈 피킹 (Zero-Shot Bin Picking, 4.5)
+
+<p align = 'center'>
+<img width="283" height="186" alt="image" src="https://github.com/user-attachments/assets/19e61e81-50be-4bbb-8f1d-fb540f8ae6e1" />
+</p>
+
+* 로봇이 학습 데이터에서 단 한 번도 본 적 없는 완전히 새로운 물체 102개를 집어 옮기는 테스트. 
+* 물체의 크기, 색상, 질감, 말랑말랑한 정도가 다 달라서 어려움.
+* 결과: DiVLA는 63.7%의 성공률. OpenVLA(28.4%), Octo(19.6%) 등 다른 모델들이 처음 보는 물체의 특징을 파악하지 못해 헤맨 것과 비교하면 엄청난 일반화(Generalization) 능력.
+
+### 5. 양팔 로봇에 빠른 적응 (Adapt to Bimanual Robot, 4.6)
+
+<p align = 'center'>
+<img width="275" height="110" alt="image" src="https://github.com/user-attachments/assets/eb4e01de-22c6-4d98-a1f0-e4391b3f04df" />
+</p>
+
+* 외팔 로봇(Franka) $\rightarrow$ 두 팔을 쓰는 로봇(AgileX)에 모델을 적용.
+* 테이블 위에 있는 식기류는 왼쪽으로, 쓰레기는 오른쪽 휴지통으로 치우는 '테이블 정리(Table bussing)' 작업.
+* 결과: 본 적 있는 물건에선 72.9%, 처음 보는 물건이 섞여 있어도 70.8%의 높은 성공률.
+
+
 ---
 
+## 5. Conclusion
+
+1. DiVLA의 탄생과 최고 수준(SOTA)의 성능 증명
+2. '추론'과 '행동'의 완벽한 결합
+3. 압도적인 일반화(Generalization) 능력
+4. VLA 모델 설계의 새로운 패러다임 제시
+
+
+---
