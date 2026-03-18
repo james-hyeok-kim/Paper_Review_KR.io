@@ -46,15 +46,18 @@ Indiana University, 3University of Michigan, 4City University of Hong Kong
 
 $$ \text{Vision Encoder(SigLIP2 or DINOv2)} \rightarrow \text{LLM(Cross Attention)} \rightarrow DiT$$
 
-| 모델 | 컴포넌트 | 모델/레이어 정보 | 메모리 (FP16 기준) |
-| :--- | :--- | :--- | :--- |
-| **$\pi$ 0.5** | Vision Encoder | SigLIP2 또는 DINOv2 | - |
-| | LLM Backbone | 126개 선형 레이어 (18개 블록 수준) | **4.27 GB** |
-| | DiT Action Head | 126개 선형 레이어 | (LLM+DiT 합산 관리) |
-| **GR00T N1.5** | Vision Encoder | SigLIP2 또는 DINOv2 | - |
-| | LLM Backbone | 84개 선형 레이어 | **2.02 GB** |
-| | DiT Action Head | 96개 선형 레이어 | (LLM+DiT 합산 관리) |
 
+#### 모델별 파라미터 수(Parameter Count) 구성 비교
+
+| 모델 | 컴포넌트 | 모델/레이어 상세 정보 | 파라미터 수 (추정치) | 전체 합계 |
+| :--- | :--- | :--- | :--- | :--- |
+| **$\pi$0.5** | **Vision Encoder** | SigLIP (So400m급) | **약 0.4B (400M)** | **총 약 3.3B** |
+| | **LLM Backbone** | 126개 선형 레이어 (18개 블록) | **약 2.6B** | (VLA 통합형) |
+| | **DiT Action Head**| 126개 선형 레이어 (18개 블록) | **약 0.3B (300M)** | |
+| --- | --- | --- | --- | --- |
+| **GR00T N1.5**| **Vision Encoder** | SigLIP2 또는 DINOv2 | **약 0.4B ~ 0.6B** | **총 약 3.0B** |
+| | **LLM Backbone** | 84개 선형 레이어 (약 12개 블록) | **약 1.8B ~ 2.0B** | (3B 변형 모델) |
+| | **DiT Action Head**| 96개 선형 레이어 (16개 블록) | **약 0.5B ~ 0.6B** | |
 
 #### Vision Encoder 모델 사이즈 및 메모리 (FP16 기준)
 
