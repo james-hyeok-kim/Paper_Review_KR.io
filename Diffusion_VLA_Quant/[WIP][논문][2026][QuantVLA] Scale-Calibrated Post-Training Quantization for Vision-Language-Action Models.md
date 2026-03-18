@@ -108,6 +108,7 @@ $$ \text{Vision Encoder(SigLIP2 or DINOv2)} \rightarrow \text{LLM(Cross Attentio
 ### 4. QuantVLA의 제안 배경
 
 * QuantVLA는 양자화로 인한 '스케일 드리프트(Scale Drift)'가 어텐션 온도와 잔차 에너지를 변화시켜 성능을 떨어뜨린다는 분석 결과에 기반하여 설계되었습니다.
+    * 어텐션 온도: 어텐션 로그 $L$에서 온도가 낮아진다(분산이 증가) softmax 쏠리게 되고(Over-sharpening), 온도가 높다 (분산이 감소) Softmax 고르게(Over-flattening)
 
 ### 5. 핵심 기여도 (Main Contributions)
 
