@@ -165,14 +165,6 @@ $$2^y = 2^{\lfloor y \rfloor} \cdot 2^{y - \lfloor y \rfloor}$$
 
 * Blackwell의 새로운 기능을 활용하여 두 개의 CTA(Threadblock)가 한 쌍으로 동작하게 했습니다. 이를 통해 각 CTA는 필요한 데이터( $B$ 타일)의 절반만 로드하면 되므로 공유 메모리 트래픽이 감소합니다.
 * dQ 원자적 연산(Atomic Adds) 절반 감소: 2-CTA 모드에서 $dS$ 데이터를 분산 공유 메모리(DSMEM)로 교환하여 $dQ$를 계산함으로써, 전역 메모리에 결과를 쓸 때 발생하는 비싼 Atomic 연산 횟수를 1-CTA 방식 대비 절반으로 줄였습니다.
-    * $dQ$를 구하는 연산( $dQ = \alpha dSK$ )은 KV 시퀀스 차원을 따라 결과값을 계속 더해나가는 리덕션(Reduction) 과정
-    * 기존 1-CTA 방식에서는 여러 CTA가 전역 메모리(GMEM)의 동일한 $dQ$ 위치에 동시에 값을 쓰려 하기 때문에, 데이터 오염을 막기 위해 비싼 **원자적 연산(Atomic Add)**을 사용
-    * CTA 0과 CTA 1은 서로가 가진 $dS$ 타일의 절반을 분산 공유 메모리(DSMEM)를 통해 맞바꿉니다.
-    * 타일 재구조화 (Repacking): 데이터를 교환한 후, 각 CTA는 이제 전체 행( $M$ ) 중 자신이 담당하는 절반의 행($M/2$)에 대해서만 모든 열( $2N$ )에 대한 리덕션을 수행
-    * CTA 0: $dQ$의 상단 $M/2$ 행만 계산 및 기록 CTA 1: $dQ$의 하단 $M/2$ 행만 계산 및 기록
-        * M: Query의 tiling, 128 or 256, 결과물인 $O$(Output)와 $dQ$의 행 크기를 결정 (Sub Sequence Length, 128, 256, 512)
-        * N: Key, Value의 Tiling, 128 $S = \alpha QK^\top$ (Sequence Length, 100K, 300K)
-        * MMA 연산 횟수: Blackwell의 MMA(행렬 연산) 지침은 $128 \times 128$ 크기를 기본으로 처리하므로, $M \times N$ 크기의 결과물을 만들기 위해 $\lceil M/128 \rceil \times \lceil N/128 \rceil$번의 연산이 필요함을 계산하는 척도가 됨
 * 결정론적(Deterministic) 모드: 훈련의 재현성을 위해 세마포어 락(Semaphore lock)을 사용한 순차적 연산 모드를 제공하며, 성능 저하를 최소화하기 위한 최적의 CTA 처리 순서를 설계했습니다.
 
 ### 3.3 스케줄링 및 최적화 (Scheduling)
