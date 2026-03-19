@@ -155,10 +155,10 @@ $$2^y = 2^{\lfloor y \rfloor} \cdot 2^{y - \lfloor y \rfloor}$$
     * CTA 0은 $A_0 \times B$를 계산하고, CTA 1은 $A_1 \times B$를 계산
 
 * 2-CTA
-    * CTA 0은 $B$의 앞부분 절반(50MB)
-    * CTA 1은 $B$의 뒷부분 절반(50MB)
-    * CTA 0는 $B$의 뒷부분 CTA 1에서 Read 가능
-    * CTA 1는 $B$의 앞부분 CTA 0에서 Read 가능
+    * CTA 0은 $B_0$의 앞부분 절반(50MB) + $A_0$ (절반)
+    * CTA 1은 $B_1$의 뒷부분 절반(50MB) + $A_1$ (절반)
+    * CTA 0는 $B_1$의 뒷부분 CTA 1에서 Read 가능
+    * CTA 1는 $B_0$의 앞부분 CTA 0에서 Read 가능
   
 
 ##### 설명
