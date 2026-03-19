@@ -146,6 +146,23 @@ $$2^y = 2^{\lfloor y \rfloor} \cdot 2^{y - \lfloor y \rfloor}$$
 
 #### 2-CTA MMA 모드
 
+##### 요약
+
+* A, B 행렬 및 결과값(Accumulator)을 다음과 같이 나누어 처리
+
+* 기존 $B$ 전체(예: 100MB)
+    * $C = A \times B$
+    * CTA 0은 $A_0 \times B$를 계산하고, CTA 1은 $A_1 \times B$를 계산
+
+* 2-CTA
+    * CTA 0은 $B$의 앞부분 절반(50MB)
+    * CTA 1은 $B$의 뒷부분 절반(50MB)
+    * CTA 0는 $B$의 뒷부분 CTA 1에서 Read 가능
+    * CTA 1는 $B$의 앞부분 CTA 0에서 Read 가능
+  
+
+##### 설명
+
 * Blackwell의 새로운 기능을 활용하여 두 개의 CTA(Threadblock)가 한 쌍으로 동작하게 했습니다. 이를 통해 각 CTA는 필요한 데이터( $B$ 타일)의 절반만 로드하면 되므로 공유 메모리 트래픽이 감소합니다.
 * dQ 원자적 연산(Atomic Adds) 절반 감소: 2-CTA 모드에서 $dS$ 데이터를 분산 공유 메모리(DSMEM)로 교환하여 $dQ$를 계산함으로써, 전역 메모리에 결과를 쓸 때 발생하는 비싼 Atomic 연산 횟수를 1-CTA 방식 대비 절반으로 줄였습니다.
     * $dQ$를 구하는 연산( $dQ = \alpha dSK$ )은 KV 시퀀스 차원을 따라 결과값을 계속 더해나가는 리덕션(Reduction) 과정
