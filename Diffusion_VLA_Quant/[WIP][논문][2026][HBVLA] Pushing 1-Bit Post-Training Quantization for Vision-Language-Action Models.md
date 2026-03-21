@@ -192,9 +192,55 @@ $$\hat{W}_{l} = \hat{W}_{l,non-sal} + \hat{W}_{l,sal}$$
 
 ## 4. Experiment
 
+### 1. 실험 환경 및 설정
+
+* 하드웨어: 모든 실험은 NVIDIA A800 GPU에서 진행되었습니다.
+* 평가 지표: 로봇 조작의 성공 여부를 판단하는 성공률(Success Rate, SR)을 주요 지표로 사용했습니다.
+* 비교 대상(Baselines): 최근 발표된 1비트 PTQ 기법들인 HBLLM, BiLLM, BiVLM을 대조군으로 선정했습니다.
+* 사용 모델: OpenVLA, OpenVLA-OFT, CogACT 등 대표적인 VLA 모델들을 양자화 대상으로 삼았습니다. 
+
+### 2. 주요 벤치마크 실험 결과
+
+세 가지 주요 환경에서 실험을 수행했으며, HBVLA는 모든 환경에서 기존 1비트 방식들을 압도했습니다. 
+
+| 벤치마크 | 특징 및 과업 | HBVLA 성능 요약 |
+| :--- | :--- | :--- |
+| **LIBERO** | 지식 전이 및 평생 학습 평가 (Spatial, Object, Goal, Long)  | 기존 1비트 방식 대비 평균 **11.1%~32.6% 높은 성공률**을 기록하며 성능 격차를 대폭 축소함. |
+| **SIMPLER** | 실제 로봇 환경(Google Robot)을 고정밀로 재현하여 Coke 집기, 서랍 열기 등 수행  | 기존 SOTA 대비 평균 **3.1%~41.2%의 절대적인 성공률 향상**을 달성하며 압도적인 효율성을 입증함. |
+| **Real-world** | Mobile ALOHA 로봇을 이용한 실제 사물 조작 (수건 접기, 하노이의 탑 등)  | 전정밀도(FP) 모델 대비 **성공률 저하가 미미**하며, 하드웨어 제약이 큰 환경에서도 안정적인 배포 가능성을 보여줌. |
+
+
+### 3. 심층 분석 (Sensitivity Analysis)
+
+* 비전 엔코더 (Vision Encoder): 양자화에 가장 강력(Robust)하며, 성능 변화가 거의 없었습니다. 
+* 언어 모델 (Language Model): 어느 정도 민감도를 보였습니다.
+* 프로젝터 및 행동 헤드 (Projector & Action Head): 가장 민감한 부분으로, 미세한 정밀도 손실로도 성능이 크게 떨어졌습니다. 
+
+### 4. 절제 연구 (Ablation Study)
+
+<p align ='center'>
+<img width="412" height="119" alt="image" src="https://github.com/user-attachments/assets/3603277c-454f-4680-bf48-c465ed8534b9" />
+<img width="388" height="126" alt="image" src="https://github.com/user-attachments/assets/335b308a-2568-43ba-b7b9-6040da8b57de" />
+</p>
+
+* 정정된 Hessian의 효과: 표준 Hessian 대신 정책 인식(Policy-Aware) Hessian을 사용했을 때, 시각적 노이즈를 효과적으로 필터링하여 성공률이 유의미하게 상승했습니다.
+* 순열 기준(Permutation Criterion): 비핵심 열을 정렬할 때 $l_1$-norm보다 $l_2$-norm을 사용하는 것이 에너지 분포를 더 잘 포착하여 양자화 오차를 줄였습니다. 
 
 
 ---
 
 ## 5. Conclusion
+
+### 핵심 기술적 기여
+
+* 정책 인식 가중치 분할: 정정된 Hessian(Rectified Hessian)을 활용하여 로봇의 행동 생성에 결정적인 가중치를 식별하고 보호함으로써 양자화로 인한 행동 성능 저하 문제를 해결했습니다.
+* Haar 도메인 최적화: 희소 직교 변환(Sparse Orthogonal Transform)을 제안하여 가중치의 기하학적 구조를 최적화하고, 모달리티 간의 이질성 및 고주파 노이즈를 효과적으로 억제했습니다.
+
+### 실험적 성과 및 가치
+
+* SOTA 성능 달성: LIBERO, SIMPLER 시뮬레이션 환경 및 실제 Mobile ALOHA 플랫폼에서의 광범위한 실험을 통해 기존의 모든 1비트 양자화 기법을 뛰어넘는 세계 최고 수준(SOTA)의 성능을 입증했습니다.
+* 실제 배포의 기반 마련: 본 연구는 거대한 VLA 모델을 연산 자원이 한정된 실제 로봇 플랫폼에 안정적으로 배포할 수 있는 실질적인 기술적 토대를 제공합니다.
+* 성능 유지율: 특히 quantized OpenVLA-OFT는 LIBERO에서 전정밀도 대비 92.2%, quantized CogAct는 SimplerEnv에서 93.6%의 성능을 유지하는 놀라운 효율성을 보여주었습니다.
+
+---
 
