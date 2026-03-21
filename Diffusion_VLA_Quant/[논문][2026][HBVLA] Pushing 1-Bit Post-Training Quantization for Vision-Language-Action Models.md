@@ -60,10 +60,14 @@ Xin Yan1, Zhenglin Wan2, Feiyang Ye, Xingrui Yu3*, Hangyu Du4, Yang You2, Ivor T
 | 컴포넌트 (Component) | 가중치 (Weight) | 활성값 (Activation) | 특징 및 적용 방식 |
 | :--- | :---: | :---: | :--- |
 | **Vision Encoder** | **1.08-bit** | **BF16** | 가중치는 1비트로 압축하되, 활성값은 고정밀 유지 (시각 노이즈 방어) |
-| **Language Model** | **1.08-bit** | **BF16** | 핵심 가중치는 잔차 보정 적용, 활성값은 가중치 중요도 판단 도구로 활용 |
 | **Projector** | **BF16** | **BF16** | 모달리티 연결부로, 정밀도 손실 시 성능 저하가 심해 양자화 제외 |
+| **Language Model** | **1.08-bit** | **BF16** | 핵심 가중치는 잔차 보정 적용, 활성값은 가중치 중요도 판단 도구로 활용 |
 | **Action Head** | **BF16** | **BF16** | 로봇의 미세한 움직임을 결정하는 핵심단으로, 모든 정밀도 유지 |
 
+
+**Model Architecture**
+
+* ViT $\rightarrow$ Projector(MLP) $\rightarrow$ LLM $\rightarrow$ Action Head(Diffusion)
 
 ---
 
