@@ -14,8 +14,8 @@ maxinyin@u.nus.edu, xinchao@nus.edu.sg
 
 ## 0. Summary
 
-<p aling = 'center'>
-<img width="1112" height="660" alt="image" src="https://github.com/user-attachments/assets/9ec2a164-3af6-4aaa-968d-72f5fcb68f26" />
+<p align = 'center'>
+<img width="800" height="400" alt="image" src="https://github.com/user-attachments/assets/9ec2a164-3af6-4aaa-968d-72f5fcb68f26" />
 </p>
 
 ### 0.1. 핵심 아이디어
