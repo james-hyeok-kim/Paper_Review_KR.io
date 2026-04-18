@@ -10,6 +10,10 @@
 
 ## 0. Summary
 
+<p align = 'center'>
+<img width="800" height="600" alt="image" src="https://github.com/user-attachments/assets/af35cb56-c7b6-49bc-9b26-f8cfd6ac6eb5" />
+</p>
+
 ### 1. 핵심 아이디어 (3가지 모듈)
 
 * 문제 인식: 기존 정적(static) 혼합 정밀도 양자화는 디노이징 타임스텝마다 레이어의 양자화 민감도가 크게 변한다는 사실을 무시하여 성능이 저하됩니다.
