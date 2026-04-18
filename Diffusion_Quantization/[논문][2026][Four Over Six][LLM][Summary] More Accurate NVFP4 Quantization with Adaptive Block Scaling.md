@@ -4,14 +4,14 @@
 
 최초 제출: 2024년 12월 (arXiv ID의 "2512"로 추정)
 
-논문 : [PDF](https://arxiv.org/pdf/2503.15465)
+논문 : [PDF](https://arxiv.org/pdf/2512.02010)
 
 ---
 
 ## 0. Summary
 
 <p align = 'center'>
-<img width="400" height="500" alt="image" src="https://github.com/user-attachments/assets/3fbebe46-56a9-4093-9db5-366d52426e15" />
+<img width="700" height="400" alt="image" src="https://github.com/user-attachments/assets/66e8d639-76e3-4015-91fb-41fcf75faf62" />
 </p>
 
 
