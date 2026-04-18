@@ -40,7 +40,8 @@ University of Alberta
 ### 2. FP4DiT의 핵심 제안
 
 * FPQ 활용: 가중치와 활성화 분포를 더 잘 정렬하기 위해 FPQ를 사용하여 W4A6(가중치 4비트, 활성화 6비트) 양자화를 달성합니다.
-    * E3M0 / E2M1 / E1M2
+    * Weight: E3M0 / E2M1 / E1M2
+    * Activation: E2M3 
 
 * 기술적 개선
     * Scale-aware AdaRound: 기존 정수 기반의 적응형 반올림(AdaRound) 기술을 FPQ에 맞게 확장 및 일반화하여 가중치 보정의 성능을 높였습니다.
