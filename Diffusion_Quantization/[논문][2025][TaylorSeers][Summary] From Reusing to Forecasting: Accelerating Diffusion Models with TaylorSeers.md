@@ -17,6 +17,10 @@
 
 ## 0. Summary
 
+<p align = 'center'>
+<img width="800" height="450" alt="image" src="https://github.com/user-attachments/assets/d4552952-4df7-4675-95a4-9bb549cbe9e0" />
+</p>
+
 ### 0.1. 핵심 아이디어
 
 * 기존 캐시 방법의 패러다임인 "cache-then-reuse"(캐시 후 재사용) 의 근본적 한계를 극복하고, 
