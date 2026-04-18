@@ -10,6 +10,10 @@
 
 ## 0. Summary
 
+<p align = 'center'>
+<img width="400" height="500" alt="image" src="https://github.com/user-attachments/assets/3fbebe46-56a9-4093-9db5-366d52426e15" />
+</p>
+
 
 ### 1. 문제 NVFP4 Scale에 의한 표현의 공백
 * 문제
