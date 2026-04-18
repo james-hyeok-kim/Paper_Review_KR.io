@@ -10,6 +10,10 @@
 
 ## 0. Summary
 
+<p align = 'center'>
+<img width="350" height="350" alt="image" src="https://github.com/user-attachments/assets/c13836ab-8e66-4115-b3aa-c572e5fd856c" />
+</p>
+
 ### 1. Hadamard Transform으로 이상치(Outlier) 제거
 
 * 입력 활성값에 랜덤 Hadamard 행렬을 곱해 분포를 고르게 만들고, 이에 대응하는 변환을 가중치 행렬에도 미리 적용해 둡니다.
