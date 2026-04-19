@@ -44,10 +44,10 @@ Project Page: https://liewfeng.github.io/TeaCache
 
 ### 0.2. 효과
 
-Open-Sora-Plan에서 최대 6.83× 가속, 품질 유지 기준 4.41× 가속 (-0.07% VBench)
-Latte에서 3.28× 가속 (PAB 1.34× 대비)
-Open-Sora에서 2.25× 가속 (PAB 1.40× 대비)
-다중 GPU(DSP) 환경에서 Open-Sora-Plan 221프레임: 8×A800 기준 32.02× 가속
+* Open-Sora-Plan에서 최대 6.83× 가속, 품질 유지 기준 4.41× 가속 (-0.07% VBench)
+ Latte에서 3.28× 가속 (PAB 1.34× 대비)
+* Open-Sora에서 2.25× 가속 (PAB 1.40× 대비)
+* 다중 GPU(DSP) 환경에서 Open-Sora-Plan 221프레임: 8×A800 기준 32.02× 가속
 
 
 ### 0.3. 모델 (베이스 모델)
