@@ -26,7 +26,13 @@
 ### 0.2. Main Idea
 
 * TAP (Temporal-Aware Parallel Clustering) — 공간적 유사도와 시간적 유사도를 결합한 병렬 클러스터링으로 캘리브레이션 샘플을 효율적으로 선정. 복잡도를 O(n³)에서 O(rn)으로 감소
+    * 유사도는 cosine similarity로 계산
+    * K개로 clusting해서 Uniform Sampling
 * VC (Variance Compensation) — 타임스텝별 보정 스케일 팩터 K를 분석적 해(closed-form)로 계산해 분산 드리프트를 추가 학습 없이 보정
+    * 각 타임스탬프에서 중간 샘플의 분산을 Adpative 수정
+    * rQNSR과 MSE를 결합하여 구성
+    * variance를 scale( $K_t$ ), sample 자체에 곱함
+    * $\tilde{x}_t = \mu_t + K_t \cdot (\hat{x}_t - \mu_t)$
 
 ### 0.3. 효과
 
