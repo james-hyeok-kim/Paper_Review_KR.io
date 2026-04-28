@@ -71,14 +71,15 @@ arXiv 공개 2025년 11월.
 #### DartQuant
 
 * DartQuant의 핵심 발상: 모델을 forward/backward 할 필요가 없다
-* Step 1: One-shot calibration data collection (단 한 번만 forward)
+
+**Step 1: One-shot calibration data collection (단 한 번만 forward)**
 
 ```
 X ← LLM(S)        # calibration sample S를 모델에 한 번 통과
 X ← token_sampling(X)  # 토큰의 10%만 샘플링하여 메모리 절약
 ```
 
-* Step 2: Iterative rotation calibration (작은 행렬 연산만 반복)
+**Step 2: Iterative rotation calibration (작은 행렬 연산만 반복)**
 
 ```
 for k = 0 to T:
@@ -88,16 +89,13 @@ for k = 0 to T:
     Z ← Z - η · ∂L/∂Z          # Z 업데이트
 ```
 
-* Step 3: Whip loss로 무엇을 최적화하는가
+**Step 3: Whip loss로 무엇을 최적화하는가**
 
-Whip loss $\sum_i \exp(-|x_i|)$는 회전된 activation O의 각 원소에 대해 평가됩니다. 
-
-이 함수의 미분을 보면:
-
-0 근처에서 gradient의 절댓값이 큼 → 작은 값들을 0에서 밀어냄
-큰 값에서는 gradient가 거의 0 → 이미 큰 값은 그대로 둠
-
-$\sum_{i} \exp(-|x_i|)$ 각 xᵢ에 대해 미분하면 (xᵢ > 0인 경우와 xᵢ < 0인 경우를 나눠서):
+* Whip loss $\sum_i \exp(-|x_i|)$는 회전된 activation O의 각 원소에 대해 평가됩니다.
+    * 이 함수의 미분을 보면:
+    * 0 근처에서 gradient의 절댓값이 큼 → 작은 값들을 0에서 밀어냄
+    * 큰 값에서는 gradient가 거의 0 → 이미 큰 값은 그대로 둠
+* $\sum_{i} \exp(-|x_i|)$ 각 xᵢ에 대해 미분하면 (xᵢ > 0인 경우와 xᵢ < 0인 경우를 나눠서):
 
 $$
 \frac{\partial L}{\partial x_i} = \begin{cases} 
