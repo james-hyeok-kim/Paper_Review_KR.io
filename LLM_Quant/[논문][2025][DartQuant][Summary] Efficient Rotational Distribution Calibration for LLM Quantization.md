@@ -56,6 +56,73 @@ arXiv 공개 2025년 11월.
         * Cayley SGD처럼 manifold 위 projection 연산(약 6n³ 추가 비용)을 쓰는 대신, 잠재 파라미터 Z를 학습하고 매 step QR 분해로 orthogonal matrix R을 추출.
         * 추가 비용은 4/3 n³ 수준으로 줄어들고, SGD/Adam 등 표준 optimizer를 그대로 사용 가능.
 
+
+### 0.1.1 기존 vs DartQuant
+
+#### 기존
+
+* 기존 SpinQuant/OSTQuant의 방식: rotation matrix R을 학습하기 위해 다음 과정을 매 iteration마다 반복합니다.
+    * Calibration 입력을 전체 모델 끝까지 forward (모든 Transformer block 통과, KV cache, attention, FFN 전부 거침)
+    * Quantization을 시뮬레이션 (pseudo-quantizer 삽입)
+    * 최종 출력의 task loss(예: cross-entropy, KL divergence) 계산
+    * 전체 모델을 통한 backward로 R에 대한 gradient 계산
+    * Cayley/Riemannian optimizer로 R 업데이트
+
+#### DartQuant
+
+* DartQuant의 핵심 발상: 모델을 forward/backward 할 필요가 없다
+* Step 1: One-shot calibration data collection (단 한 번만 forward)
+
+```
+X ← LLM(S)        # calibration sample S를 모델에 한 번 통과
+X ← token_sampling(X)  # 토큰의 10%만 샘플링하여 메모리 절약
+```
+
+* Step 2: Iterative rotation calibration (작은 행렬 연산만 반복)
+
+```
+for k = 0 to T:
+    R ← qr_decomposition(Z)    # Z에서 orthogonal R 추출
+    O ← X @ R                   # 저장된 X에 R만 곱함
+    L ← Whip(O)                 # 회전된 activation의 분포 손실
+    Z ← Z - η · ∂L/∂Z          # Z 업데이트
+```
+
+* Step 3: Whip loss로 무엇을 최적화하는가
+
+Whip loss $\sum_i \exp(-|x_i|)$는 회전된 activation O의 각 원소에 대해 평가됩니다. 
+
+이 함수의 미분을 보면:
+
+0 근처에서 gradient의 절댓값이 큼 → 작은 값들을 0에서 밀어냄
+큰 값에서는 gradient가 거의 0 → 이미 큰 값은 그대로 둠
+
+$\sum_{i} \exp(-|x_i|)$ 각 xᵢ에 대해 미분하면 (xᵢ > 0인 경우와 xᵢ < 0인 경우를 나눠서):
+
+$$
+\frac{\partial L}{\partial x_i} = \begin{cases} 
+-\exp(-x_i) & \text{if } x_i > 0 \\ 
++\exp(x_i) & \text{if } x_i < 0 
+\end{cases}
+$$
+
+* 절댓값으로 묶으면: $\left|\frac{\partial L}{\partial x_i}\right| = \exp(-|x_i|)​$
+* xᵢ 값exp(-|xᵢ|) ≈ gradient 크기
+    * 0.01 (0 근처 작은 값)약 0.99
+    * 0.5약 0.61
+    * 1.0약 0.37
+    * 3.0약 0.05
+    * 10.0 (outlier)약 0.000045
+
+* 표면적으로는 "작은 값들만 키우는" 손실처럼 보이지만, 핵심 트릭은 R이 orthogonal이라 norm이 보존된다는 제약입니다.
+* 즉 $\|XR\|_2 = \|X\|_2$​가 항상 유지되므로, 작은 값들이 커지면 norm 합을 맞추기 위해 outlier(큰 값)들이 자동으로 줄어들 수밖에 없습니다.
+* 이것이 논문에서 말하는 "aggregation 효과"입니다.
+* 논문의 4차원 예시로 직관을 설명하면,
+* x = [x₁, x₂, x₃, x₄]에서 x₄가 outlier일 때,
+    * 작은 값 x₁, x₂, x₃에 양의 perturbation ε₁, ε₂, ε₃ > 0을 가하면 norm 보존 제약상
+    * x₄에는 음의 perturbation ε₄ < 0이 가해질 수밖에 없습니다.
+*  즉 작은 값을 키우는 압력이 곧 outlier를 줄이는 압력으로 작용하는 구조입니다.
+
 ### 0.2. Quantization 설정
 
 * W4A8KV16, W4A4KV16, W4A4KV4 세 가지 주요 설정
