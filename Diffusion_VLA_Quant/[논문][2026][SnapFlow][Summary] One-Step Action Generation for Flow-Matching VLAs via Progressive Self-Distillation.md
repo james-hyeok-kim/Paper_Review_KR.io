@@ -18,6 +18,10 @@
 
 ## 0. Summary 
 
+<p align = 'center'>
+<img width="700" height="500" alt="image" src="https://github.com/user-attachments/assets/a6b9d2f7-e3ae-4fdb-ab07-6e6a4f31b647" />
+</p>
+
 ### 0.1. 문제
 
 * $\pi_0$, $\pi_{0.5}$, SmolVLA와 같은 최신 VLA(Vision-Language-Action) 로봇 제어 모델들은 '유동 일치(Flow-Matching)' 방식을 사용하여 뛰어난 성능을 보입니다. 
