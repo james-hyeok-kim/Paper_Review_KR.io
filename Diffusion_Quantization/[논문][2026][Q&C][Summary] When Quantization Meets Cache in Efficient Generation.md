@@ -34,6 +34,25 @@
     * variance를 scale( $K_t$ ), sample 자체에 곱함
     * $\tilde{x}_t = \mu_t + K_t \cdot (\hat{x}_t - \mu_t)$
 
+#### 양자화(Quantization) 설정
+* W8A8 설정을 중심
+* 추가 설정: ImageNet $512\times512$ 해상도 실험에서는 가중치 4비트, 활성화 8비트(W4A8) 조합을 사용
+* 방법론의 견고함을 보여주기 위해 4비트 및 6비트(W4A8, W6A8) 환경에서도 실험을 수행했습니다.
+* 최신 모델인 FLUX.1이나 PixArt-$\Sigma$에 대해서는 INT W4A4 설정을 적용
+* 양자화 방식: 모든 가중치는 채널별(Channel-wise), 활성화 함수는 텐서별(Tensor-wise)로 균일 양자화(Uniform quantizer)를 적용했습니다. 
+
+#### 캐시(Cache) 메커니즘
+
+* 건너뛰는 부분: 주로 Self-Attention(자기 주의 집중) 레이어와 MLP(Multi-Layer Perceptron) 레이어의 출력을 저장하고 재사용함으로써, 해당 레이어들의 중복 계산을 건너뜁니다.
+* 동작 방식:캐시 간격 $N$을 설정하여, $mod(t, N) = 0$인 단계에서만 전체 순전파(Full forward pass)를 수행하고 특징을 업데이트(Caching)합니다.
+    * 그 사이의 $N-1$ 단계 동안은 저장된 특징을 그대로 재사용하여 전체 모델 계산 과정을 생략(Bypassing)합니다.
+* 핵심 원리: 고수준 특징(High-level features)은 단계별 변화가 적다는 점을 활용해 이를 고정하고, 저수준의 세부 사항만 업데이트하는 식으로 계산 효율을 높입니다.  
+
+* 디퓨전 단계 축소(Step Reduction): 250단계에서 50단계로 줄여 5배 향상.
+* 양자화(Quantization): W8A8 설정을 통해 1.96배 향상.
+* 캐시 재사용(Cache Reuse): 위에서 언급한 1.28배 향상.
+* 계산식: $5 \times 1.96 \times 1.28 \approx 12.54 \text{x}$ (측정 오차 포함 약 12.7x).  
+
 ### 0.3. 효과
 
 * 최대 12.7× 가속 (스텝 감소 + 양자화 + 캐시 결합)
