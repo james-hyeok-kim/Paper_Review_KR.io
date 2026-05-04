@@ -29,9 +29,13 @@ James Hensman, Microsoft Research, jameshensman@microsoft.com
 
 ## 0. Summary
 
-### 0.1. 문제 정의대
+<p align = 'center'>
+<img width="750" height="400" alt="image" src="https://github.com/user-attachments/assets/eedc7f1f-4da9-49c4-a52c-351dd82ac6b2" />
+</p>
 
-* 규모 언어 모델(LLM)의 추론에는 막대한 연산, 메모리, 에너지가 필요하며, 특히 프리필(prefill) 단계에서 많은 자원이 소모. 
+### 0.1. 문제 정의
+
+* 대규모 언어 모델(LLM)의 추론에는 막대한 연산, 메모리, 에너지가 필요하며, 특히 프리필(prefill) 단계에서 많은 자원이 소모. 
 * 양자화(Quantization) 기술이 중요하지만, 활성화(Activations) 값을 4비트로 양자화하는 것은 매우 어렵습니다.  
 * 활성화 값 내에 정상 범위를 크게 벗어나는 거대한 '이상치(Outlier)' 값들이 존재하기 때문입니다.  
 * 기존 연구들은 이러한 이상치 피처들을 식별하여 추론 시 16비트 같은 고정밀도(higher precision)로 유지해야 했기 때문에 하드웨어 구현이 복잡해지는 한계가 있었습니다.  
