@@ -41,21 +41,9 @@ yasaman.haghighi@epfl.ch alexandre.alahi@epfl.ch
     * 그 이후의 나머지 80% 구간에서는 모델에 따라 오차 허용치를 0.1~0.6으로 더 높게(느슨하게) 설정하여 적극적으로 연산을 스킵했습니다.
 
 
-
-| 모델 (Model) | 방법론 (Method) | NFE (↓) | 캐시 비율 (Cache Ratio) |
-| :--- | :--- | :---: | :---: |
-| **Wan 2.1** | TeaCache-slow | 33 | 34% |
-| (T=50) | MagCache-slow | 25 | 50% |
-| | **SenCache-slow (Ours)** | **25** | **50%** |
-| | TeaCache-fast | 25 | 50% |
-| | MagCache-fast | 21 | 58% |
-| | **SenCache-fast (Ours)** | **21** | **58%** |
-| **Cog VideoX** | TeaCache | 22 | 56% |
-| (T=50) | MagCache | 23 | 54% |
-| | **SenCache (Ours)** | **22** | **56%** |
-| **LTX-Video** | TeaCache | 32 | 36% |
-| (T=50) | MagCache | 28 | 44% |
-| | **SenCache (Ours)** | **27** | **46%** |
+<p align = 'center'>
+<img width="524" height="409" alt="image" src="https://github.com/user-attachments/assets/b7efabc9-b2db-49c3-8c52-c1d0c842507e" />
+</p>
 
 ### 0.3. 적용 모델
 
@@ -66,3 +54,33 @@ yasaman.haghighi@epfl.ch alexandre.alahi@epfl.ch
 * VBench: 주요 성능 평가를 위해 전체 프롬프트 세트를 활용했습니다.  
 * T2V-CompBench: 파라미터 절제 연구(Ablation study)를 위해 무작위로 70개의 프롬프트를 선정하여 비디오를 생성했습니다.  
 * MixKit 데이터셋: 모델의 민감도 점수를 캘리브레이션하기 위해 8개의 비디오 샘플을 사용했습니다.
+
+### 0.5. Skip Equation
+
+#### 1. 출력 변화량의 근사 (First-order Approximation)
+
+* 연속된 두 타임스텝 사이에서 노이즈 제거 네트워크(denoiser)의 출력값 변화는 입력값인 잠재 변수( $x_t$ )와 타임스텝( $t$ )의 변화에 따른 함수 변화로 나타낼 수 있습니다.
+* 이를 1차 근사하면 다음과 같습니다.
+
+$$f_{\theta}(x_{t+\Delta t},t+\Delta t,c)-f_{\theta}(x_{t},t,c)\approx J_{x}\Delta x_{t}+J_{t}\Delta t$$  
+
+* $J_x = \frac{\partial f_{\theta}}{\partial x_t}$: 잠재 변수 입력에 대한 자코비안(Jacobian), 즉 입력값 변화에 대한 모델의 민감도입니다.
+* $J_t = \frac{\partial f_{\theta}}{\partial t}$: 타임스텝 입력에 대한 편미분 값으로, 시간 변화에 따른 모델의 민감도입니다.
+* $\Delta x_t, \Delta t$: 각각 잠재 변수와 타임스텝의 변화량입니다.
+
+#### 2. 민감도 점수 (Sensitivity Score, $S_t$)
+
+* 위의 근사식에 노름(norm)을 취하여 실제 출력값이 변화할 수 있는 최대 상한선을 민감도 점수( $S_t$ )로 정의합니다.
+
+$$S_{t}=||J_{x}||||\Delta x_{t}||+||J_{t}||\Delta t|$$  
+
+* 이 수식은 잠재 변수의 이동 거리와 타임스텝의 간격이 모델 출력에 미치는 영향을 각각의 민감도( $||J_x||, ||J_t||$ )와 결합하여 계산합니다.  
+* 단순히 입력이 얼마나 변했느냐가 아니라, "이 모델이 해당 입력 변화에 얼마나 민감하게 반응하느냐"를 함께 고려하는 것이 핵심입니다.
+
+#### 3. 동적 캐싱 결정 규칙 (Decision Rule)
+
+* 매 추론 단계마다 계산된 $S_t$를 미리 설정된 허용 오차인 $\epsilon$(epsilon)과 비교하여 캐싱 여부를 결정합니다.
+* 조건:
+    * $S_t \le \epsilon$ 일 때  결과: 모델 연산을 스킵하고 캐시된 이전 출력값을 재사용합니다.
+        * 이 조건이 만족된다는 것은 현재 단계에서 모델을 새로 돌려도 결과값의 변화가 허용 오차($\epsilon$)보다 작을 것이라고 예측됨을 의미합니다.
+    * 조건: $S_t > \epsilon$ 일 때  결과: 모델을 새로 연산(Full Forward)하고 캐시를 업데이트합니다.  
