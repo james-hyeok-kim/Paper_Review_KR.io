@@ -92,4 +92,9 @@ $$v=\sum_{i=1}^{S}w_{i}h_{i}, \quad w_{i}=\frac{i}{\sum_{j=1}^{S}j}$$
 * 파이프라인 단순화: 레이아웃 분석, OCR, 텍스트 정제 등의 복잡한 단계(Cascade of processes)를 생략하므로 시스템 구조가 훨씬 간결해집니다.
 * 속도: 오프라인 문서 처리 단계에서 파싱 과정을 건너뛰기 때문에, 전체 처리 시간을 약 58% 절감할 수 있습니다.  
 
+
+<p align='center'>
+<img width="1099" height="527" alt="image" src="https://github.com/user-attachments/assets/78f0611c-8285-4525-b2eb-db110ad5e73c" />
+</p>
+
 ---
