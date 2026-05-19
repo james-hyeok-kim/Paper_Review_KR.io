@@ -59,7 +59,14 @@ Write to `temp/<slug>/draft.md` — single markdown file with this exact structu
 
 ### 0.5. 상세 동작 방식 (How It Works)
 
-(아래 0.5 작성 규칙 참고 — 필수)
+**[REQUIRED — 절대 생략 금지]** 단계별(Step 1 → Step N) 흐름 + ASCII 다이어그램 최소 1개 포함. 아래 0.5 작성 규칙 참고.
+
+```
+[입력] → [Step 1: ...] → [Step 2: ...] → [출력]
+```
+
+Step 1. ...
+Step 2. ...
 
 ---
 
@@ -91,6 +98,8 @@ Write to `temp/<slug>/draft.md` — single markdown file with this exact structu
    - 논문 (PDF link)
    - 출처 (abs/forum URL)
 3. **0. Summary 5-subsection**: 문제 / 핵심 아이디어 / 효과 / 결과 / 상세 동작 방식 — 이 순서 고정.
+
+   > ⚠️ **CRITICAL**: `### 0.5. 상세 동작 방식 (How It Works)` 섹션은 **가장 자주 누락되는 섹션**이다. draft 작성 후 반드시 0.5 섹션이 존재하는지 확인하고, 없으면 반드시 추가하라. 빠뜨리면 pipeline이 block된다.
 
    **0.5 상세 동작 방식 작성 규칙 (사용자 요청, 필수)**:
    - 배경 지식이 전혀 없는 독자도 "어떻게 동작하는가"를 이해할 수 있도록 **단계별(Step 1 → Step N)** 형식으로 작성.
@@ -153,10 +162,20 @@ Write to `temp/<slug>/draft.md` — single markdown file with this exact structu
    - 추측성 서술 ("아마도", "~인 듯하다") — 본문에 없으면 쓰지 말 것
    - 본문에 없는 숫자 fabrication
 
+## 출력 전 자가 점검 (MANDATORY — 출력 전 반드시 확인)
+
+draft.md를 저장한 뒤, 아래를 확인하고 통과해야만 출력:
+- [ ] `### 0.5. 상세 동작 방식 (How It Works)` 헤더가 존재하는가?
+- [ ] 0.5 섹션 안에 Step 1→N 흐름이 있는가?
+- [ ] 0.5 섹션 안에 ASCII 다이어그램(코드블록 내 텍스트 흐름도)이 있는가?
+
+0.5가 없으면 → draft.md에 추가 후 다시 저장. 출력 포맷의 `0.5_written` 필드에 결과 보고.
+
 ## 출력 (your reply to orchestrator)
 ```
 draft written: temp/<slug>/draft.md
-sections: 0(Summary), 1(Intro), 2(Method), 3(Experiments), 4(Conclusion)
+sections: 0(Summary with 0.1–0.5), 1(Intro), 2(Method), 3(Experiments), 4(Conclusion)
+0.5_written: yes
 figures placed: <list of FIG markers used>
 word count: <approx>
 notes: <anything notable, e.g. "limitation section missing in source">
