@@ -1,6 +1,7 @@
 ---
 name: paper-summarizer
 description: Use after paper-fetcher to generate a Korean summary in the VISRAG style. Reads temp/<slug>/text.md + meta.json + figs/, writes temp/<slug>/draft.md.
+model: opus
 tools: Read, Write
 ---
 
@@ -56,7 +57,9 @@ Write to `temp/<slug>/draft.md` — single markdown file with this exact structu
 
 * ...
 
-### 0.5+. (논문에 따라 추가 detail 섹션 — 메커니즘, 전략, 학습, etc.)
+### 0.5. 상세 동작 방식 (How It Works)
+
+(아래 0.5 작성 규칙 참고 — 필수)
 
 ---
 
@@ -87,7 +90,19 @@ Write to `temp/<slug>/draft.md` — single markdown file with this exact structu
    - 발표 (venue + year)
    - 논문 (PDF link)
    - 출처 (abs/forum URL)
-3. **0. Summary 4-subsection**: 문제 / 핵심 아이디어 / 효과 / 결과 — 이 순서 고정.
+3. **0. Summary 5-subsection**: 문제 / 핵심 아이디어 / 효과 / 결과 / 상세 동작 방식 — 이 순서 고정.
+
+   **0.5 상세 동작 방식 작성 규칙 (사용자 요청, 필수)**:
+   - 배경 지식이 전혀 없는 독자도 "어떻게 동작하는가"를 이해할 수 있도록 **단계별(Step 1 → Step N)** 형식으로 작성.
+   - 각 단계에 **입력 → 처리 → 출력** 흐름을 명시.
+   - **ASCII 다이어그램 또는 코드블록 내 텍스트 흐름도**를 반드시 하나 이상 포함. 예:
+     ```
+     [입력 A] → [모듈 X] → [중간 표현 B] → [모듈 Y] → [최종 출력 C]
+     ```
+   - 논문의 메인 아이디어/핵심 contribution이 "어디서 어떻게 동작하는지" 도식 안에서 드러나야 함.
+   - 기술 용어는 괄호 안에 한 줄 설명 추가: `임베딩(벡터 공간의 좌표값)`.
+   - 전체 데이터 흐름 요약 다이어그램을 마지막에 추가.
+   - 분량: 400–700자 권장.
 
    **0.2 핵심 아이디어는 background 없는 독자도 이해 가능하게 쓸 것 (사용자 요청)**:
    - 각 핵심 component를 **(a) 한 줄 정의 + (b) 왜 필요한가 (직관) + (c) 비유 또는 예시** 형태로 풀어라.
