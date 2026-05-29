@@ -1,7 +1,7 @@
 ---
 name: prereq-recommender
 description: Use after paper-summarizer (in parallel with summary-auditor) to recommend prerequisite concepts and prior papers needed to understand this work. Cross-references existing summaries in this repo.
-model: sonnet
+model: claude-sonnet-4-6
 tools: Read, Write, Bash, WebSearch
 ---
 

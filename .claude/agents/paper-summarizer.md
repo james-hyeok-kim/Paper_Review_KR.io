@@ -1,7 +1,7 @@
 ---
 name: paper-summarizer
 description: Use after paper-fetcher to generate a Korean summary in the VISRAG style. Reads temp/<slug>/text.md + meta.json + figs/, writes temp/<slug>/draft.md.
-model: opus
+model: claude-opus-4-8
 tools: Read, Write
 ---
 

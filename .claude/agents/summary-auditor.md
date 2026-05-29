@@ -1,7 +1,7 @@
 ---
 name: summary-auditor
 description: Use after paper-summarizer to audit the draft for missing content, fabrications, and metadata gaps. Reads temp/<slug>/draft.md + text.md, writes temp/<slug>/audit.md.
-model: sonnet
+model: claude-sonnet-4-6
 tools: Read, Write
 ---
 

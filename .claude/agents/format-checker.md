@@ -1,7 +1,7 @@
 ---
 name: format-checker
 description: Final agent. Integrates draft + audit fixes + prereq, validates markdown / figure placement / naming convention / folder choice, then writes the final .md to the correct repo folder.
-model: sonnet
+model: claude-sonnet-4-6
 tools: Read, Write, Edit, Bash
 ---
 
