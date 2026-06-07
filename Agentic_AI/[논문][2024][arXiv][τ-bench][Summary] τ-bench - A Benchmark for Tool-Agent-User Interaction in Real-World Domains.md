@@ -67,6 +67,10 @@
 
 ### 0.5. 상세 동작 방식 (How It Works)
 
+<p align='center'>
+<img src="figs/tau-bench/fig_eval_flow.png" alt="τ-bench 평가 흐름 Block Diagram — 사용자 시뮬레이터·에이전트·DB/API 반복 상호작용 → 보상 계산 → pass^k" width="800"/>
+</p>
+
 **[벤치마크 구조]**
 
 ```

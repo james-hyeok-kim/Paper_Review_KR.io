@@ -63,6 +63,8 @@ Stanford University
 
 ### 0.5. 상세 동작 방식 (How It Works)
 
+<img src="figs/FrugalGPT/fig_cascade_flow.png" alt="FrugalGPT LLM Cascade 흐름도" width="900"/>
+
 **LLM Cascade 동작 흐름**:
 
 ```

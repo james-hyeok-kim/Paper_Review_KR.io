@@ -22,6 +22,17 @@ Google Research, Brain team
 <img src="figs/ReAct/fig_01.png" alt="Figure 1" width="800"/>
 </p>
 
+> **Figure 1 설명** — 4가지 프롬프팅 방식을 동일한 HotpotQA 질문으로 비교한 궤적 예시.
+>
+> | 방식 | 특징 | 한계 |
+> |---|---|---|
+> | **Standard** | 질문 → 바로 답변 (추론·검색 없음) | 사실 오류 다발 |
+> | **CoT** | Thought만 생성, 외부 검색 없음 | Hallucination — 없는 사실 지어냄 |
+> | **Act** | 검색 API만 호출, Thought 없음 | 검색 결과 해석 실패, 목표 추적 어려움 |
+> | **ReAct** | Thought → Action → Observation 교차 | 검색 결과를 추론으로 해석 → 올바른 답 도달 |
+>
+> 핵심 포인트: CoT는 내부 추론만, Act는 외부 행동만 하지만, **ReAct는 두 흐름을 번갈아 실행**하여 서로를 보완한다. Thought가 다음 Action의 방향을 결정하고, Observation이 다음 Thought의 근거가 된다.
+
 ### 0.1. 문제 (Problem)
 
 * LLM(대형 언어 모델)의 **추론(reasoning)**과 **행동(acting)** 능력은 지금까지 별도 연구 주제로만 다뤄졌음.
@@ -60,6 +71,8 @@ Google Research, Brain team
 * **WebShop** (온라인 쇼핑 내비게이션): ReAct 성공률 **40.0%** — IL (29.1%), IL+RL (28.7%) 대비 **약 10%p 절대 향상**.
 
 ### 0.5. 상세 동작 방식 (How It Works)
+
+<img src="figs/ReAct/fig_react_flow.png" alt="ReAct 상세 동작 흐름" width="900"/>
 
 ReAct는 LLM에게 "Thought → Action → Observation" 루프를 반복하도록 프롬프트로 유도한다. 아래는 HotpotQA(지식 추론)와 ALFWorld(의사결정) 두 가지 태스크에서의 흐름이다.
 
