@@ -172,6 +172,12 @@ Amazon 페버리원 3개 데이터셋(Instruments, Arts, Games)에서 전통 협
 <img src="figs/LC-Rec/table_01.png" alt="TABLE I" width="500"/>
 </p>
 
+> **컬럼 설명**
+> - **FR (Full Ranking)**: 전체 아이템 풀을 대상으로 랭킹 — 소수 후보만 재랭킹하는 방식이 아니라, 카탈로그 전체에서 직접 추천 후보를 생성
+> - **LS (Language Semantics)**: 아이템 제목·설명 등 텍스트 언어 의미론 활용 여부
+> - **CS (Collaborative Semantics)**: 사용자-아이템 상호작용 패턴(협업 필터링 신호) 활용 여부
+> - **ILC (Integration of Language and Collaborative semantics in LLMs)**: 언어·협업 의미론을 LLM 내부에서 통합하는지 여부 — LC-Rec만 4개 모두 ✓
+
 ---
 
 ## 2. Method
