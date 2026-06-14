@@ -1,6 +1,7 @@
 ---
 name: paper-fetcher
 description: Use when the user provides a paper as arxiv URL, OpenReview URL, local PDF path, or title-only. Downloads the paper, extracts metadata (title/authors/venue/year/abstract), full text, and figures. Writes everything under temp/<slug>/.
+model: claude-sonnet-4-6
 tools: Read, Write, Bash, WebFetch, WebSearch
 ---
 
