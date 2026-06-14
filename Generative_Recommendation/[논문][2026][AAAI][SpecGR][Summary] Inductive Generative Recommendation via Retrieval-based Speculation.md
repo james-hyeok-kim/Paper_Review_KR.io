@@ -19,6 +19,10 @@ University of California, San Diego
 ## 0. Summary
 
 <p align='center'>
+<img src="figs/SpecGR/fig_00.png" alt="Figure 1 — SpecGR Overview" width="600"/>
+</p>
+
+<p align='center'>
 <img src="figs/SpecGR/fig_01.png" alt="Figure 01" width="800"/>
 </p>
 
@@ -194,6 +198,10 @@ $$X = [\langle \text{bos} \rangle, \text{ID}_1, \text{ID}_2, ..., \text{ID}_w, \
 
 ### 3.2 Overall Performance (RQ1)
 
+<p align='center'>
+<img src="figs/SpecGR/table_01.png" alt="Table 1" width="800"/>
+</p>
+
 Table 1: 세 데이터셋 모두에서 SpecGR-Aux 또는 SpecGR++가 best.
 - Games R@50: UniSRec 0.0621 → SpecGR-Aux **0.0778** (+5.13% over best baseline RecFormer 0.0740)
 - Phones N@50: UniSRec 0.0077 → SpecGR-Aux/++ **0.0090** (+14.80%)
@@ -206,6 +214,10 @@ Table 2 (Games / Phones subset 분석):
 - SpecGR++: 13.28M params로 16.16M짜리 SpecGR-Aux와 거의 동등한 성능
 
 ### 3.3 Ablation (RQ2)
+
+<p align='center'>
+<img src="figs/SpecGR/table_02.png" alt="Table 2" width="800"/>
+</p>
 
 Table 3 — SpecGR++의 inference / training 컴포넌트 제거 실험:
 - (1.1) inductive drafting 제거 → R@50 0.0717 → 0.0609 (Games)

@@ -16,6 +16,10 @@ Alibaba Group
 
 ## 0. Summary
 
+<p align='center'>
+<img src="figs/GenRec/fig_01.png" alt="Figure 1 — GenRec Architecture" width="800"/>
+</p>
+
 ### 0.1. 문제 (Problem)
 
 * 대규모 산업 추천 시스템에서 생성형 추천(Generative Recommendation)을 배포하려면 세 가지 근본적인 도전을 동시에 해결해야 한다.
@@ -215,6 +219,11 @@ $$\mathcal{L}_{hybrid} = \mathcal{L}_{GRPO} + \gamma \cdot \mathcal{L}_{NLL}$$
 | GenRec (ours) | Page-wise NTP + ALTM + GRPO-SR |
 
 ### 주요 결과
+
+<p align='center'>
+<img src="figs/GenRec/table_01.png" alt="Table 1 — Performance" width="500"/>
+<img src="figs/GenRec/table_02.png" alt="Table 2 — Scaling" width="500"/>
+</p>
 
 **오프라인 (Recall@10, NDCG@10)**:
 

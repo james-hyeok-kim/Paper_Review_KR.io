@@ -19,7 +19,7 @@ Tsinghua University
 ## 0. Summary
 
 <p align='center'>
-NEZHA Architecture Overview
+<img src="figs/NEZHA/fig_01.png" alt="Figure 1 — NEZHA Framework" width="800"/>
 </p>
 
 ### 0.1. 문제 (Problem)
@@ -234,6 +234,10 @@ Draft가 거부될 때마다 정확히 Main 모델의 다음 토큰을 사용하
 
 ### 데이터셋
 
+<p align='center'>
+<img src="figs/NEZHA/table_02.png" alt="Table 2 — Dataset Statistics" width="450"/>
+</p>
+
 | 데이터셋 | 규모 | 용도 |
 |---------|------|------|
 | Amazon Beauty | 2.6M 리뷰 | 오프라인 벤치마크 |
@@ -250,6 +254,10 @@ Draft가 거부될 때마다 정확히 Main 모델의 다음 토큰을 사용하
 | **NEZHA (ours)** | Integrated Draft Head + Hash-set Verifier |
 
 ### 결과
+
+<p align='center'>
+<img src="figs/NEZHA/table_03.png" alt="Table 3 — Overall Performance" width="800"/>
+</p>
 
 **품질 (오프라인)**:
 

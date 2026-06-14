@@ -18,6 +18,10 @@ Microsoft Research Asia
 
 ## 0. Summary
 
+<p align="center">
+<img src="figs/LaSER/fig_01.png" alt="Figure 1 — LaSER Pipeline" width="700"/>
+</p>
+
 ### 0.1. 문제 (Problem)
 
 고난도 정보 검색(Dense Retrieval)에서 LLM 기반 임베딩 모델이 충분한 추론 능력을 발휘하지 못하는 문제를 다룬다.
@@ -196,6 +200,10 @@ $$\mathcal{L} = \mathcal{L}_{con} + \alpha \mathcal{L}_{KL} + \beta \mathcal{L}_
 
 ### 데이터셋
 
+<p align="center">
+<img src="figs/LaSER/table_02.png" alt="Table 2 — Dataset Statistics" width="500"/>
+</p>
+
 | 벤치마크 | 특징 | 용도 |
 |---------|------|------|
 | BRIGHT | 복잡한 추론 필요 검색 (11개 도메인) | 주요 평가 |
@@ -211,6 +219,10 @@ $$\mathcal{L} = \mathcal{L}_{con} + \alpha \mathcal{L}_{KL} + \beta \mathcal{L}_
 | LaSER (ours) | 7B+ | Dual-View 정렬 |
 
 ### BRIGHT 결과 (nDCG@10)
+
+<p align="center">
+<img src="figs/LaSER/table_03.png" alt="Table 3 — BRIGHT Benchmark Results" width="700"/>
+</p>
 
 | 모델 | 평균 | 수학 | 코딩 | 과학 |
 |------|------|------|------|------|
