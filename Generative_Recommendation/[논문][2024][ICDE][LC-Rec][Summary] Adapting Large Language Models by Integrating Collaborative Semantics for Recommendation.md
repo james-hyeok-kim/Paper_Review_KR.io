@@ -14,6 +14,10 @@
 
 ## 0. Summary
 
+<p align='center'>
+<img src="figs/LC-Rec/fig_01.png" alt="Figure 1" width="800"/>
+</p>
+
 ### 0.1. 문제 (Problem)
 
 LLM 기반 추천 시스템은 크게 두 가지 흐름으로 나뉜다.
@@ -164,6 +168,10 @@ Amazon 페버리원 3개 데이터셋(Instruments, Arts, Games)에서 전통 협
 
 **LC-Rec의 핵심 통찰**: 협업 필터링에서 학습된 아이템 임베딩을 **LLM이 처리할 수 있는 이산 토큰으로 변환**하면, 두 접근의 장점을 동시에 가질 수 있다. 협업 신호를 담은 코드워드를 LLM 어휘에 추가하고, 이 코드워드의 의미를 LLM이 이해하도록 정렬 튜닝을 수행하는 것이 LC-Rec의 전략이다.
 
+<p align='center'>
+<img src="figs/LC-Rec/table_01.png" alt="TABLE I" width="500"/>
+</p>
+
 ---
 
 ## 2. Method
@@ -236,6 +244,10 @@ $$\mathcal{L} = -\sum_{\tau \in \mathcal{T}} \sum_{t} \log P(y_t \mid x_\tau, y_
 
 **데이터셋**: Amazon 페버리원 3개 카테고리
 
+<p align='center'>
+<img src="figs/LC-Rec/table_02.png" alt="TABLE II" width="500"/>
+</p>
+
 | 데이터셋 | 도메인 | 아이템 수 | 상호작용 수 |
 |---|---|---|---|
 | Instruments | 악기/음악 장비 | ~10K | ~100K |
@@ -254,6 +266,10 @@ $$\mathcal{L} = -\sum_{\tau \in \mathcal{T}} \sum_{t} \log P(y_t \mid x_\tau, y_
 | 혼합 방식 | VQ-Rec, VIP5 |
 
 ### 3.2. 주요 결과
+
+<p align='center'>
+<img src="figs/LC-Rec/table_03.png" alt="TABLE III" width="800"/>
+</p>
 
 * LC-Rec이 3개 데이터셋 모든 지표에서 SOTA 달성
 * BIGRec (임의 정수 ID) 대비 일관된 우위 → **협업 신호를 담은 ID의 효과** 실증
