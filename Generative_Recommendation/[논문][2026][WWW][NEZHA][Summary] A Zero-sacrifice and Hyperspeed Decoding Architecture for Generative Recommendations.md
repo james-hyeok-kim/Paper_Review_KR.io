@@ -102,6 +102,94 @@ Hash-set: 유효한 아이템 ID 전체 → O(1) 조회
 
 ### 0.5. 상세 동작 방식 (How It Works)
 
+#### 오프라인 학습 흐름
+
+<p align='center'>
+<img src="figs/NEZHA/offline_diagram.png" alt="Offline Training Flow" width="800"/>
+</p>
+
+```
+  [훈련 데이터]
+       │
+       ▼
+┌─────────────────────────────────────────────┐
+│  GR Main 모델  (frozen · 역전파 차단)        │
+│                                             │
+│  [Embedding] ──▶ [Transformer L_d 레이어]   │
+│                           │                 │
+│                           ▼                 │
+│                    hidden state h_t         │
+└───────────────────────────┬─────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────┐
+│  Draft Head  (MLP · 학습 대상)               │
+│                                             │
+│  h_t ──▶ [W_k · h_t + b_k,  k = 1..K]     │
+│                    │                        │
+│                    ▼                        │
+│       P(s_{t+1}), ..., P(s_{t+K})          │
+└──────────────────┬──────────────────────────┘
+                   │ 예측 분포
+                   ▼
+┌─────────────────────────────────────────────┐
+│  CE Loss   sum L_CE(s_pred, s*_true)        │
+│                    ▲                        │
+│        Ground Truth  s*_{t+1} .. s*_{t+K}  │
+└──────────────────┬──────────────────────────┘
+                   │
+                   │  역전파 → Draft Head(W_k, b_k)만 업데이트
+                   │          Main 모델 파라미터 변경 없음
+                   └──────────────────────────────────────────▶
+```
+
+#### 온라인 추론 흐름
+
+<p align='center'>
+<img src="figs/NEZHA/online_diagram.png" alt="Online Inference Flow" width="700"/>
+</p>
+
+```
+  [사용자 이력]
+       │
+       ▼
+  [GR Encoder + KV-cache 생성]
+       │
+       ▼
+  [빔 B개 초기화]
+       │
+       ▼
+  ┌────────────────┐    Yes
+  │ 모든 빔 완료?  │──────────────▶  [Top-B 추천 반환]
+  └───────┬────────┘
+          │ No
+          ▼
+  Step 1 [Draft Head]
+     h_t ──▶ K+1 후보 서브토큰 제안
+          │
+          ▼
+  Step 2 [Main Head]
+     beams + draft_tokens ──▶ 단 1회 포워드 패스 (병렬 검증)
+          │
+          ▼
+  ┌──────────────────────────────────────────────┐
+  │  Step 3  Hash-set Verifier                  │
+  │                                              │
+  │  A: draft_k == argmax(main_logits_k) ?       │
+  │  B: assemble_id(draft) in H (카탈로그) ?     │
+  └──────────┬───────────────────────┬───────────┘
+             │ A & B 모두 통과        │ 불일치 또는 미존재
+             ▼                       ▼
+      [Accept]                  [Reject]
+      수용 확정                  Main 토큰 1개 사용
+      K+1 스텝 전진              1 스텝 전진
+      (최대 K+1 스킵)            KV-cache rollback
+             │                       │
+             └───────────┬───────────┘
+                         │
+                    (루프 반복)
+```
+
 **[오프라인 학습] Draft Head 훈련**
 
 ```

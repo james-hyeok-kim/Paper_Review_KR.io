@@ -94,36 +94,229 @@ $$\mathcal{L}_{process} = \sum_{k=1}^K \| z_k - \text{Enc}(r_k) \|_2^2$$
 
 ### 0.5. 상세 동작 방식 (How It Works)
 
-**[학습 데이터 구축] ReasonEmb**
+<img src="figs/LaSER/laser_diagram.png" width="950"/>
 
-LaSER는 ReasonEmb라는 새로운 훈련 데이터셋을 구축한다:
-```
-1. BRIGHT 등 기존 검색 데이터셋에서 (query, relevant_doc, hard_negative) 트리플렛 수집
-2. GPT-4o-mini로 각 쿼리에 대해 단계별 CoT 추론 텍스트 R 생성
-3. 추론 텍스트를 K개 단계로 분할: [r1, r2, ..., rK]
-4. 각 r_k를 임베딩하여 프로세스 정렬 학습에 사용
-```
+구체적인 예시를 통해 전체 흐름을 단계별로 설명한다.
 
-**[훈련 파이프라인]**
+---
 
-```
-Stage 1: 베이스 LLM (e.g., Mistral-7B)으로 Explicit View 임베딩 모델 초기화
-         → 일반 검색 데이터로 Contrastive Loss 사전훈련
+#### 예시 쿼리
 
-Stage 2: Latent View 헤드 추가
-         → Multi-grained Alignment로 공동 훈련:
-            L_total = L_contrastive + α·L_KL + β·L_process
-```
+> **"퀀텀 컴퓨팅의 오류율 문제를 다루는 논문을 찾아줘"**
 
-**[인퍼런스]**
+이 쿼리는 단순 키워드 매칭으로는 풀기 어렵다. "퀀텀 컴퓨팅 → 큐비트 → 결어긋남(decoherence) → 오류 정정 코드 → 관련 논문" 같은 다단계 추론이 필요하다.
+
+---
+
+#### STEP 0. 학습 데이터 구축 — ReasonEmb
+
+##### 트리플렛(Triplet)이란?
+
+검색 모델을 학습시키려면 "이건 맞고, 저건 틀리다"를 동시에 알려줘야 한다. 이를 위해 세 가지 요소를 묶은 것이 **트리플렛**이다.
 
 ```
-입력: 쿼리 q
-1. Latent View: z1 = f(q), z2 = f(q, z1), ..., zK = f(q, z_{K-1})
-2. 최종 임베딩: e_q = normalize(zK)
-3. ANN 검색: top-k 문서 = argmax_{d} e_q · e_d
-# CoT 텍스트 생성 없음 → 빠른 인퍼런스
+트리플렛 = (q, d+, d-)
+
+  q   : 쿼리 — 사용자가 검색하는 질문
+  d+  : Positive  — 이 쿼리에 실제로 맞는 관련 문서
+  d-  : Negative  — 이 쿼리에 맞지 않는 비관련 문서
 ```
+
+모델은 트리플렛을 보고 다음을 학습한다:
+
+```
+e_q · e_{d+}  →  크게  (쿼리와 관련 문서는 가깝게)
+e_q · e_{d-}  →  작게  (쿼리와 비관련 문서는 멀게)
+```
+
+특히 **하드 네거티브(Hard Negative)** 가 중요하다. 주제는 비슷하지만 정확히 맞지는 않는 문서로, 모델이 헷갈리기 쉬운 어려운 케이스이기 때문에 학습 효과가 훨씬 크다.
+
+```
+쉬운 네거티브: "프랑스 와인 양조 역사"       ← 퀀텀이랑 관계없어서 모델이 금방 구분
+하드 네거티브: "Quantum Supremacy" 논문    ← 퀀텀 컴퓨팅이지만 오류율이 아님 → 어려움
+```
+
+---
+
+##### ReasonEmb 데이터셋 구축 과정
+
+ReasonEmb는 **사람이 손으로 만들지 않는다.** 세 단계로 자동 구축된다.
+
+**① 기존 검색 데이터셋에서 (q, d+, d-) 트리플렛 수집**
+
+BRIGHT, BEIR 등 이미 사람이 레이블링해둔 벤치마크 데이터셋을 재활용한다. 여기서 쿼리·관련 문서·하드 네거티브를 수집하는 것이므로 이 단계에는 추가 인력이 필요 없다.
+
+```
+기존 데이터셋 (BRIGHT 등)
+        ↓ 수집
+(q, d+, d-) 트리플렛 ~100K 쌍
+```
+
+**② GPT-4o-mini로 CoT 추론 텍스트 자동 생성**
+
+각 쿼리에 대해 GPT-4o-mini API를 호출하여 K개 단계의 추론 텍스트 R = [r1, …, rK]를 생성한다. 사람이 추론 텍스트를 한 줄도 직접 쓰지 않는다.
+
+```python
+for (q, d+, d-) in triplets:
+    R = GPT4oMini.generate(
+        prompt=f"""쿼리: {q}
+                   관련 문서를 찾기 위해 필요한 추론 과정을
+                   {K}개 단계로 나눠서 작성하라."""
+    )
+    r1, r2, r3, r4 = split_into_steps(R)
+    dataset.append((q, r1, r2, r3, r4, d+, d-))
+```
+
+**③ 최종 ReasonEmb 데이터셋**
+
+```
+ReasonEmb 한 샘플 =
+  q   : "퀀텀 컴퓨팅의 오류율 문제를 다루는 논문"
+  r1  : "퀀텀 컴퓨팅의 핵심 개념인 큐비트와 중첩을 파악한다."
+  r2  : "큐비트의 결어긋남(decoherence)이 오류의 주요 원인임을 식별한다."
+  r3  : "오류 정정 코드(QEC)나 내결함성을 다루는 연구 방향을 탐색한다."
+  r4  : "위 개념을 실험적으로 검증하거나 새 방법을 제안하는 논문을 목표로 한다."
+  d+  : "Fault-Tolerant Quantum Computing via Surface Codes (Nature 2023)"
+  d-  : "Quantum Supremacy Using a Programmable Superconducting Processor (Google 2019)"
+         → 퀀텀 컴퓨팅이지만 오류율/정정이 아닌 연산 속도 논문 → 하드 네거티브
+```
+
+> **한계**: GPT-4o-mini API를 ~100K 쿼리에 호출하므로 비용이 발생한다. 논문에서도 이를 명시적 한계로 언급한다.
+
+| 구성 요소 | 출처 | 사람 개입 여부 |
+|---|---|---|
+| (q, d+, d-) 트리플렛 | 기존 검색 데이터셋 재활용 | 기존 레이블 재사용 |
+| CoT 추론 r1~rK | GPT-4o-mini 자동 생성 | 없음 (프롬프트 설계만) |
+
+이 `(q, r1~r4, d+, d-)` 묶음이 LaSER의 전체 학습 데이터로 사용된다.
+
+---
+
+#### STEP 1. Explicit View — 텍스트 CoT 인코딩 (학습 시에만)
+
+쿼리 q와 CoT 추론 텍스트 R을 **합쳐서** LLM 인코더에 입력한다.
+
+```
+입력 텍스트:
+  "[쿼리] 퀀텀 컴퓨팅의 오류율 문제를 다루는 논문
+   [추론] 큐비트의 결어긋남이 오류 원인 → 오류 정정 코드 탐색 → 내결함성 논문 목표"
+
+LLM 인코더 (Mistral-7B)
+        ↓
+e_explicit = [0.12, -0.45, 0.87, ..., 0.33]  ← 768~4096차원 벡터
+```
+
+이 `e_explicit`은 추론 텍스트가 포함된 "정답 임베딩"으로, **Latent View를 가르치는 교사(teacher)** 역할을 한다.
+
+---
+
+#### STEP 2. Latent View — 잠재 사고 토큰 자기회귀 생성 (학습 + 인퍼런스)
+
+쿼리 q **만** 입력하여, K=4개의 연속 벡터(soft token)를 순서대로 생성한다. 텍스트를 전혀 출력하지 않는다.
+
+```
+입력: "퀀텀 컴퓨팅의 오류율 문제를 다루는 논문"
+        ↓
+z1 = Decoder(q)
+   → [0.08, -0.31, 0.72, ...]  ← "큐비트·중첩 개념" 방향의 벡터
+        ↓
+z2 = Decoder(q, z1)
+   → [0.15, -0.41, 0.80, ...]  ← "결어긋남·오류 원인" 방향의 벡터
+        ↓
+z3 = Decoder(q, z1, z2)
+   → [0.19, -0.44, 0.85, ...]  ← "오류 정정 코드 탐색" 방향의 벡터
+        ↓
+z4 = Decoder(q, z1, z2, z3)
+   → [0.21, -0.46, 0.88, ...]  ← "내결함성 논문" 방향의 최종 임베딩
+
+최종 쿼리 임베딩: e_q = normalize(z4)
+```
+
+각 z_k는 CoT의 각 추론 단계(r_k)에 대응하는 연속 벡터이다. 텍스트로 "큐비트"라고 쓰지는 않지만, 그 개념 방향으로 벡터가 이동한다.
+
+---
+
+#### STEP 3. Multi-grained Alignment — 세 가지 정렬 손실
+
+Explicit View(교사)와 Latent View(학생)가 같은 방향으로 학습하도록 세 가지 손실을 동시에 사용한다.
+
+**① 출력 대조 손실 (Contrastive Loss)**
+
+```
+e_q(latent) · e_{d+}  →  높게  (관련 문서와 가깝게)
+e_q(latent) · e_{d-}  →  낮게  (하드 네거티브와 멀게)
+
+Loss_con = -log [ exp(e_q · e_{d+} / τ) / Σ exp(e_q · e_{d'} / τ) ]
+```
+
+→ Latent View 임베딩이 실제로 관련 문서를 잘 찾도록 훈련
+
+**② KL 정렬 (출력 분포 일치)**
+
+```
+Explicit View가 배치 내 문서들을 보는 확률 분포:  P_explicit = softmax([0.9, 0.1, 0.05, ...])
+Latent View가 배치 내 문서들을 보는 확률 분포:   P_latent  = softmax([0.7, 0.2, 0.1,  ...])
+
+Loss_KL = KL(P_explicit || P_latent)
+```
+
+→ 어떤 문서를 얼마나 중요하게 보는지의 "판단 방식"까지 일치시킴
+
+**③ 프로세스 정렬 (중간 단계 일치)**
+
+```
+z1  ←→  Enc(r1)  "큐비트·중첩 개념" 임베딩
+z2  ←→  Enc(r2)  "결어긋남·오류 원인" 임베딩
+z3  ←→  Enc(r3)  "오류 정정 코드" 임베딩
+z4  ←→  Enc(r4)  "내결함성 논문" 임베딩
+
+Loss_proc = (1/K) Σ ||z_k - sg[Enc(r_k)]||²
+            (sg = stop-gradient: Explicit 쪽은 고정, Latent만 업데이트)
+```
+
+→ 단계를 건너뛰지 않고 **추론 경로 자체**를 학습하게 강제
+
+**총 손실:**
+```
+L_total = L_con + α·L_KL + β·L_proc
+```
+
+---
+
+#### STEP 4. 인퍼런스 (추론 시)
+
+학습이 끝나면 **Explicit View와 CoT 텍스트는 사용하지 않는다.** Latent View만으로 빠르게 임베딩을 만든다.
+
+```
+[사용자 입력]
+쿼리: "퀀텀 컴퓨팅의 오류율 문제를 다루는 논문"
+        ↓
+[Latent View — 4번 forward pass]
+z1 → z2 → z3 → z4  (텍스트 생성 없음, 벡터만 계산)
+        ↓
+e_q = normalize(z4)  ← 최종 쿼리 임베딩
+        ↓
+[ANN 검색 (FAISS 등)]
+코사인 유사도 기준 Top-K 문서 반환:
+  1위: "Fault-Tolerant Quantum Computing via Surface Codes" (유사도 0.91)
+  2위: "Quantum Error Correction with Superconducting Qubits" (유사도 0.87)
+  3위: "Noise-Resilient Quantum Gates via Dynamical Decoupling" (유사도 0.83)
+```
+
+CoT 텍스트 생성이 없으므로 기존 Explicit CoT 방식 대비 **수십 배 빠른** 인퍼런스가 가능하다.
+
+---
+
+#### 핵심 직관 요약
+
+| 단계 | 무엇을 하는가 | 왜 중요한가 |
+|---|---|---|
+| Explicit View | CoT 텍스트를 포함한 "정답 임베딩" 계산 | Latent View의 학습 목표 제공 |
+| Latent View | 쿼리만으로 K개 soft token 생성 | 인퍼런스 시 CoT 없이 추론 |
+| Contrastive Loss | 관련 문서 가깝게, 비관련 멀게 | 실제 검색 성능 보장 |
+| KL Loss | 두 뷰의 문서 중요도 분포 일치 | 판단 방식 전이 |
+| Process Loss | 각 z_k ≈ 각 r_k 임베딩 | 추론 단계를 순서대로 학습 |
+| 인퍼런스 | Latent View만 사용 | CoT 없이 추론 능력 유지 |
 
 ---
 

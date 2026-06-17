@@ -107,6 +107,10 @@ Amazon 페버리원 3개 데이터셋(Instruments, Arts, Games)에서 전통 협
 
 ### 0.5. 상세 동작 방식 (How It Works)
 
+<p align="center">
+<img src="figs/LC-Rec/pipeline_diagram.png" alt="LC-Rec Offline + Online 파이프라인" width="900"/>
+</p>
+
 **[오프라인] 협업 ID 생성 파이프라인**
 
 ```

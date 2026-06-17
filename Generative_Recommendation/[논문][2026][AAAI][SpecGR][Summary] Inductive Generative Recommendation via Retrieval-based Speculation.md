@@ -19,11 +19,7 @@ University of California, San Diego
 ## 0. Summary
 
 <p align='center'>
-<img src="figs/SpecGR/fig_00.png" alt="Figure 1 — SpecGR Overview" width="600"/>
-</p>
-
-<p align='center'>
-<img src="figs/SpecGR/fig_01.png" alt="Figure 01" width="800"/>
+<img src="figs/SpecGR/fig_00.png" alt="Figure 1 — SpecGR Overview" width="700"/>
 </p>
 
 ### 0.1. 문제 (Problem)
