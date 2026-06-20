@@ -20,6 +20,10 @@ University of California San Diego
 <img src="figs/TD-MPC2/fig_01.png" alt="Figure 01" width="800"/>
 </p>
 
+> **Figure 1 축 읽는 법** — 성격이 다른 두 부분으로 구성된다.
+> - **왼쪽 (확장성 곡선)**: 가로축 x = **모델 크기(파라미터 수, log 스케일 1M→1B)**, 세로축 y = **80개 task 평균 normalized score**. 빨강(TD-MPC2)은 키울수록 상승(확장 O), 파랑(전작 TD-MPC)은 하락(확장 X). 빨강이 거의 직선 = score가 log(파라미터)에 비례.
+> - **오른쪽 (도메인별 막대 6개)**: 가로축 x = **방법 4종**(SAC, DreamerV3, TD-MPC, TD-MPC2, 범주형), 세로축 y = **그 도메인의 성능 점수**(패널마다 범위 다름). 모든 도메인에서 빨강(TD-MPC2)이 가장 높음.
+
 ### 0.1. 문제 (Problem)
 
 * 강화학습(RL) 알고리즘은 대부분 **단일 task 학습**에 맞춰져 있고, task마다 hyperparameter를 따로 튜닝해야 한다. 어떤 hyperparameter를 골라야 하는지에 대한 원리적 방법도 없다.
@@ -300,6 +304,11 @@ $$\mu^*, \sigma^* = \arg\max_{(\mu,\sigma)} \mathbb{E}_{(a_t,\dots,a_{t+H})\sim\
 <p align='center'>
 <img src="figs/TD-MPC2/fig_04.png" alt="Figure 04" width="800"/>
 </p>
+
+> **Figure 4 축 읽는 법 (single-task RL 학습 곡선)** — 가로축 x = **environment steps**(환경과 상호작용한 횟수 = 모은 데이터 양, 오른쪽일수록 많음), 세로축 y = **성능**(DMControl은 episode return, 나머지는 success rate), 연한 음영 = 3 seed의 95% 신뢰구간.
+> - **데이터 효율**: 곡선이 *얼마나 빨리(왼쪽에서) 올라가나* → 같은 데이터량에서 더 높으면 적은 경험으로 잘 배운 것. 실제 로봇처럼 상호작용 비용이 큰 환경에서 핵심 장점.
+> - **최종 성능(asymptotic)**: 곡선이 오른쪽에서 *도달하는 천장 높이*.
+> - 빨강(TD-MPC2)이 "더 왼쪽에서, 더 높이" 올라감 = 데이터 효율·최종 성능 모두 우위. ManiSkill2·MyoSuite처럼 어려운 도메인일수록 격차가 큼.
 
 **기존 방법과 비교**: 104개 task 전 도메인에서 TD-MPC2가 데이터 효율·최종 성능 모두 우위(Figure 4). 특히 고차원 locomotion(Dog $A\in\mathbb{R}^{38}$, Humanoid)과 다중 객체 manipulation(Pick YCB, 74개 객체)에서 큰 격차로 능가하며 Pick YCB는 60% 이상 성공(다른 방법은 예산 내 실패). MyoSuite 결과는 사전 실험 없이 얻은 것이라 더 주목할 만하다. TD-MPC는 gradient 폭주로 종종 발산하지만 TD-MPC2는 안정적이며, DreamerV3는 Dog에서 수치적 불안정, 정밀 객체 manipulation(lift/pick/stack)에서 고전한다.
 
