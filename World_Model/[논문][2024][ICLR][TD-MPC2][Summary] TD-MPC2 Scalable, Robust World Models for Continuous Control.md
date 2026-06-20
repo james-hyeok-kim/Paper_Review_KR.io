@@ -1,0 +1,273 @@
+# TD-MPC2: Scalable, Robust World Models for Continuous Control
+
+저자 :
+
+Nicklas Hansen, Hao Su, Xiaolong Wang
+
+University of California San Diego
+
+발표 : ICLR 2024
+
+논문 : [PDF](https://arxiv.org/pdf/2310.16828)
+
+출처 : [https://arxiv.org/abs/2310.16828](https://arxiv.org/abs/2310.16828)
+
+---
+
+## 0. Summary
+
+<p align='center'>
+<img src="figs/TD-MPC2/fig_01.png" alt="Figure 01" width="800"/>
+</p>
+
+### 0.1. 문제 (Problem)
+
+* 강화학습(RL) 알고리즘은 대부분 **단일 task 학습**에 맞춰져 있고, task마다 hyperparameter를 따로 튜닝해야 한다. 어떤 hyperparameter를 골라야 하는지에 대한 원리적 방법도 없다.
+* 대규모·다양한(여러 embodiment·action space) 데이터를 한 모델로 소화하려면 task 간 차이(행동 차원 수, 탐험 난이도, 보상 크기 분포 등)에 **robust**해야 하는데, 기존 RL은 그렇지 못하다.
+* Gato, RT-1 같은 generalist agent는 **거의 expert 수준의 시연(near-expert demonstration)** 을 가정한 behavior cloning에 의존해 사용 가능한 데이터가 크게 제한되고, action을 토큰화(discretization)해 고차원 연속 제어에 확장하기 어렵다.
+* 전작인 TD-MPC는 단일 task에서는 강했지만, **모델·데이터 크기를 단순히 키우면 오히려 성능이 떨어지는**(gradient 폭주로 발산까지 하는) 확장성 문제가 있었다.
+
+### 0.2. 핵심 아이디어 (Core Idea)
+
+* **암묵적(decoder-free) 월드 모델(Implicit World Model)**: "월드 모델"은 환경이 앞으로 어떻게 변할지 예측하는 환경의 내부 시뮬레이터다. TD-MPC2는 미래 관측(이미지·센서값)을 **복원(decode)하지 않는다**. 대신 행동 시퀀스에 대해 "결과(보상의 합, return)"만 정확히 예측하는 데 집중한다. 비유하면, 자동차를 운전할 때 모든 픽셀을 머릿속에 그리는 대신 "이렇게 핸들을 돌리면 결국 어디에 도착할지"만 예측하는 것이다. 픽셀 복원은 비싸고 제어에 꼭 필요하지도 않기 때문이다.
+
+* **잠재 공간에서의 계획(Latent-space Planning, MPC)**: 인코딩된 잠재 표현 $z$ 위에서 여러 후보 행동 시퀀스를 모델로 빠르게 굴려보고(rollout), return이 가장 높은 시퀀스를 고른다. "16수 앞을 머릿속으로 시뮬레이션해 보고 첫 수를 두는 체스 기사"와 같다. 단, 짧은 horizon 너머는 학습된 **terminal value 함수 $Q$** 로 보충(bootstrap)해 근시안적 최적화 문제를 해결한다.
+
+* **SimNorm (Simplicial Normalization)**: 잠재 벡터 $z$ 를 여러 개의 작은 조각(simplex)으로 나눠 각 조각에 softmax를 적용하는 정규화다. 직관적으로는 "표현을 sparse하게(몇 개 차원만 켜지게) 부드럽게 유도"해 gradient 폭주를 막는 안전장치다. 이것이 TD-MPC2의 학습 안정성의 핵심이다.
+
+  $$z^{\circ} = [g_1, \dots, g_L], \quad g_i = \mathrm{softmax}(z_{i:i+V}/\tau)$$
+
+  여기서 $z^{\circ}$ 는 정규화된 잠재 표현, $L$ 은 simplex(조각)의 개수, $V$ 는 각 조각의 차원, $\tau$ 는 sparsity를 조절하는 temperature다. 즉 잠재 벡터를 $L$ 개 그룹으로 나눈 뒤 각 그룹에 softmax를 적용해 이어붙인다.
+
+* **이산 회귀(Discrete Regression)로 보상·가치 예측**: task마다 보상의 크기가 천차만별이라(작은 값 vs 매우 큰 값) 일반 회귀는 불안정하다. 그래서 보상·가치를 log 변환 공간에서 **여러 bin 중 하나를 맞추는 분류 문제**로 바꿔 cross-entropy로 학습한다. "정확한 숫자 대신 어느 구간에 속하는지 맞히게" 해 보상 크기에 둔감하게 만든다.
+
+* **학습 가능한 task embedding + action masking**: 여러 task·embodiment를 한 모델로 다루기 위해, 각 task를 나타내는 벡터 $e$ ($\ell_2$-norm $\le 1$로 제약)를 데이터로부터 학습하고 모든 component에 조건으로 넣는다. action space 크기가 다른 task는 최대 차원으로 zero-padding한 뒤 유효하지 않은 차원을 masking해, domain 지식 없이도 섞어 학습한다.
+
+### 0.3. 효과 (Effects)
+
+* **단일 hyperparameter set**으로 4개 도메인 104개 연속 제어 task를 모두 처리. task별 튜닝이 사라진다.
+* TD-MPC와 달리 **모델·데이터 크기를 키울수록 성능이 일관되게 향상**(확장성 확보).
+* SAC·DreamerV3가 발산하는 고차원 task(Dog $A\in\mathbb{R}^{38}$, Humanoid)에서도 **안정적**으로 학습.
+* batch size 256, update-to-data ratio 1 등 더 가벼운 설정으로도 더 강한 baseline들을 능가.
+
+### 0.4. 결과 (Results)
+
+* 104개 task에서 model-free(SAC), model-based(DreamerV3, TD-MPC)를 데이터 효율·최종 성능 모두에서 능가.
+* 단일 **317M 파라미터** agent로 80개 task(여러 도메인·embodiment·action space)를 수행. 모델 크기에 따라 normalized score가 **16.0 → 49.5 → 57.1 → 68.0 → 70.6** (1M→5M→19M→48M→317M)으로 상승, log(파라미터) 대비 거의 선형 확장.
+* Few-shot finetuning: 70개 task로 사전학습한 19M agent가 미관측 10개 task에서 scratch 대비 약 **2배**(24.0 → 47.0) 향상.
+* Pick YCB(74개 객체 manipulation)에서 60% 이상 성공, 다른 방법들은 같은 예산 내에 학습 실패.
+
+### 0.5. 상세 동작 방식 (How It Works)
+
+TD-MPC2는 (A) 월드 모델 **학습 루프**와 (B) 학습된 모델로 행동을 고르는 **계획(추론) 루프**가 번갈아 도는 구조다.
+
+Step 1. **인코딩**: 환경 관측 $s$ (센서값 또는 이미지)를 인코더 $h$ 에 넣어 잠재 표현 $z$ (잠재 공간의 좌표값)로 변환하고, SimNorm으로 정규화한다.
+Step 2. **잠재 예측**: 잠재 동역학 $d(z,a)$ 가 다음 잠재 상태를, $R(z,a)$ 가 보상을, $Q(z,a)$ 가 미래 return을 예측한다. 이 과정에서 미래 관측은 복원하지 않는다(decoder-free).
+Step 3. **모델 학습**: replay buffer에서 뽑은 데이터로 (a) joint-embedding 예측 오차, (b) 보상 예측(이산 cross-entropy), (c) 가치 예측(TD-target, 이산 cross-entropy)을 합한 손실을 줄여 $h,d,R,Q$ 를 동시 업데이트한다. 별도로 maximum-entropy 목적함수로 policy prior $p$ 를 학습한다.
+Step 4. **계획(추론)**: 매 결정 시점마다 MPPI 옵티마이저가 여러 행동 시퀀스를 샘플링해 모델로 굴려보고(latent rollout), horizon 끝은 $Q$ 로 보충한 return을 계산한다. 후보 중 일부는 policy prior $p$ 가 제공해 수렴을 가속한다.
+Step 5. **행동 실행 → 데이터 수집**: return이 높도록 갱신한 가우시안 분포 $\mathcal{N}(\mu^*,\sigma^*)$ 에서 첫 행동을 실행하고, 새 transition을 replay buffer에 저장한다. 이후 Step 1로 돌아가 반복한다.
+
+전체 데이터 흐름 요약:
+
+```
+[관측 s] → [Encoder h] → [잠재 z + SimNorm]
+            │
+            ├─(추론)→ [MPPI: d/R/Q 로 후보 rollout] ← [policy prior p 가 후보 일부 제공]
+            │                       │
+            │                       └→ [최적 행동 a 실행] → [replay buffer]
+            │
+            └─(학습)→ [Joint-embedding + Reward(CE) + Value(TD,CE) loss] → h,d,R,Q 갱신
+                                                              → policy loss → p 갱신
+                                                              → (다시 Step 1 반복)
+```
+
+---
+
+## 1. Introduction
+
+인터넷 규모 데이터로 거대 모델을 학습하는 패러다임은 언어·비전에서 generalist 모델을 만들어냈다. 그 성공의 핵심은 (1) 방대한 데이터와 (2) 모델·데이터 크기에 따라 안정적으로 확장되는 아키텍처였다. 로보틱스에도 이 패러다임을 옮기려는 시도가 있었지만, 저수준 action으로 여러 embodiment를 넘나들며 다양한 제어 task를 수행하는 generalist embodied agent는 여전히 멀다.
+
+저자들은 현재 접근의 두 가지 한계를 지적한다. (a) behavior cloning을 위해 **거의 expert 수준의 시연**을 가정하기 때문에 사용 가능한 데이터가 심하게 제한된다. (b) 크고 정제되지 않은(uncurated, 품질이 섞인) 데이터를 소화할 수 있는 **확장 가능한 연속 제어 알고리즘**이 부재하다.
+
+강화학습(RL)은 정제되지 않은 데이터에서 전문가 행동을 추출하기에 이상적인 틀이지만, 기존 RL은 대부분 단일 task용이며 task별 hyperparameter에 의존한다. 대규모 multi-task 데이터를 다루려면 task 간 차이(행동 차원, 탐험 난이도, 보상 분포)에 robust해야 한다.
+
+이 논문은 그 목표를 향한 큰 진전인 **TD-MPC2**를 제안한다. 전작 TD-MPC는 학습된 암묵적(decoder-free) 월드 모델의 잠재 공간에서 국소 궤적 최적화(planning)를 수행하는 model-based RL이었으나, 모델·데이터를 단순히 키우면 오히려 성능이 떨어졌다. TD-MPC2의 알고리즘적 기여는 두 가지다. (1) 핵심 설계 선택들을 재검토해 **알고리즘 robust성**을 확보(모든 task에 동일 hyperparameter 사용), (2) domain 지식 없이 여러 embodiment·action space를 수용하는 **아키텍처 설계**.
+
+저자들은 DMControl, Meta-World, ManiSkill2, MyoSuite 4개 도메인의 **104개** 연속 제어 task에서 평가한다. 고차원 상태·행동(최대 $A\in\mathbb{R}^{39}$), 이미지 관측, 희소 보상, 다중 객체 manipulation, 생리학적으로 정확한 근골격 제어, 복잡한 locomotion(Dog·Humanoid)을 포함한다. 동일 hyperparameter로 기존 model-based·model-free 방법을 일관되게 능가하며, 단일 **317M** 파라미터 월드 모델로 80개 task를 수행한다. 또한 300개 이상의 모델 checkpoint, 데이터셋, 코드를 공개한다.
+
+## 2. Method
+
+<p align='center'>
+<img src="figs/TD-MPC2/fig_03.png" alt="Figure 03" width="800"/>
+</p>
+
+### 2.1. 암묵적 월드 모델 학습
+
+복원(decoder) 목적함수로 생성 모델을 학습하는 것은 풍부한 학습 신호 때문에 매력적이지만, 긴 horizon에 걸쳐 원시 미래 관측을 정확히 예측하는 것은 어렵고 효과적인 제어로 이어지지도 않는다(objective mismatch). 그래서 TD-MPC2는 **결과(return)를 정확히 예측하는 최대한 유용한 모델**을 목표로, joint-embedding 예측 + 보상 예측 + TD-learning을 결합해 관측을 복원하지 않는 control-centric 월드 모델을 학습한다.
+
+**5개 component** (식 2):
+
+* Encoder: $z = h(s, e)$ — 관측을 잠재 표현으로 매핑
+* Latent dynamics: $z' = d(z, a, e)$ — 잠재 forward 동역학
+* Reward: $\hat r = R(z, a, e)$ — transition의 보상 예측
+* Terminal value: $\hat q = Q(z, a, e)$ — return(할인된 보상 합) 예측
+* Policy prior: $\hat a = p(z, e)$ — $Q$ 를 최대화하는 action 예측
+
+여기서 $e$ 는 multi-task 모델용 학습 가능한 task embedding이다.
+
+**모델 목적함수** (식 3): $h, d, R, Q$ 를 함께 최적화한다.
+
+$$\mathcal{L}(\theta) = \mathbb{E}_{(s,a,r,s')_{0:H}\sim\mathcal{B}}\left[\sum_{t=0}^{H}\lambda^t\Big(\underbrace{\|z'_t - \mathrm{sg}(h(s'_t))\|_2^2}_{\text{joint-embedding}} + \underbrace{\mathrm{CE}(\hat r_t, r_t)}_{\text{reward}} + \underbrace{\mathrm{CE}(\hat q_t, q_t)}_{\text{value}}\Big)\right]$$
+
+여기서 $\mathrm{sg}$ 는 stop-gradient, $q_t = r_t + \gamma\bar Q(z'_t, p(z'_t))$ 는 TD-target, $\lambda\in(0,1]$ 는 먼 미래 step의 가중치를 줄이는 계수, $\mathrm{CE}$ 는 cross-entropy다. $\bar Q$ 는 $Q$ 의 EMA(지수이동평균)다. 보상·가치는 log 변환 공간에서 **이산 회귀(다중 클래스 분류)** 로 정식화해 task 간 보상 크기 차이에 둔감하게 만든다.
+
+**정책 목적함수** (식 4): policy prior $p$ 는 maximum-entropy 정책으로, $\alpha Q - \beta\mathcal{H}$ 형태(가치 항 + 엔트로피 항)를 최대화한다. 엔트로피 조기 붕괴를 막기 위해 $\alpha$ 를 이동 통계로 자동 조정한다.
+
+**아키텍처**: 모든 component는 LayerNorm + Mish 활성화를 쓰는 MLP다. gradient 폭주를 막기 위해 잠재 표현 $z$ 를 $L$ 개의 simplex로 사영하는 **SimNorm**(식 5)을 적용한다. simplex 임베딩은 hard constraint 없이 표현을 sparse하게 유도한다. TD-target의 편향을 줄이기 위해 **5개 Q-함수 앙상블**을 학습하고, 무작위로 2개를 뽑아 그 최솟값을 target으로 쓴다.
+
+### 2.2. Policy Prior를 활용한 MPC 계획
+
+TD-MPC2는 학습된 월드 모델로 계획(planning)해 closed-loop 정책을 도출한다. MPC 틀에서 **MPPI**(Model Predictive Path Integral)를 미분 없는(derivative-free) 옵티마이저로 사용해, 길이 $H$ 의 행동 시퀀스를 모델로 굴려 평가한다. 매 결정 시점마다 대각 공분산 가우시안의 파라미터 $\mu^*, \sigma^*$ 를 다음을 최대화하도록 추정한다 (식 6):
+
+$$\mu^*, \sigma^* = \arg\max_{(\mu,\sigma)} \mathbb{E}_{(a_t,\dots,a_{t+H})\sim\mathcal{N}(\mu,\sigma^2)}\left[\gamma^H Q(z_{t+H}, a_{t+H}) + \sum_{h=t}^{H-1}\gamma^h R(z_h, a_h)\right]$$
+
+여기서 $\gamma$ 는 할인율이며, horizon $H$ 너머는 terminal value $Q$ 로 bootstrap해 2절에서 정의한 전체 RL 목적을 근사한다. $\mathcal{N}(\mu,\sigma^2)$ 에서 시퀀스를 반복 샘플링·평가하고 return 가중 평균으로 $\mu,\sigma$ 를 갱신한다. 수렴 가속을 위해 후보 시퀀스 일부는 policy prior $p$ 에서 나오고, 직전 결정 결과를 한 칸 shift해 warm-start한다.
+
+### 2.3. Generalist Agent 학습
+
+* **학습 가능한 task embedding**: 자연어 같은 domain 지식이 없을 때, task embedding $e$ 를 데이터로부터 학습해 5개 component 모두에 조건으로 넣는다. 학습 안정성과 의미적으로 일관된 embedding을 위해 $\ell_2$-norm을 $\le 1$ 로 제약한다. 새 task로 finetuning할 때는 의미적으로 유사한 task의 embedding이나 무작위 벡터로 초기화한다.
+* **Action masking**: 모든 입출력을 최대 차원으로 zero-padding하고, policy prior $p$ 가 유효하지 않은 action 차원을 학습·추론 모두에서 masking한다. 이로써 무효 차원의 예측 오차가 TD-target 추정에 영향을 주지 않고, 작은 action space task에서 엔트로피가 거짓으로 부풀려지는 것을 막는다.
+
+### 2.4. TD-MPC 대비 주요 개선 (Appendix A)
+
+* **아키텍처**: ELU→Mish + LayerNorm, latent에 SimNorm, Q-함수 2→5개 + 1% Dropout. TD-MPC는 latent 제약이 없어 gradient 폭주로 일부 task에서 발산.
+* **Policy prior**: 결정론적 정책 + 가우시안 노이즈 → maximum-entropy RL (task-agnostic hyperparameter 적용 용이).
+* **모델 목적함수**: 연속 회귀 → log 공간 이산 회귀(보상·가치)로 보상 크기에 robust.
+* **Multi-task 프레임워크**: 정규화된 task embedding + zero-padding/action masking 도입.
+* **단순화**: MPPI momentum 제거, prioritized replay → uniform sampling, code-level 최적화로 더 큰 모델(5M)임에도 wall-time을 TD-MPC(1M) 수준으로 유지.
+
+## 3. Experiments
+
+<p align='center'>
+<img src="figs/TD-MPC2/fig_02.png" alt="Figure 02" width="800"/>
+</p>
+
+**Setup**: DMControl(39), Meta-World(50), ManiSkill2(5), MyoSuite(10) 등 4개 도메인 104개 연속 제어 task. 고차원 상태·행동(최대 $A\in\mathbb{R}^{39}$), 희소 보상, 다중 객체 manipulation, 근골격 제어, Dog·Humanoid locomotion 포함. 이미지 관측 DMControl task 10개도 포함. 기본은 **5M 파라미터** TD-MPC2를 사용한다.
+
+**Baseline**: (1) SAC(model-free, maximum-entropy), (2) DreamerV3(model-based, 생성 월드 모델 rollout으로 model-free 정책 최적화, 약 20M 파라미터), (3) TD-MPC(원본), 시각 RL용으로 (4) CURL, (5) DrQ-v2. SAC·TD-MPC는 task별 hyperparameter를 쓰지만 TD-MPC2는 **모든 task에 동일 hyperparameter**. 또한 SAC·TD-MPC는 batch 512, DreamerV3는 UTD 512인 반면 TD-MPC2는 batch 256, UTD 1로 더 가볍다.
+
+<p align='center'>
+<img src="figs/TD-MPC2/fig_04.png" alt="Figure 04" width="800"/>
+</p>
+
+**기존 방법과 비교**: 104개 task 전 도메인에서 TD-MPC2가 데이터 효율·최종 성능 모두 우위(Figure 4). 특히 고차원 locomotion(Dog $A\in\mathbb{R}^{38}$, Humanoid)과 다중 객체 manipulation(Pick YCB, 74개 객체)에서 큰 격차로 능가하며 Pick YCB는 60% 이상 성공(다른 방법은 예산 내 실패). MyoSuite 결과는 사전 실험 없이 얻은 것이라 더 주목할 만하다. TD-MPC는 gradient 폭주로 종종 발산하지만 TD-MPC2는 안정적이며, DreamerV3는 Dog에서 수치적 불안정, 정밀 객체 manipulation(lift/pick/stack)에서 고전한다.
+
+<p align='center'>
+<img src="figs/TD-MPC2/fig_07.png" alt="Figure 07" width="800"/>
+</p>
+
+**대규모 Multi-task 확장**: 240개 단일 task TD-MPC2 agent의 replay buffer에서 모은 545M transition(무작위~전문가 행동 혼합)으로 80개 task를 학습. 1M~317M 5개 모델을 평가한 결과 모델 크기에 따라 normalized score가 일관되게 상승.
+
+| Params (M) | GPU days | Score |
+|---|---|---|
+| 1 | 3.7 | 16.0 |
+| 5 | 4.2 | 49.5 |
+| 19 | 5.3 | 57.1 |
+| 48 | 12 | 68.0 |
+| 317 | 33 | 70.6 |
+
+317M에서도 포화 조짐이 없고, normalized score는 log(파라미터)에 거의 선형으로 확장된다(scaling law는 단정하지 않음). 317M 모델은 단일 RTX 3090으로 약 33 GPU-day에 학습 가능하다. 학습된 task embedding은 의미적으로 유사한 task(Door Open / Door Close)가 가깝게 모이며, 목적(walk/run)보다 **동역학(embodiment·객체)** 과 더 잘 정렬된다.
+
+**Few-shot learning**: 70개 task로 사전학습한 19M agent를 미관측 10개 task에 20k step 동안 online finetuning하면, scratch 학습 대비 약 **2배**(24.0 → 47.0) 향상(Figure 8).
+
+<p align='center'>
+<img src="figs/TD-MPC2/fig_09.png" alt="Figure 09" width="800"/>
+</p>
+
+**Ablation** (Figure 9, 가장 어려운 3개 task + 80-task multitask): actor(planning + policy > policy/planning 단독), normalization(LN + SimNorm > SimNorm > No Norm, 46.8→51.0→54.2), 회귀 방식(discrete > continuous, 49.6→54.2), Q-함수 개수(2→5→10, 53.5→54.2→57.0). 모든 설계 선택이 단일·다중 task 모두에서 의미 있게 기여하며, 상대적 중요도가 두 설정에서 일관된다. task embedding 정규화($\ell_2$-norm 1)도 안정적 multitask 학습에 중간 정도로 중요하다.
+
+**시각 RL**: 인코더를 얕은 conv 인코더로 교체하면, hyperparameter 변경 없이 10개 이미지 기반 DMControl task에서 최고 baseline(DrQ-v2, DreamerV3)과 동등한 성능을 낸다(Figure 10).
+
+## 4. Conclusion
+
+이 논문에는 별도의 "Conclusion" 절이 없고, §5 "Lessons, Opportunities, and Risks"가 사실상 결론 역할을 한다.
+
+* **Lessons**: RL은 역사적으로 아키텍처·hyperparameter·seed에 극도로 민감했다. TD-MPC2는 robust성을 높여 작은 팀·개인도 RL을 쓸 수 있게 **민주화**하는 흐름의 일부다. 다만 "모든 것을 out-of-the-box로 푸는" 알고리즘은 아직 없으며, DreamerV3가 강한 이산 action(Atari·Minecraft)과 달리 TD-MPC2는 어려운 **연속 제어**에서 더 강하다. 이산 action space 확장은 미해결 과제다.
+* **Opportunities**: 대규모 multi-task 월드 모델을 generalist 월드 모델로 활용하는 길을 제시. 암묵적 월드 모델은 시각 변화가 큰 task에서 복원 기반보다 유리할 수 있으며, zero-shot 수행, 새 embodiment로의 빠른 finetuning, vision-language 모델과의 결합을 전망. "보상"을 success label·인간 선호·goal 임베딩 거리 같은 일반화된 task 완료 지표로 확장할 수 있다.
+* **Risks**: 보상 misspecification으로 인한 의도치 않은 결과, 물리 로봇에 대한 무제약 자율성의 안전 위험, 일부 응용에서 데이터 확보 비용으로 인한 권력 집중.
+
+**Commentary**: TD-MPC2는 "거창한 새 모델"이 아니라 SimNorm·이산 회귀·Q-앙상블·maximum-entropy policy 같은 **기존 설계 선택의 robust화**를 누적해 RL에서 좀처럼 보기 힘든 "단일 hyperparameter로 104개 task + 크기에 따른 일관된 확장"을 달성했다는 점이 인상적이다. decoder-free 월드 모델 + 잠재 공간 planning이 연속 제어 generalist agent의 현실적 한 축임을 설득력 있게 보여준다.
+
+---
+
+## 부록: 사전 지식 (Prerequisites)
+
+### A.1. 알아야 할 핵심 개념
+
+- **Model-Based RL vs. Model-Free RL** — 환경 동역학 모델을 명시적으로 학습해 계획(planning)에 쓰는 방식(MBRL) vs. 경험에서 직접 정책을 최적화하는 방식(MFRL)의 대비.
+  - 본문 위치: §1 Introduction, §3 Experiments (SAC·DreamerV3·TD-MPC 비교)
+
+- **암묵적(Decoder-Free) 월드 모델 / Implicit World Model** — 미래 관측을 픽셀 수준으로 복원(decode)하지 않고 잠재 공간에서만 미래 상태·보상·가치를 예측하는 control-centric 월드 모델. 복원 없이 "결과"만 정확히 예측하므로 계산 비용과 objective mismatch를 줄인다.
+  - 본문 위치: §2.1 암묵적 월드 모델 학습 (핵심 설계 원칙)
+
+- **MPC (Model Predictive Control)** — 매 결정 시점마다 짧은 horizon H 앞을 모델로 시뮬레이션해 최적 행동 시퀀스를 찾고, 그 첫 번째 행동만 실행 후 다시 계획을 반복하는 receding-horizon 제어 기법.
+  - 본문 위치: §2.2 Policy Prior를 활용한 MPC 계획
+
+- **MPPI (Model Predictive Path Integral)** — MPC에서 행동 시퀀스를 미분 없이(derivative-free) 가우시안 분포에서 대량 샘플링해 return 가중 평균으로 분포를 갱신하는 sampling-based optimizer. TD-MPC2의 추론 루프에 그대로 채택됨.
+  - 본문 위치: §2.2 식 (6)
+
+- **TD-Learning & Value Bootstrapping** — Bellman 방정식을 이용해 미래 return을 현재 가치 추정으로 대체(bootstrap)하며 가치 함수를 반복 개선하는 강화학습의 기본 원리. TD-target = r + γQ̄(z', p(z'))로 정의됨.
+  - 본문 위치: §2.1 모델 목적함수 식 (3)
+
+- **Maximum-Entropy RL / SAC-style Policy** — 기대 return 최대화에 더해 정책 엔트로피를 최대화해 다양한 행동을 탐험하는 프레임워크. TD-MPC2의 policy prior p는 αQ − βH 형태의 maximum-entropy 목적함수로 학습됨.
+  - 본문 위치: §2.1 정책 목적함수 식 (4)
+
+- **분산 RL / 이산 가치 회귀 (Distributional RL / Discrete Value Regression)** — 보상·가치의 기댓값 대신 분포(또는 bin별 확률)를 학습하는 기법. C51이 원형이며, DreamerV3의 symlog two-hot encoding도 동류. TD-MPC2는 log 변환 공간에서 cross-entropy로 이산 회귀를 수행해 task 간 보상 크기 차이에 둔감하게 만든다.
+  - 본문 위치: §2.1, §2.4 "이산 회귀(Discrete Regression)로 보상·가치 예측"
+
+- **Joint-Embedding Predictive Architecture (JEPA 계열 자기예측 표현)** — 미래 입력을 픽셀 공간에서 복원하는 대신, 미래 잠재 표현을 현재 잠재 표현에서 예측하고 stop-gradient로 타깃을 고정해 표현을 학습하는 기법. TD-MPC2의 joint-embedding loss ||z'_t − sg(h(s'_t))||² 가 이 아이디어를 채택함.
+  - 본문 위치: §2.1 모델 목적함수 식 (3) joint-embedding 항
+
+- **Q-앙상블 / Clipped Double-Q (Q-Ensemble / Conservative Value Estimation)** — Q 과대추정을 막기 위해 여러 Q 함수를 학습하고 그 최솟값(또는 하한)을 TD-target으로 사용하는 기법. TD-MPC2는 Q 5개 앙상블에서 무작위 2개를 선택해 최솟값을 씀.
+  - 본문 위치: §2.1 "5개 Q-함수 앙상블"
+
+- **Multi-Task / Task-Conditioned RL** — 단일 정책이 여러 task·embodiment를 수행하도록 task 식별 정보(embedding, one-hot 등)를 조건으로 넣어 학습하는 패러다임. action space 크기가 다른 task를 통합 학습하는 방법(zero-padding, masking)도 필요함.
+  - 본문 위치: §2.3 Generalist Agent 학습
+
+---
+
+### A.2. 먼저 읽으면 좋은 논문
+
+1. **[2022][TD-MPC]** ([arxiv 2203.04955](https://arxiv.org/abs/2203.04955)) — Temporal Difference Learning for Model Predictive Control. decoder-free 잠재 월드 모델 + MPC + TD-learning의 원형.
+   - **왜?** TD-MPC2는 TD-MPC의 직접적 후속작이다. TD-MPC2가 "어디를 왜 바꿨는가"(§2.4)를 이해하려면 전작을 먼저 봐야 한다.
+   - **Repo 내 정리**: 없음
+
+2. **[2023][DreamerV3]** ([arxiv 2301.04104](https://arxiv.org/abs/2301.04104)) — Mastering Diverse Domains through World Models. symlog 변환 + two-hot encoding으로 보상 크기에 robust한 생성 월드 모델.
+   - **왜?** 이산 가치 회귀와 보상 정규화 기법의 직접적 선행 연구이며, 논문 전반에 걸쳐 주요 baseline으로 비교된다.
+   - **Repo 내 정리**: 없음
+
+3. **[2020][MuZero]** ([arxiv 1911.08265](https://arxiv.org/abs/1911.08265)) — Mastering Atari, Go, Chess and Shogi by Planning with a Learned Model. 규칙을 모르는 환경에서 잠재 dynamics 모델로 MCTS planning을 수행하는 첫 번째 대규모 성공 사례.
+   - **왜?** "decoder 없이 latent space에서만 계획한다"는 TD-MPC2의 핵심 아이디어의 개념적 조상. control-centric 월드 모델의 논거를 이해하는 데 필수.
+   - **Repo 내 정리**: 없음
+
+4. **[2018][SAC]** ([arxiv 1801.01290](https://arxiv.org/abs/1801.01290)) — Soft Actor-Critic: Off-Policy Maximum Entropy Deep RL with a Stochastic Actor. 연속 행동 공간에서 최대 엔트로피 RL의 표준 알고리즘.
+   - **왜?** TD-MPC2의 policy prior가 SAC-style maximum-entropy 목적함수를 채택하며, 연속 제어 benchmark의 model-free 기준선으로 직접 비교된다.
+   - **Repo 내 정리**: 없음
+
+5. **[2017][C51]** ([arxiv 1707.06887](https://arxiv.org/abs/1707.06887)) — A Distributional Perspective on Reinforcement Learning. 가치를 스칼라가 아닌 범주형 분포로 학습하는 distributional RL의 원형.
+   - **왜?** TD-MPC2의 "이산 회귀(cross-entropy) 가치 헤드"가 이 계열의 기법을 연속 제어·다중 task에 적용한 것이다.
+   - **Repo 내 정리**: 없음
+
+6. **[2017][MPPI]** ([arxiv 1707.02342](https://arxiv.org/abs/1707.02342)) — Information Theoretic Model Predictive Control: Theory and Applications to Autonomous Driving. 가우시안 샘플링 기반 MPC optimizer인 MPPI의 핵심 논문.
+   - **왜?** TD-MPC2의 추론 루프(§2.2)가 MPPI를 그대로 채택한다. 식 (6)의 return-weighted Gaussian update를 이해하려면 이 논문이 필요하다.
+   - **Repo 내 정리**: 없음
+
+---
+
+### A.3. 관련/후속 논문
+
+- **[2024][HWM]** ([arxiv 2405.18418](https://arxiv.org/abs/2405.18418)) — Hierarchical World Models as Visual Whole-Body Humanoid Controllers. Hansen et al. (TD-MPC2 저자진)이 TD-MPC2 프레임워크를 계층적으로 확장해 56-DoF 시각 기반 휴머노이드 전신 제어에 적용한 직접 후속 연구.
+
+- **[2024][SimBa]** ([arxiv 2410.09754](https://arxiv.org/abs/2410.09754)) — Simplicity Bias for Scaling Up Parameters in Deep RL. TD-MPC2와 같은 흐름에서 대형 모델을 RL에 안정적으로 확장하는 아키텍처 편향을 연구한 관련 후속 연구.
+
+- **[2026][Dreamer-CDP]** ([arxiv 2603.07083](https://arxiv.org/abs/2603.07083)) — Improving Reconstruction-free World Models via Continuous Deterministic Representation Prediction. decoder-free 월드 모델의 표현 학습을 개선하는 방향으로 TD-MPC2 계열을 발전시킨 연구.
