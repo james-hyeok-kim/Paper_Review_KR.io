@@ -103,13 +103,19 @@ line([Rt(enc), Lf(post)]);           lab(36.5, 77.2, "enc(x_t)", size=9.2, color
 line([Rt(post), Lf(st)], color="#1f9e8e"); lab(61.5, 77.2, "z_t", size=9.6, color="#1f9e8e", weight="bold")
 line([Rt(st), Lf(actor)]);           lab(80, 77.2, "s_t", size=9.6, color="#d4a017", weight="bold")
 
-# ---- Sequence Model (GRU) below: recurrent state update ----
+# ---- Sequence Model (GRU): produces recurrent state h_t; consumes z_t, a_t ----
 gru = box(48, 33, 28, 13, "Sequence Model",
           "h_{t+1} = f_φ(h_t, z_t, a_t)\n순환 상태 갱신", arch="(GRU)", key="gru")
 
-# s_t -> GRU (provides h_t, z_t)   |   GRU -> Posterior (next-step h)
-line([(70.5, 61.5), (70.5, 46)], color=REC); lab(74.4, 54, "h_t, z_t", size=9.0, color="#2c7a2c", weight="bold", bg=True)
-line([(53, 46), (53, 61.5)], color=REC);     lab(48.6, 54, "h_{t+1}\n(다음 h_t)", size=8.6, color="#2c7a2c", weight="bold", bg=True)
+# GRU's recurrent state h_t -> Posterior  AND  -> model state (s_t = {h_t, z_t})
+line([(52, 46), (52, 61.5)], color=REC); lab(52, 54.6, "h_t", size=9.4, color="#2c7a2c", weight="bold", bg=True)
+line([(73, 46), (73, 61.5)], color=REC); lab(73, 54.6, "h_t", size=9.4, color="#2c7a2c", weight="bold", bg=True)
+# model state's z_t feeds back into GRU (input for next h)
+line([(66, 61.5), (66, 46)], color="#1f9e8e"); lab(62.6, 54.6, "z_t", size=9.0, color="#1f9e8e", weight="bold", bg=True)
+# GRU self-recurrence  h_t -> h_{t+1}  (arc bulging left, away from the box)
+ax.add_patch(FancyArrowPatch((48, 43.5), (48, 35.5), arrowstyle="-|>", mutation_scale=13,
+             color=REC, lw=2.0, zorder=5, connectionstyle="arc3,rad=0.6", shrinkA=2, shrinkB=2))
+lab(40.8, 39.5, "h_t 순환\n(→ h_{t+1})", size=8.2, color="#2c7a2c", style="italic")
 
 # ---- action feedback loop (bottom, orthogonal) ----
 line([Bt(actor), (89.5, 20), (10.5, 20), (10.5, 61.5)], color=ACT, lw=2.8)
