@@ -392,6 +392,45 @@ $$L(\phi) = \mathbb{E}_{q_\phi}\Big[\textstyle\sum_{t=1}^{T}\big(\beta_{pred}L_{
 
 > **요약**: RSSM은 "상상 엔진"을 만들고, Actor-Critic은 **그 엔진을 써서 행동을 배운다.** 두 루프는 동시에 돌지만 목표가 달라 둘 다 필요하다. 그리고 추론 시에는 Encoder(Posterior)+GRU+Actor만으로 행동한다.
 
+#### 0.6.4. 보충 설명 — 시퀀스 모델의 GRU (Block-Diagonal GRU)
+
+시퀀스 모델 $h_t = f_\phi(h_{t-1}, z_{t-1}, a_{t-1})$ 의 코어는 **GRU**다. GRU는 과거 기억 $h_{t-1}$ 에 새 입력을 얼마나 받아들이고 버릴지를 **게이트 2개**로 조절하는 순환 신경망으로, LSTM보다 가볍다(게이트 2개). DreamerV3는 여기에 **block-diagonal** 구조를 더한다.
+
+<p align='center'>
+<img src="figs/DreamerV3/gru.png" alt="DreamerV3 Block-Diagonal GRU" width="900"/>
+</p>
+
+**(1) 입력 구성** — GRU 입력 $x_t$ 는 직전 latent $z_{t-1}$, 직전 행동 $a_{t-1}$, 그리고 **직전 순환상태 $h_{t-1}$** 를 각각 linear embed 한 뒤 concat 한 것이다. ($h_{t-1}$ 을 입력으로도 넣는 이유는 (3) 참고.)
+
+**(2) 게이트와 수식** — 입력 $x_t$ 와 직전 상태 $h_{t-1}$ 로부터:
+
+$$r_t = \sigma(W_r x_t + U_r h_{t-1}) \quad\text{(리셋 게이트)}$$
+$$u_t = \sigma(W_u x_t + U_u h_{t-1}) \quad\text{(업데이트 게이트)}$$
+$$c_t = \tanh\big(W_c x_t + U_c\,(r_t \odot h_{t-1})\big) \quad\text{(후보 상태)}$$
+$$h_t = (1 - u_t) \odot h_{t-1} + u_t \odot c_t \quad\text{(새 순환상태)}$$
+
+여기서 $\sigma$=sigmoid(0\~1), $\odot$=원소별 곱, $\tanh$=−1\~1.
+
+**차원(dimension)** — 모델 차원을 $d$ 라 하면 순환상태 크기는 **$8d$** (논문 표: recurrent units = 8d). 따라서:
+
+* $h_{t-1},\,h_t,\,r_t,\,u_t,\,c_t \in \mathbb{R}^{8d}$ (게이트·후보·상태 모두 같은 크기)
+* 입력 $x_t \in \mathbb{R}^{m}$ — $z_{t-1},a_{t-1},h_{t-1}$ 임베딩을 concat한 벡터
+* 입력 가중치 $W_r,W_u,W_c \in \mathbb{R}^{8d\times m}$ (**dense**)
+* 순환 가중치 $U_r,U_u,U_c \in \mathbb{R}^{8d\times 8d}$ (**block-diagonal**: 8개의 $d\times d$ 블록 → nonzero 파라미터 $8d^2$)
+* $\sigma,\tanh,\odot$ 는 원소별이라 차원 $8d$ 를 그대로 보존
+* (예: 200M 모델 $d=1024 \Rightarrow 8d=8192$)
+
+* **리셋 게이트 $r_t$**: 후보 $c_t$ 를 만들 때 과거 $h_{t-1}$ 를 **얼마나 무시**할지 ($r_t\approx0$ 이면 과거를 버리고 새 입력만으로 후보 생성).
+* **업데이트 게이트 $u_t$**: 과거 $h_{t-1}$ 를 **그대로 유지**($u_t\approx0$)할지 새 후보 $c_t$ 로 **갈아탈지**($u_t\approx1$) 비율. → $u_t$ 가 작으면 장기 기억이 오래 보존된다.
+* **셀 내부 신호 흐름** (그림 [B]): 입력 $x_t$ 는 **① 게이트와 ② 후보 둘 다**에 들어간다(**③ 혼합엔 $x_t$ 없음**). 게이트가 만든 $r_t$ 는 **②(후보)** 로, $u_t$ 는 ②를 건너뛰고 **③(혼합)** 으로 간다. ②의 $c_t$ 는 **③** 으로 간다. $h_{t-1}$ 은 ①·②·③ **모두**에 입력된다.
+
+**(3) DreamerV3 고유 — block-diagonal 순환 가중치 (8 블록)** — 논문 부록은 시퀀스 모델을 *"a GRU with **block-diagonal recurrent weights of 8 blocks**"* 로 명시한다. 즉 순환 가중치 $U_r, U_u, U_c$ 를 8개의 $d\times d$ 블록으로 이뤄진 block-diagonal 행렬로 만든다.
+
+* **왜?** 메모리 유닛을 $8d$ 개로 크게 늘리되, 파라미터·FLOPs는 $(8d)^2 = 64d^2$ 대신 **$8\cdot d^2$ 로 8배 절감**. (예: 200M 모델 $d=1024$ → recurrent units $8d=8192$ = 8블록 × 1024)
+* **부작용 보완 (cross-block mixing)**: block-diagonal이면 순환 경로에서 블록끼리 섞이지 않는다. 그래서 (1)에서 **$h_{t-1}$ 도 dense linear로 embed해 입력 $x_t$ 에 포함**시켜, 입력 경로를 통해 블록 간 정보가 섞이도록 한다 (논문: *"...and of the recurrent state to allow mixing between blocks"*).
+
+> **정리**: 게이트 수식 자체는 표준 GRU(Cho et al. 2014)이며, **block-diagonal(8블록) + 3-입력 embedding** 이 DreamerV3의 효율화 설계다.
+
 ---
 
 ## 1. Introduction
